@@ -5,6 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Add Product - Component Inventory Tracker</title>
 
+<!-- ================= WEBSITE & MOBILE ICONS (FAVICON) ================= -->
+<link rel="icon" type="image/png" href="logo.png">
+<link rel="shortcut icon" type="image/png" href="logo.png">
+<link rel="apple-touch-icon" href="logo.png">
+
 <style>
 * {
     margin: 0;
@@ -511,7 +516,7 @@ body.light-mode .btn-secondary:hover {
 
 <script>
 /* =====================================================
-   LOAD THEME FROM SETTINGS
+    LOAD THEME FROM SETTINGS
 ===================================================== */
 const savedTheme = localStorage.getItem('appTheme') || 'dark';
 if (savedTheme === 'light') {
@@ -519,7 +524,7 @@ if (savedTheme === 'light') {
 }
 
 /* =====================================================
-   CHECK LOGIN
+    CHECK LOGIN
 ===================================================== */
 const loggedInUser = localStorage.getItem("loggedInUser");
 
@@ -528,7 +533,7 @@ if (!loggedInUser) {
 }
 
 /* =====================================================
-   แสดง ID + E-MAIL ของคนที่ Login
+    แสดง ID + E-MAIL ของคนที่ Login
 ===================================================== */
 let currentUsername = "Unknown";
 try {
@@ -548,7 +553,7 @@ try {
 }
 
 /* =====================================================
-   FOOTPRINT OPTIONS DATA (กำหนดรายการ Footprint แยกตามประเภท)
+    FOOTPRINT OPTIONS DATA (กำหนดรายการ Footprint แยกตามประเภท)
 ===================================================== */
 const footprintOptions = {
     "Resistor": [
@@ -593,7 +598,7 @@ const footprintOptions = {
 };
 
 /* =====================================================
-   DEVICE TYPE / DETAIL OPTIONS DATA (กำหนดรหัสเลขและรายละเอียด แยกตาม Type)
+    DEVICE TYPE / DETAIL OPTIONS DATA (กำหนดรหัสเลขและรายละเอียด แยกตาม Type)
 ===================================================== */
 const deviceTypeOptions = {
     "Resistor": [
@@ -654,7 +659,7 @@ const deviceTypeOptions = {
 };
 
 /* =====================================================
-   TYPE MAPPING (แปลง Type เป็นรหัสตัวย่อหลัก)
+    TYPE MAPPING (แปลง Type เป็นรหัสตัวย่อหลัก)
 ===================================================== */
 const typeCodeMapping = {
     "LED": "LED",
@@ -668,7 +673,7 @@ const typeCodeMapping = {
 };
 
 /* =====================================================
-   UPDATE FOOTPRINT & DEVICE TYPE DROPDOWNS
+    UPDATE FOOTPRINT & DEVICE TYPE DROPDOWNS
 ===================================================== */
 function onTypeChange() {
     const typeSelect = document.getElementById("type");
