@@ -1,48 +1,60 @@
 const express = require('express');
+const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
-const { DatabaseSync } = require('node:sqlite');
+const { Pool } = require('pg');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 // ==========================================
-// DATABASE
+// DATABASE (PostgreSQL / Supabase)
 // ==========================================
-const dbPath = path.join(__dirname, 'data.db');
-const db = new DatabaseSync(dbPath);
+const pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: { rejectUnauthorized: false } // จำเป็นสำหรับ Supabase
+});
 
-db.exec(`
-    CREATE TABLE IF NOT EXISTS inventory (
-        product_id  TEXT PRIMARY KEY,
-        type        TEXT,
-        footprint   TEXT,
-        device_type TEXT,
-        cost        TEXT,
-        durability  TEXT,
-        quantity    INTEGER NOT NULL DEFAULT 0,
-        updated_at  TEXT
-    );
+async function initDatabase() {
+    await pool.query(`
+        CREATE TABLE IF NOT EXISTS inventory (
+            product_id  TEXT PRIMARY KEY,
+            type        TEXT,
+            footprint   TEXT,
+            device_type TEXT,
+            cost        TEXT,
+            durability  TEXT,
+            quantity    INTEGER NOT NULL DEFAULT 0,
+            updated_at  TEXT
+        );
+    `);
 
-    CREATE TABLE IF NOT EXISTS history (
-        id         INTEGER PRIMARY KEY AUTOINCREMENT,
-        action     TEXT,
-        product_id TEXT,
-        time       TEXT,
-        user       TEXT
-    );
+    await pool.query(`
+        CREATE TABLE IF NOT EXISTS history (
+            id         SERIAL PRIMARY KEY,
+            action     TEXT,
+            product_id TEXT,
+            time       TEXT,
+            "user"     TEXT
+        );
+    `);
 
-    CREATE TABLE IF NOT EXISTS deleted_items (
-        id            INTEGER PRIMARY KEY AUTOINCREMENT,
-        timestamp     TEXT,
-        user          TEXT,
-        deleted_line  TEXT
-    );
-`);
+    await pool.query(`
+        CREATE TABLE IF NOT EXISTS deleted_items (
+            id            SERIAL PRIMARY KEY,
+            timestamp     TEXT,
+            "user"        TEXT,
+            deleted_line  TEXT
+        );
+    `);
+
+    console.log('[DB] ตาราง inventory, history, deleted_items พร้อมใช้งาน');
+}
 
 // ==========================================
 // MIDDLEWARE
 // ==========================================
+app.use(cors());
 app.use(express.json());
 
 // ==========================================
@@ -50,27 +62,25 @@ app.use(express.json());
 // ==========================================
 function getCurrentDateTime() {
     const now = new Date();
-
     const year = now.getFullYear();
     const month = String(now.getMonth() + 1).padStart(2, '0');
     const day = String(now.getDate()).padStart(2, '0');
-
     const hours = String(now.getHours()).padStart(2, '0');
     const minutes = String(now.getMinutes()).padStart(2, '0');
     const seconds = String(now.getSeconds()).padStart(2, '0');
-
     return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 }
 
 // ==========================================
 // FUNCTION: บันทึกประวัติลงตาราง history
 // ==========================================
-function addHistory(action, productId, user = 'Unknown') {
+async function addHistory(action, productId, user = 'Unknown') {
     const time = getCurrentDateTime();
     try {
-        db.prepare(
-            'INSERT INTO history (action, product_id, time, user) VALUES (?, ?, ?, ?)'
-        ).run(action, productId, time, user);
+        await pool.query(
+            'INSERT INTO history (action, product_id, time, "user") VALUES ($1, $2, $3, $4)',
+            [action, productId, time, user]
+        );
         console.log(`[HISTORY] ${action} | ${productId} | ${user}`);
     } catch (err) {
         console.error('ไม่สามารถบันทึกประวัติ:', err.message);
@@ -78,7 +88,7 @@ function addHistory(action, productId, user = 'Unknown') {
 }
 
 // ==========================================
-// FUNCTION: แปลงแถว inventory เป็นบรรทัดข้อความแบบเดิม
+// FUNCTION: แปลงแถวเป็นบรรทัดข้อความแบบเดิม
 // ==========================================
 function formatInventoryLine(row) {
     return `${row.product_id} | ${row.type} | ${row.footprint} | ${row.device_type} | ${row.cost} | ${row.durability} | ${row.quantity} | ${row.updated_at}`;
@@ -91,8 +101,10 @@ function formatHistoryLine(row) {
 // ==========================================
 // MIGRATE: นำเข้าข้อมูลจากไฟล์ .txt เดิม (ทำครั้งเดียวตอนฐานข้อมูลว่าง)
 // ==========================================
-function migrateLegacyFilesIfNeeded() {
-    const invCount = db.prepare('SELECT COUNT(*) AS c FROM inventory').get().c;
+async function migrateLegacyFilesIfNeeded() {
+    const invCountResult = await pool.query('SELECT COUNT(*) AS c FROM inventory');
+    const invCount = parseInt(invCountResult.rows[0].c);
+
     if (invCount === 0) {
         const legacyPath = path.join(__dirname, 'inventory.txt');
         if (fs.existsSync(legacyPath)) {
@@ -100,24 +112,26 @@ function migrateLegacyFilesIfNeeded() {
                 .split(/\r?\n/)
                 .filter(l => l.trim());
 
-            const insert = db.prepare(`
-                INSERT OR IGNORE INTO inventory
-                (product_id, type, footprint, device_type, cost, durability, quantity, updated_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            `);
-
             let n = 0;
             for (const line of lines) {
                 const c = line.split('|').map(s => s.trim());
                 if (c.length < 8 || !c[0]) continue;
-                insert.run(c[0], c[1] || '-', c[2] || '-', c[3] || '-', c[4] || '-', c[5] || '-', parseInt(c[6]) || 0, c[7] || getCurrentDateTime());
+
+                await pool.query(`
+                    INSERT INTO inventory
+                    (product_id, type, footprint, device_type, cost, durability, quantity, updated_at)
+                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+                    ON CONFLICT (product_id) DO NOTHING
+                `, [c[0], c[1] || '-', c[2] || '-', c[3] || '-', c[4] || '-', c[5] || '-', parseInt(c[6]) || 0, c[7] || getCurrentDateTime()]);
                 n++;
             }
             console.log(`[MIGRATE] นำเข้า ${n} รายการจาก inventory.txt`);
         }
     }
 
-    const histCount = db.prepare('SELECT COUNT(*) AS c FROM history').get().c;
+    const histCountResult = await pool.query('SELECT COUNT(*) AS c FROM history');
+    const histCount = parseInt(histCountResult.rows[0].c);
+
     if (histCount === 0) {
         const legacyPath = path.join(__dirname, 'history.txt');
         if (fs.existsSync(legacyPath)) {
@@ -125,16 +139,14 @@ function migrateLegacyFilesIfNeeded() {
                 .split(/\r?\n/)
                 .filter(l => l.trim());
 
-            const insert = db.prepare(
-                'INSERT INTO history (action, product_id, time, user) VALUES (?, ?, ?, ?)'
-            );
-
             let n = 0;
             for (const line of lines) {
-                // รูปแบบเดิม: ACTION | PRODUCT-ID | TIME |USER|
                 const m = line.match(/^(.*?)\|(.*?)\|(.*?)\|(.*?)\|$/);
                 if (m) {
-                    insert.run(m[1].trim(), m[2].trim(), m[3].trim(), m[4].trim());
+                    await pool.query(
+                        'INSERT INTO history (action, product_id, time, "user") VALUES ($1, $2, $3, $4)',
+                        [m[1].trim(), m[2].trim(), m[3].trim(), m[4].trim()]
+                    );
                     n++;
                 }
             }
@@ -142,7 +154,9 @@ function migrateLegacyFilesIfNeeded() {
         }
     }
 
-    const delCount = db.prepare('SELECT COUNT(*) AS c FROM deleted_items').get().c;
+    const delCountResult = await pool.query('SELECT COUNT(*) AS c FROM deleted_items');
+    const delCount = parseInt(delCountResult.rows[0].c);
+
     if (delCount === 0) {
         const legacyPath = path.join(__dirname, 'delete.txt');
         if (fs.existsSync(legacyPath)) {
@@ -150,13 +164,12 @@ function migrateLegacyFilesIfNeeded() {
                 .split(/\r?\n/)
                 .filter(l => l.trim());
 
-            const insert = db.prepare(
-                'INSERT INTO deleted_items (timestamp, user, deleted_line) VALUES (?, ?, ?)'
-            );
-
             let n = 0;
             for (const line of lines) {
-                insert.run(getCurrentDateTime(), 'legacy-import', line.trim());
+                await pool.query(
+                    'INSERT INTO deleted_items (timestamp, "user", deleted_line) VALUES ($1, $2, $3)',
+                    [getCurrentDateTime(), 'legacy-import', line.trim()]
+                );
                 n++;
             }
             console.log(`[MIGRATE] นำเข้า ${n} รายการจาก delete.txt`);
@@ -164,17 +177,13 @@ function migrateLegacyFilesIfNeeded() {
     }
 }
 
-migrateLegacyFilesIfNeeded();
-
-
 // ============================================================
 // VIRTUAL TEXT ROUTES (ให้ frontend เดิมทำงานได้โดยไม่ต้องแก้)
-// ต้องประกาศก่อน express.static เพื่อไม่ให้ไฟล์ .txt เก่าบัง route นี้
 // ============================================================
-app.get('/inventory.txt', (req, res) => {
+app.get('/inventory.txt', async (req, res) => {
     try {
-        const rows = db.prepare('SELECT * FROM inventory ORDER BY rowid ASC').all();
-        const text = rows.map(formatInventoryLine).join('\n') + (rows.length ? '\n' : '');
+        const result = await pool.query('SELECT * FROM inventory ORDER BY product_id ASC');
+        const text = result.rows.map(formatInventoryLine).join('\n') + (result.rows.length ? '\n' : '');
         res.type('text/plain').send(text);
     } catch (err) {
         console.error(err);
@@ -182,10 +191,10 @@ app.get('/inventory.txt', (req, res) => {
     }
 });
 
-app.get('/history.txt', (req, res) => {
+app.get('/history.txt', async (req, res) => {
     try {
-        const rows = db.prepare('SELECT * FROM history ORDER BY id ASC').all();
-        const text = rows.map(formatHistoryLine).join('\n') + (rows.length ? '\n' : '');
+        const result = await pool.query('SELECT * FROM history ORDER BY id ASC');
+        const text = result.rows.map(formatHistoryLine).join('\n') + (result.rows.length ? '\n' : '');
         res.type('text/plain').send(text);
     } catch (err) {
         console.error(err);
@@ -200,16 +209,13 @@ app.use(express.static(__dirname));
 
 
 // ============================================================
-// 1. ADD PRODUCT (ตรวจสอบซ้ำ, บวกจำนวน, อัปเดตเวลาล่าสุด)
+// 1. ADD PRODUCT
 // ============================================================
-app.post('/save', (req, res) => {
+app.post('/save', async (req, res) => {
     const data = req.body;
 
     if (!data || !data.line) {
-        return res.status(400).json({
-            success: false,
-            error: 'ไม่พบข้อมูลที่จะบันทึก'
-        });
+        return res.status(400).json({ success: false, error: 'ไม่พบข้อมูลที่จะบันทึก' });
     }
 
     const newParts = data.line.trim().split('|').map(p => p.trim());
@@ -219,42 +225,39 @@ app.post('/save', (req, res) => {
     const username = data.user || 'Unknown';
 
     if (!productId) {
-        return res.status(400).json({
-            success: false,
-            error: 'ไม่พบ Product ID'
-        });
+        return res.status(400).json({ success: false, error: 'ไม่พบ Product ID' });
     }
 
     try {
-        const existing = db.prepare('SELECT quantity FROM inventory WHERE product_id = ?').get(productId);
+        const existingResult = await pool.query(
+            'SELECT quantity FROM inventory WHERE product_id = $1',
+            [productId]
+        );
 
-        if (existing) {
+        if (existingResult.rows.length > 0) {
+            const existing = existingResult.rows[0];
             const totalQuantity = (existing.quantity || 0) + newQuantity;
 
-            db.prepare('UPDATE inventory SET quantity = ?, updated_at = ? WHERE product_id = ?')
-                .run(totalQuantity, currentDateTime, productId);
+            await pool.query(
+                'UPDATE inventory SET quantity = $1, updated_at = $2 WHERE product_id = $3',
+                [totalQuantity, currentDateTime, productId]
+            );
 
-            addHistory('EDIT', productId, username);
+            await addHistory('EDIT', productId, username);
             console.log(`[UPDATE/ADD] Summed quantity for ${productId} by ${username}`);
 
-            res.json({
-                success: true,
-                message: `อัปเดตจำนวนสินค้า ${productId} สำเร็จ (รวมยอดเดิม)`
-            });
+            res.json({ success: true, message: `อัปเดตจำนวนสินค้า ${productId} สำเร็จ (รวมยอดเดิม)` });
         } else {
-            db.prepare(`
+            await pool.query(`
                 INSERT INTO inventory
                 (product_id, type, footprint, device_type, cost, durability, quantity, updated_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            `).run(productId, newParts[1] || '-', newParts[2] || '-', newParts[3] || '-', newParts[4] || '-', newParts[5] || '-', newQuantity, currentDateTime);
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+            `, [productId, newParts[1] || '-', newParts[2] || '-', newParts[3] || '-', newParts[4] || '-', newParts[5] || '-', newQuantity, currentDateTime]);
 
-            addHistory('ADD', productId, username);
+            await addHistory('ADD', productId, username);
             console.log(`[ADD] New item ${productId} by ${username}`);
 
-            res.json({
-                success: true,
-                message: `เพิ่มสินค้า ${productId} สำเร็จ`
-            });
+            res.json({ success: true, message: `เพิ่มสินค้า ${productId} สำเร็จ` });
         }
     } catch (err) {
         console.error(err);
@@ -266,63 +269,52 @@ app.post('/save', (req, res) => {
 // ============================================================
 // 2. DELETE PRODUCT
 // ============================================================
-app.post('/api/delete-item', (req, res) => {
+app.post('/api/delete-item', async (req, res) => {
     const targetId = req.body.id;
     const username = req.body.user || 'Unknown';
 
     if (!targetId) {
-        return res.status(400).json({
-            success: false,
-            message: 'ไม่พบ Product ID'
-        });
+        return res.status(400).json({ success: false, message: 'ไม่พบ Product ID' });
     }
 
     try {
-        const row = db.prepare('SELECT * FROM inventory WHERE product_id = ?').get(targetId);
+        const rowResult = await pool.query('SELECT * FROM inventory WHERE product_id = $1', [targetId]);
 
-        if (!row) {
-            return res.status(404).json({
-                success: false,
-                message: `ไม่พบ Product ID: ${targetId}`
-            });
+        if (rowResult.rows.length === 0) {
+            return res.status(404).json({ success: false, message: `ไม่พบ Product ID: ${targetId}` });
         }
 
-        db.prepare('DELETE FROM inventory WHERE product_id = ?').run(targetId);
+        const row = rowResult.rows[0];
+
+        await pool.query('DELETE FROM inventory WHERE product_id = $1', [targetId]);
 
         const deleteLog = `[${getCurrentDateTime()}] | User: ${username} | ${formatInventoryLine(row)}`;
-        db.prepare('INSERT INTO deleted_items (timestamp, user, deleted_line) VALUES (?, ?, ?)')
-            .run(getCurrentDateTime(), username, deleteLog);
+        await pool.query(
+            'INSERT INTO deleted_items (timestamp, "user", deleted_line) VALUES ($1, $2, $3)',
+            [getCurrentDateTime(), username, deleteLog]
+        );
 
-        addHistory('DELETE', targetId, username);
+        await addHistory('DELETE', targetId, username);
         console.log(`[DELETE] ${targetId} by ${username}`);
 
-        res.json({
-            success: true,
-            message: `ลบสินค้า ${targetId} สำเร็จ`
-        });
+        res.json({ success: true, message: `ลบสินค้า ${targetId} สำเร็จ` });
     } catch (err) {
         console.error(err);
-        res.status(500).json({
-            success: false,
-            message: 'ลบสินค้าไม่สำเร็จ'
-        });
+        res.status(500).json({ success: false, message: 'ลบสินค้าไม่สำเร็จ' });
     }
 });
 
 
 // ============================================================
-// 3. EDIT PRODUCT (แก้ไขและตรวจสอบ ID ซ้ำเพื่อบวกจำนวนรวมกัน)
+// 3. EDIT PRODUCT
 // ============================================================
-app.post('/api/edit-item', (req, res) => {
+app.post('/api/edit-item', async (req, res) => {
     const oldId = req.body.oldId;
     const newLine = req.body.line;
     const username = req.body.user || 'Unknown';
 
     if (!oldId || !newLine) {
-        return res.status(400).json({
-            success: false,
-            message: 'ข้อมูล EDIT ไม่ครบ'
-        });
+        return res.status(400).json({ success: false, message: 'ข้อมูล EDIT ไม่ครบ' });
     }
 
     const newParts = newLine.split('|').map(c => c.trim());
@@ -331,51 +323,42 @@ app.post('/api/edit-item', (req, res) => {
     const currentDateTime = getCurrentDateTime();
 
     if (!newId) {
-        return res.status(400).json({
-            success: false,
-            message: 'ไม่พบ Product ID ใหม่'
-        });
+        return res.status(400).json({ success: false, message: 'ไม่พบ Product ID ใหม่' });
     }
 
     try {
-        const oldRow = db.prepare('SELECT * FROM inventory WHERE product_id = ?').get(oldId);
+        const oldRowResult = await pool.query('SELECT * FROM inventory WHERE product_id = $1', [oldId]);
 
-        if (!oldRow) {
-            return res.status(404).json({
-                success: false,
-                message: `ไม่พบ Product ID เดิม: ${oldId}`
-            });
+        if (oldRowResult.rows.length === 0) {
+            return res.status(404).json({ success: false, message: `ไม่พบ Product ID เดิม: ${oldId}` });
         }
 
-        db.prepare('DELETE FROM inventory WHERE product_id = ?').run(oldId);
+        await pool.query('DELETE FROM inventory WHERE product_id = $1', [oldId]);
 
-        const conflictRow = db.prepare('SELECT * FROM inventory WHERE product_id = ?').get(newId);
+        const conflictResult = await pool.query('SELECT * FROM inventory WHERE product_id = $1', [newId]);
 
-        if (conflictRow) {
+        if (conflictResult.rows.length > 0) {
+            const conflictRow = conflictResult.rows[0];
             const totalQty = (conflictRow.quantity || 0) + editingQuantity;
-            db.prepare('UPDATE inventory SET quantity = ?, updated_at = ? WHERE product_id = ?')
-                .run(totalQty, currentDateTime, newId);
+            await pool.query(
+                'UPDATE inventory SET quantity = $1, updated_at = $2 WHERE product_id = $3',
+                [totalQty, currentDateTime, newId]
+            );
         } else {
-            db.prepare(`
+            await pool.query(`
                 INSERT INTO inventory
                 (product_id, type, footprint, device_type, cost, durability, quantity, updated_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            `).run(newId, newParts[1] || '-', newParts[2] || '-', newParts[3] || '-', newParts[4] || '-', newParts[5] || '-', editingQuantity, currentDateTime);
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+            `, [newId, newParts[1] || '-', newParts[2] || '-', newParts[3] || '-', newParts[4] || '-', newParts[5] || '-', editingQuantity, currentDateTime]);
         }
 
-        addHistory('EDIT', newId, username);
+        await addHistory('EDIT', newId, username);
         console.log(`[EDIT] ${oldId} -> ${newId} by ${username}`);
 
-        res.json({
-            success: true,
-            message: `แก้ไขสินค้า ${newId} สำเร็จ`
-        });
+        res.json({ success: true, message: `แก้ไขสินค้า ${newId} สำเร็จ` });
     } catch (err) {
         console.error(err);
-        res.status(500).json({
-            success: false,
-            message: 'บันทึก EDIT ไม่สำเร็จ'
-        });
+        res.status(500).json({ success: false, message: 'บันทึก EDIT ไม่สำเร็จ' });
     }
 });
 
@@ -383,21 +366,14 @@ app.post('/api/edit-item', (req, res) => {
 // ============================================================
 // 4. API อ่าน HISTORY
 // ============================================================
-app.get('/api/history', (req, res) => {
+app.get('/api/history', async (req, res) => {
     try {
-        const rows = db.prepare('SELECT * FROM history ORDER BY id ASC').all();
-        const logs = rows.map(formatHistoryLine);
-
-        res.json({
-            success: true,
-            logs: logs
-        });
+        const result = await pool.query('SELECT * FROM history ORDER BY id ASC');
+        const logs = result.rows.map(formatHistoryLine);
+        res.json({ success: true, logs: logs });
     } catch (err) {
         console.error(err);
-        res.status(500).json({
-            success: false,
-            message: 'อ่านประวัติไม่ได้'
-        });
+        res.status(500).json({ success: false, message: 'อ่านประวัติไม่ได้' });
     }
 });
 
@@ -405,23 +381,17 @@ app.get('/api/history', (req, res) => {
 // ============================================================
 // 5. API สำหรับบันทึกประวัติ LOGIN / LOGOUT
 // ============================================================
-app.post('/api/history/add', (req, res) => {
+app.post('/api/history/add', async (req, res) => {
     const { user, action } = req.body;
     const username = user || 'Unknown';
     const actionType = action || 'LOGIN';
 
     try {
-        addHistory(actionType, '-', username);
-        res.json({
-            success: true,
-            message: 'บันทึกประวัติเซสชันสำเร็จ'
-        });
+        await addHistory(actionType, '-', username);
+        res.json({ success: true, message: 'บันทึกประวัติเซสชันสำเร็จ' });
     } catch (err) {
         console.error(err);
-        res.status(500).json({
-            success: false,
-            message: 'บันทึกประวัติไม่สำเร็จ'
-        });
+        res.status(500).json({ success: false, message: 'บันทึกประวัติไม่สำเร็จ' });
     }
 });
 
@@ -429,20 +399,14 @@ app.post('/api/history/add', (req, res) => {
 // ============================================================
 // 6. API RESET/CLEAR HISTORY
 // ============================================================
-app.post('/api/history/reset', (req, res) => {
+app.post('/api/history/reset', async (req, res) => {
     try {
-        db.prepare('DELETE FROM history').run();
+        await pool.query('DELETE FROM history');
         console.log('[RESET] History logs cleared.');
-        res.json({
-            success: true,
-            message: 'ล้างประวัติทั้งหมดสำเร็จ'
-        });
+        res.json({ success: true, message: 'ล้างประวัติทั้งหมดสำเร็จ' });
     } catch (err) {
         console.error('ไม่สามารถเคลียร์ history ได้:', err.message);
-        res.status(500).json({
-            success: false,
-            message: 'ไม่สามารถรีเซ็ตประวัติได้'
-        });
+        res.status(500).json({ success: false, message: 'ไม่สามารถรีเซ็ตประวัติได้' });
     }
 });
 
@@ -450,20 +414,14 @@ app.post('/api/history/reset', (req, res) => {
 // ============================================================
 // 7. API RESET/CLEAR INVENTORY
 // ============================================================
-app.post('/api/inventory/reset', (req, res) => {
+app.post('/api/inventory/reset', async (req, res) => {
     try {
-        db.prepare('DELETE FROM inventory').run();
+        await pool.query('DELETE FROM inventory');
         console.log('[RESET] Inventory database cleared.');
-        res.json({
-            success: true,
-            message: 'ลบข้อมูลสินค้าทั้งหมดสำเร็จ'
-        });
+        res.json({ success: true, message: 'ลบข้อมูลสินค้าทั้งหมดสำเร็จ' });
     } catch (err) {
         console.error('ไม่สามารถเคลียร์ inventory ได้:', err.message);
-        res.status(500).json({
-            success: false,
-            message: 'ไม่สามารถรีเซ็ตข้อมูลสินค้าได้'
-        });
+        res.status(500).json({ success: false, message: 'ไม่สามารถรีเซ็ตข้อมูลสินค้าได้' });
     }
 });
 
@@ -471,16 +429,27 @@ app.post('/api/inventory/reset', (req, res) => {
 // ============================================================
 // START SERVER
 // ============================================================
-app.listen(PORT, () => {
-    console.log('==========================================');
-    console.log('Component Inventory Server (SQLite)');
-    console.log('==========================================');
-    console.log(`Server:    http://localhost:${PORT}`);
-    console.log(`Database:  ${dbPath}`);
-    console.log(`Login:     http://localhost:${PORT}/Login.HTML`);
-    console.log(`Dashboard: http://localhost:${PORT}/main.HTML`);
-    console.log(`ADD:       http://localhost:${PORT}/ADD.HTML`);
-    console.log(`Inventory: http://localhost:${PORT}/Inventory.HTML`);
-    console.log(`Setting:   http://localhost:${PORT}/setting.html`);
-    console.log('==========================================');
-});
+async function startServer() {
+    try {
+        await initDatabase();
+        await migrateLegacyFilesIfNeeded();
+
+        app.listen(PORT, () => {
+            console.log('==========================================');
+            console.log('Component Inventory Server (PostgreSQL)');
+            console.log('==========================================');
+            console.log(`Server:    http://localhost:${PORT}`);
+            console.log(`Login:     http://localhost:${PORT}/Login.HTML`);
+            console.log(`Dashboard: http://localhost:${PORT}/main.HTML`);
+            console.log(`ADD:       http://localhost:${PORT}/ADD.HTML`);
+            console.log(`Inventory: http://localhost:${PORT}/Inventory.HTML`);
+            console.log(`Setting:   http://localhost:${PORT}/setting.html`);
+            console.log('==========================================');
+        });
+    } catch (err) {
+        console.error('ไม่สามารถเริ่ม server ได้:', err.message);
+        process.exit(1);
+    }
+}
+
+startServer();
