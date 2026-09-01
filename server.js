@@ -203,6 +203,37 @@ app.get('/history.txt', async (req, res) => {
 });
 
 // ==========================================
+// ROUTE: หน้าแรกและรองรับตัวพิมพ์เล็ก/ใหญ่ (แก้ปัญหา Cannot GET)
+// ==========================================
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'Login.HTML'));
+});
+
+app.get(['/login.html', '/Login.html'], (req, res) => {
+    res.sendFile(path.join(__dirname, 'Login.HTML'));
+});
+
+app.get(['/main.html', '/Main.html'], (req, res) => {
+    res.sendFile(path.join(__dirname, 'main.HTML'));
+});
+
+app.get(['/inventory.html', '/Inventory.html'], (req, res) => {
+    res.sendFile(path.join(__dirname, 'Inventory.HTML'));
+});
+
+app.get(['/add.html', '/Add.html'], (req, res) => {
+    res.sendFile(path.join(__dirname, 'ADD.HTML'));
+});
+
+app.get(['/history.html', '/History.html'], (req, res) => {
+    res.sendFile(path.join(__dirname, 'history.HTML'));
+});
+
+app.get(['/setting.html', '/Setting.html'], (req, res) => {
+    res.sendFile(path.join(__dirname, 'setting.html'));
+});
+
+// ==========================================
 // STATIC FILES (HTML/CSS/JS)
 // ==========================================
 app.use(express.static(__dirname));
