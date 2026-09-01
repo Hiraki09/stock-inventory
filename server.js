@@ -31,11 +31,11 @@ async function initDatabase() {
 
     await pool.query(`
         CREATE TABLE IF NOT EXISTS history (
-            id         SERIAL PRIMARY KEY,
-            action     TEXT,
-            product_id TEXT,
-            time       TEXT,
-            "user"     TEXT
+            id          SERIAL PRIMARY KEY,
+            action      TEXT,
+            product_id  TEXT,
+            time        TEXT,
+            "user"      TEXT
         );
     `);
 
