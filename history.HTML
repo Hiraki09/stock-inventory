@@ -1,0 +1,1147 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>History - Component Inventory Tracker</title>
+
+<style>
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+
+body {
+    background: #080f1b;
+    color: #e5e7eb;
+    min-height: 100vh;
+    display: flex;
+}
+
+body.light-mode {
+    background: #f1f5f9;
+    color: #1e293b;
+}
+
+
+/* ================= SIDEBAR ================= */
+
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 265px;
+    height: 100vh;
+    overflow: hidden;
+    background: #09111d;
+    border-right: 1px solid #243244;
+    padding: 28px 14px;
+}
+
+body.light-mode .sidebar {
+    background: #ffffff;
+    border-right: 1px solid #cbd5e1;
+}
+
+
+.logo {
+    padding: 0 15px 28px;
+    border-bottom: 1px solid #202d3d;
+    margin-bottom: 25px;
+}
+
+body.light-mode .logo {
+    border-bottom: 1px solid #e2e8f0;
+}
+
+
+.logo h1 {
+    font-size: 27px;
+    color: #f8fafc;
+    letter-spacing: -1px;
+}
+
+body.light-mode .logo h1 {
+    color: #0f172a;
+}
+
+
+.logo p {
+    color: #aab4c3;
+    font-size: 17px;
+    letter-spacing: 1px;
+}
+
+body.light-mode .logo p {
+    color: #64748b;
+}
+
+
+/* ================= MENU ================= */
+
+.menu a {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px 18px;
+    margin-bottom: 7px;
+    border-radius: 9px;
+    color: #aeb9c9;
+    text-decoration: none;
+    font-size: 16px;
+    transition: 0.2s;
+}
+
+body.light-mode .menu a {
+    color: #475569;
+}
+
+
+.menu a:hover {
+    background: #141e2c;
+    color: white;
+}
+
+body.light-mode .menu a:hover {
+    background: #f1f5f9;
+    color: #0f172a;
+}
+
+
+.menu a.active {
+    background: #162235;
+    color: #70a0ff;
+    border: 1px solid #263752;
+}
+
+body.light-mode .menu a.active {
+    background: #eff6ff;
+    color: #2563eb;
+    border: 1px solid #bfdbfe;
+}
+
+
+.icon {
+    width: 23px;
+    text-align: center;
+    font-size: 19px;
+}
+
+
+/* ================= USER ================= */
+
+.user {
+    position: absolute;
+    bottom: 20px;
+    left: 14px;
+    width: 237px;
+    padding: 15px;
+    background: #101a28;
+    border: 1px solid #263448;
+    border-radius: 9px;
+}
+
+body.light-mode .user {
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+}
+
+
+.user-name {
+    font-weight: bold;
+}
+
+
+.user-email {
+    color: #8995a7;
+    font-size: 12px;
+    margin-top: 4px;
+}
+
+body.light-mode .user-email {
+    color: #64748b;
+}
+
+
+/* ================= MAIN ================= */
+
+.main {
+    margin-left: 265px;
+    width: calc(100% - 265px);
+    height: 100vh;
+    padding: 30px 35px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+
+/* ================= HEADER ================= */
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+
+.title-area {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+
+.menu-button {
+    width: 54px;
+    height: 54px;
+    border-radius: 9px;
+    border: 1px solid #273548;
+    background: #111b29;
+    color: white;
+    font-size: 28px;
+    cursor: pointer;
+}
+
+body.light-mode .menu-button {
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    color: #0f172a;
+}
+
+
+.title h2 {
+    font-size: 30px;
+    color: #f8fafc;
+}
+
+body.light-mode .title h2 {
+    color: #0f172a;
+}
+
+
+.title p {
+    color: #8995a7;
+    margin-top: 4px;
+}
+
+body.light-mode .title p {
+    color: #64748b;
+}
+
+
+/* ================= CONTROLS (SEARCH) ================= */
+
+.controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.search {
+    width: 280px;
+    height: 44px;
+    background: #080d14;
+    border: 1px solid #273548;
+    border-radius: 6px;
+    padding: 0 15px;
+    color: white;
+    outline: none;
+}
+
+body.light-mode .search {
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    color: #1e293b;
+}
+
+
+.search:focus {
+    border-color: #557bdc;
+}
+
+
+.search::placeholder {
+    color: #566276;
+}
+
+body.light-mode .search::placeholder {
+    color: #94a3b8;
+}
+
+
+/* ================= HISTORY BOX ================= */
+
+.history-box {
+    background: #0d1622;
+    border: 1px solid #263548;
+    border-radius: 9px;
+    padding: 18px;
+    width: 100%;
+    overflow-x: auto;
+}
+
+body.light-mode .history-box {
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+}
+
+
+/* ================= TABLE ================= */
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+
+th {
+    padding: 14px 12px;
+    text-align: left;
+    color: #9eabc0;
+    font-size: 12px;
+    letter-spacing: 0.5px;
+    background: #18263a;
+}
+
+body.light-mode th {
+    background: #f1f5f9;
+    color: #475569;
+}
+
+
+td {
+    padding: 17px 12px;
+    border-top: 1px solid #263548;
+    color: #e4e9f0;
+    font-size: 14px;
+}
+
+body.light-mode td {
+    border-top: 1px solid #e2e8f0;
+    color: #334155;
+}
+
+
+tr:hover {
+    background: #151f2d;
+}
+
+body.light-mode tr:hover {
+    background: #f8fafc;
+}
+
+
+/* ================= ID ================= */
+
+.product-id {
+    color: #70a0ff;
+    font-weight: 600;
+}
+
+body.light-mode .product-id {
+    color: #2563eb;
+}
+
+
+/* ================= ACTION ================= */
+
+.action-badge {
+    display: inline-block;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+
+.action-add {
+    background: #16a34a;
+    color: white;
+}
+
+
+.action-edit {
+    background: #2563eb;
+    color: white;
+}
+
+
+.action-delete {
+    background: #dc2626;
+    color: white;
+}
+
+
+/* ================= DATE ================= */
+
+.date {
+    color: #70809a;
+}
+
+body.light-mode .date {
+    color: #64748b;
+}
+
+/* ================= USER COLUMN ================= */
+
+.user-col {
+    color: #a3b8cc;
+    font-weight: 500;
+}
+
+body.light-mode .user-col {
+    color: #475569;
+}
+
+
+/* ================= EMPTY ================= */
+
+.empty {
+    text-align: center;
+    padding: 50px;
+    color: #687588;
+}
+
+
+/* ================= PAGINATION ================= */
+
+.pagination-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.page-info {
+    font-size: 13px;
+    color: #8995a7;
+}
+
+body.light-mode .page-info {
+    color: #64748b;
+}
+
+.rows-per-page-area {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    color: #8995a7;
+}
+
+body.light-mode .rows-per-page-area {
+    color: #64748b;
+}
+
+.rows-select {
+    height: 36px;
+    background: #111b29;
+    border: 1px solid #273548;
+    border-radius: 6px;
+    padding: 0 10px;
+    color: white;
+    outline: none;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+body.light-mode .rows-select {
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    color: #1e293b;
+}
+
+.rows-select option {
+    background: #111b29;
+    color: white;
+}
+
+body.light-mode .rows-select option {
+    background: #ffffff;
+    color: #1e293b;
+}
+
+.pagination {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.page-btn {
+    background: #111b29;
+    border: 1px solid #273548;
+    color: #9eabc0;
+    min-width: 32px;
+    height: 32px;
+    padding: 0 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+body.light-mode .page-btn {
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    color: #475569;
+}
+
+.page-btn:hover {
+    background: #18263a;
+    color: #ffffff;
+}
+
+body.light-mode .page-btn:hover {
+    background: #f1f5f9;
+    color: #0f172a;
+}
+
+.page-btn.active {
+    background: #2563eb;
+    border-color: #2563eb;
+    color: #ffffff;
+}
+
+.page-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+
+/* ================= MODAL ยืนยันรหัสผ่าน ================= */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(5px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.modal-overlay.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal-box {
+    background: #0d1622;
+    border: 1px solid #263548;
+    padding: 30px;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    transform: translateY(-20px);
+    transition: transform 0.3s ease;
+}
+
+body.light-mode .modal-box {
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+
+.modal-overlay.show .modal-box {
+    transform: translateY(0);
+}
+
+.modal-box h3 {
+    font-size: 20px;
+    color: #f1f5f9;
+    margin-bottom: 10px;
+}
+
+body.light-mode .modal-box h3 {
+    color: #0f172a;
+}
+
+.modal-box p {
+    color: #8995a7;
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+body.light-mode .modal-box p {
+    color: #64748b;
+}
+
+.modal-input {
+    width: 100%;
+    padding: 12px 15px;
+    background: #111b29;
+    border: 1px solid #273548;
+    border-radius: 6px;
+    color: white;
+    font-size: 15px;
+    margin-bottom: 20px;
+    outline: none;
+}
+
+body.light-mode .modal-input {
+    background: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    color: #0f172a;
+}
+
+.modal-input:focus {
+    border-color: #2563eb;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.modal-btn {
+    flex: 1;
+    padding: 12px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: 0.2s;
+}
+
+.modal-btn.cancel {
+    background: #273548;
+    color: #e5e7eb;
+}
+
+body.light-mode .modal-btn.cancel {
+    background: #e2e8f0;
+    color: #475569;
+}
+
+.modal-btn.cancel:hover {
+    background: #33445c;
+}
+
+.modal-btn.confirm {
+    background: #2563eb;
+    color: white;
+}
+
+.modal-btn.confirm:hover {
+    background: #1d4ed8;
+}
+
+
+/* ================= RESPONSIVE ================= */
+
+@media (max-width: 700px) {
+
+    .sidebar {
+        width: 210px;
+    }
+
+    .main {
+        margin-left: 210px;
+        width: calc(100% - 210px);
+        padding: 20px;
+    }
+
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<!-- ================= SIDEBAR ================= -->
+
+<div class="sidebar">
+
+    <div class="logo">
+        <h1>COMPONENT</h1>
+        <p>INVENTORY TRACKER</p>
+    </div>
+
+    <div class="menu">
+        <a href="main.HTML">
+            <span class="icon">▦</span>
+            Dashboard
+        </a>
+
+        <a href="Inventory.html">
+            <span class="icon">◇</span>
+            Inventory
+        </a>
+
+        <a href="ADD.html">
+            <span class="icon">▥</span>
+            Add Product
+        </a>
+
+        <a href="history.html" class="active">
+            <span class="icon">▤</span>
+            History
+        </a>
+
+        <a href="setting.html">
+            <span class="icon">⚙</span>
+            Settings
+        </a>
+    </div>
+
+    <div class="user">
+        <div class="user-name" id="currentUserName">
+            ● &nbsp; Loading...
+        </div>
+
+        <div class="user-email" id="currentUserEmail">
+            Loading...
+        </div>
+    </div>
+
+</div>
+
+
+
+<!-- ================= MAIN ================= -->
+
+<main class="main">
+
+    <div class="header">
+        <div class="title-area">
+            <button class="menu-button" onclick="location.reload()">
+                ☰
+            </button>
+
+            <div class="title">
+                <h2>History</h2>
+                <p>Component activity history</p>
+            </div>
+        </div>
+
+        <div class="controls">
+            <input
+                type="text"
+                id="searchInput"
+                class="search"
+                placeholder="Search by ID, Action, Date, or User..."
+            >
+        </div>
+    </div>
+
+
+
+    <!-- ================= TABLE ================= -->
+
+    <div class="history-box">
+
+        <table>
+            <thead>
+                <tr>
+                    <th>ACTION</th>
+                    <th>PRODUCT ID</th>
+                    <th>DATE</th>
+                    <th>USER</th>
+                </tr>
+            </thead>
+
+            <tbody id="historyBody">
+            </tbody>
+        </table>
+
+        <div id="emptyMessage" class="empty" style="display:none;">
+            No history found.
+        </div>
+
+    </div>
+
+    <!-- ================= PAGINATION FOOTER ================= -->
+    <div class="pagination-footer">
+        <div id="pageInfo" class="page-info">Showing 0 to 0 of 0 entries</div>
+        
+        <div class="rows-per-page-area">
+            Rows per page:
+            <select id="rowsSelect" class="rows-select" onchange="changeRowsPerPage()">
+                <option value="10">10</option>
+                <option value="20">20</option>
+                <option value="50">50</option>
+            </select>
+        </div>
+
+        <div id="paginationContainer" class="pagination"></div>
+    </div>
+
+</main>
+
+
+<!-- ================= MODAL ยืนยันรหัสผ่านเข้าชม (Admin เท่านั้น) ================= -->
+<div class="modal-overlay" id="historyAuthModal">
+    <div class="modal-box">
+        <h3>Admin Restricted Access</h3>
+        <p>Please enter the Admin password to view the history logs.</p>
+        <input type="password" class="modal-input" id="historyPasswordInput" placeholder="Enter admin password">
+        <div class="modal-actions">
+            <button class="modal-btn cancel" id="cancelAuthBtn">Go Back</button>
+            <button class="modal-btn confirm" id="submitAuthBtn">Verify & View</button>
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+    // โหลดค่าธีมจากหน้า settings (รองรับ light/dark mode ทันทีที่เปิดหน้าเว็บ)
+    const savedTheme = localStorage.getItem('appTheme') || 'dark';
+    if (savedTheme === 'light') {
+        document.body.classList.add('light-mode');
+    }
+
+/* =====================================================
+    CHECK LOGIN & ESCAPE HTML UTILITY
+===================================================== */
+
+const loggedInUser = localStorage.getItem("loggedInUser");
+
+if (!loggedInUser) {
+    window.location.href = "Login.HTML";
+}
+
+function escapeHtml(text) {
+    const map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+    };
+    return text.toString().replace(/[&<>"']/g, function(m) { return map[m]; });
+}
+
+let currentUserObj = null;
+
+try {
+    currentUserObj = JSON.parse(loggedInUser);
+
+    document.getElementById("currentUserName").innerHTML =
+        "● &nbsp;" + escapeHtml(currentUserObj.id || currentUserObj.email);
+
+    document.getElementById("currentUserEmail").textContent =
+        currentUserObj.email || "";
+
+} catch (error) {
+    console.error("Invalid login data:", error);
+    localStorage.removeItem("loggedInUser");
+    window.location.href = "Login.HTML";
+}
+
+
+/* ================= LOAD HISTORY.TXT ================= */
+
+let historyData = [];
+let currentPage = 1;
+let rowsPerPage = 10;
+let filteredData = [];
+
+// กำหนดรหัสผ่านเฉพาะ Admin ตามระบบของคุณ
+const ADMIN_EMAIL = "admin@CBV.com";
+const ADMIN_PASSWORD = "admin3120654"; // รหัสผ่านของ Admin FIRST
+
+document.addEventListener("DOMContentLoaded", () => {
+    // ตรวจสอบสิทธิ์และ Session การปลดล็อก
+    if (!currentUserObj || currentUserObj.email.toLowerCase() !== ADMIN_EMAIL.toLowerCase()) {
+        alert("หน้านี้สำหรับผู้ดูแลระบบ (Admin) เท่านั้น!");
+        window.location.href = "main.HTML";
+        return;
+    }
+
+    if (sessionStorage.getItem('historyUnlocked') === 'true') {
+        document.getElementById('historyAuthModal').classList.remove('show');
+        loadHistory();
+    } else {
+        document.getElementById('historyAuthModal').classList.add('show');
+        document.getElementById('historyPasswordInput').focus();
+    }
+
+    // ผูก Event ปุ่มใน Modal
+    const submitAuthBtn = document.getElementById('submitAuthBtn');
+    const cancelAuthBtn = document.getElementById('cancelAuthBtn');
+    const passwordInput = document.getElementById('historyPasswordInput');
+
+    submitAuthBtn.addEventListener('click', verifyAdminPassword);
+    passwordInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') verifyAdminPassword();
+    });
+
+    cancelAuthBtn.addEventListener('click', () => {
+        window.location.href = 'main.HTML';
+    });
+});
+
+function verifyAdminPassword() {
+    const passwordInput = document.getElementById('historyPasswordInput');
+    const enteredPassword = passwordInput.value;
+
+    if (!enteredPassword) {
+        alert('กรุณากรอกรหัสผ่าน Admin');
+        return;
+    }
+
+    if (enteredPassword === ADMIN_PASSWORD) {
+        sessionStorage.setItem('historyUnlocked', 'true');
+        document.getElementById('historyAuthModal').classList.remove('show');
+        loadHistory();
+    } else {
+        alert('รหัสผ่าน Admin ไม่ถูกต้อง!');
+        passwordInput.value = '';
+        passwordInput.focus();
+    }
+}
+
+async function loadHistory() {
+    try {
+        const response = await fetch("history.txt?time=" + Date.now());
+
+        if (!response.ok) {
+            throw new Error("Cannot load history.txt");
+        }
+
+        const text = await response.text();
+        historyData = [];
+
+        const lines = text.split(/\r?\n/);
+
+        lines.forEach(function(line) {
+            line = line.trim();
+
+            if (!line) {
+                return;
+            }
+
+            const parts = line.split("|");
+
+            if (parts.length < 4) {
+                return;
+            }
+
+            const action = parts[0].trim();
+            const productID = parts[1].trim();
+            const date = parts[2].trim();
+            const user = parts[3].trim().replace(/^\||\|$/g, '');
+
+            historyData.push({
+                action: action,
+                productID: productID,
+                date: date,
+                user: user
+            });
+        });
+
+        filteredData = [...historyData];
+        currentPage = 1;
+        displayHistory();
+
+    } catch (error) {
+        console.error(error);
+
+        document.getElementById("historyBody").innerHTML = `
+            <tr>
+                <td colspan="4" style="text-align:center;color:#ff716d;padding:40px;">
+                    ไม่สามารถอ่าน history.txt ได้
+                </td>
+            </tr>
+        `;
+    }
+}
+
+
+
+/* ================= CHANGE ROWS PER PAGE ================= */
+
+function changeRowsPerPage() {
+    const select = document.getElementById("rowsSelect");
+    rowsPerPage = parseInt(select.value);
+    currentPage = 1;
+    displayHistory();
+}
+
+
+
+/* ================= DISPLAY WITH PAGINATION ================= */
+
+function displayHistory() {
+    const body = document.getElementById("historyBody");
+    const empty = document.getElementById("emptyMessage");
+    const paginationContainer = document.getElementById("paginationContainer");
+    const pageInfo = document.getElementById("pageInfo");
+
+    body.innerHTML = "";
+    paginationContainer.innerHTML = "";
+
+    if (filteredData.length === 0) {
+        empty.style.display = "block";
+        pageInfo.innerText = "Showing 0 to 0 of 0 entries";
+        return;
+    }
+
+    empty.style.display = "none";
+
+    const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+    if (currentPage > totalPages) {
+        currentPage = totalPages;
+    }
+    if (currentPage < 1) {
+        currentPage = 1;
+    }
+
+    const startIndex = (currentPage - 1) * rowsPerPage;
+    const endIndex = startIndex + rowsPerPage;
+    const paginatedData = filteredData.slice(startIndex, endIndex);
+
+    const showingEnd = Math.min(endIndex, filteredData.length);
+    pageInfo.innerText = `Showing ${startIndex + 1} to ${showingEnd} of ${filteredData.length} items`;
+
+    paginatedData.forEach(function(item) {
+        let actionClass = "action-default";
+
+        if (item.action === "ADD") {
+            actionClass = "action-add";
+        }
+        else if (item.action === "EDIT") {
+            actionClass = "action-edit";
+        }
+        else if (item.action === "DELETE") {
+            actionClass = "action-delete";
+        }
+
+        const row = document.createElement("tr");
+
+        row.innerHTML = `
+            <td>
+                <span class="action-badge ${actionClass}">
+                    ${escapeHtml(item.action)}
+                </span>
+            </td>
+
+            <td class="product-id">
+                ${escapeHtml(item.productID)}
+            </td>
+
+            <td class="date">
+                ${escapeHtml(item.date)}
+            </td>
+
+            <td class="user-col">
+                ${escapeHtml(item.user)}
+            </td>
+        `;
+
+        body.appendChild(row);
+    });
+
+    if (totalPages > 1) {
+        const firstBtn = document.createElement("button");
+        firstBtn.className = "page-btn";
+        firstBtn.innerHTML = "«";
+        firstBtn.disabled = currentPage === 1;
+        firstBtn.onclick = function() {
+            if (currentPage > 1) {
+                currentPage = 1;
+                displayHistory();
+            }
+        };
+        paginationContainer.appendChild(firstBtn);
+
+        const prevBtn = document.createElement("button");
+        prevBtn.className = "page-btn";
+        prevBtn.innerHTML = "‹";
+        prevBtn.disabled = currentPage === 1;
+        prevBtn.onclick = function() {
+            if (currentPage > 1) {
+                currentPage--;
+                displayHistory();
+            }
+        };
+        paginationContainer.appendChild(prevBtn);
+
+        for (let i = 1; i <= totalPages; i++) {
+            const pageBtn = document.createElement("button");
+            pageBtn.className = `page-btn ${i === currentPage ? 'active' : ''}`;
+            pageBtn.innerText = i;
+            pageBtn.onclick = function() {
+                currentPage = i;
+                displayHistory();
+            };
+            paginationContainer.appendChild(pageBtn);
+        }
+
+        const nextBtn = document.createElement("button");
+        nextBtn.className = "page-btn";
+        nextBtn.innerHTML = "›";
+        nextBtn.disabled = currentPage === totalPages;
+        nextBtn.onclick = function() {
+            if (currentPage < totalPages) {
+                currentPage++;
+                displayHistory();
+            }
+        };
+        paginationContainer.appendChild(nextBtn);
+
+        const lastBtn = document.createElement("button");
+        lastBtn.className = "page-btn";
+        lastBtn.innerHTML = "»";
+        lastBtn.disabled = currentPage === totalPages;
+        lastBtn.onclick = function() {
+            if (currentPage < totalPages) {
+                currentPage = totalPages;
+                displayHistory();
+            }
+        };
+        paginationContainer.appendChild(lastBtn);
+    }
+}
+
+
+
+/* ================= SEARCH ================= */
+
+document.getElementById("searchInput").addEventListener(
+    "input",
+    function() {
+        const keyword = this.value.toLowerCase();
+
+        filteredData = historyData.filter(function(item) {
+            return (
+                item.action.toLowerCase().includes(keyword) ||
+                item.productID.toLowerCase().includes(keyword) ||
+                item.date.toLowerCase().includes(keyword) ||
+                item.user.toLowerCase().includes(keyword)
+            );
+        });
+
+        currentPage = 1;
+        displayHistory();
+    }
+);
+
+</script>
+
+</body>
+
+</html>

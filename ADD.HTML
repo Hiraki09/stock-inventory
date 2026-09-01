@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Add Product - Component Inventory Tracker</title>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+
+body {
+    background: #080f1b;
+    color: #e5e7eb;
+    min-height: 100vh;
+    overflow: hidden;
+    display: flex;
+}
+
+body.light-mode {
+    background: #f1f5f9;
+    color: #1e293b;
+}
+
+/* ================= SIDEBAR ================= */
+
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 265px;
+    height: 100vh;
+    overflow: hidden;
+    background: #09111d;
+    border-right: 1px solid #243244;
+    padding: 28px 14px;
+}
+
+body.light-mode .sidebar {
+    background: #ffffff;
+    border-right: 1px solid #cbd5e1;
+}
+
+.logo {
+    padding: 0 15px 28px;
+    border-bottom: 1px solid #202d3d;
+    margin-bottom: 25px;
+}
+
+body.light-mode .logo {
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.logo h1 {
+    font-size: 27px;
+    color: #f8fafc;
+    letter-spacing: -1px;
+}
+
+body.light-mode .logo h1 {
+    color: #0f172a;
+}
+
+.logo p {
+    color: #aab4c3;
+    font-size: 17px;
+    letter-spacing: 1px;
+}
+
+body.light-mode .logo p {
+    color: #64748b;
+}
+
+/* MENU */
+
+.menu a {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px 18px;
+    margin-bottom: 7px;
+    border-radius: 9px;
+    color: #aeb9c9;
+    text-decoration: none;
+    font-size: 16px;
+    transition: 0.2s;
+}
+
+body.light-mode .menu a {
+    color: #475569;
+}
+
+.menu a:hover {
+    background: #141e2c;
+    color: white;
+}
+
+body.light-mode .menu a:hover {
+    background: #f1f5f9;
+    color: #0f172a;
+}
+
+.menu a.active {
+    background: #162235;
+    color: #70a0ff;
+    border: 1px solid #263752;
+}
+
+body.light-mode .menu a.active {
+    background: #eff6ff;
+    color: #2563eb;
+    border: 1px solid #bfdbfe;
+}
+
+.icon {
+    width: 23px;
+    text-align: center;
+    font-size: 19px;
+}
+
+/* USER PROFILE BOX */
+
+.user {
+    position: absolute;
+    bottom: 20px;
+    left: 14px;
+    width: 237px;
+    padding: 15px;
+    background: #101a28;
+    border: 1px solid #263448;
+    border-radius: 9px;
+}
+
+body.light-mode .user {
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+}
+
+.user-name {
+    font-weight: bold;
+}
+
+.user-email {
+    color: #8995a7;
+    font-size: 12px;
+    margin-top: 4px;
+}
+
+body.light-mode .user-email {
+    color: #64748b;
+}
+
+/* ================= MAIN ================= */
+
+.main {
+    margin-left: 265px;
+    width: calc(100% - 265px);
+    height: 100vh;
+    padding: 28px 32px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    background-color: #080f1b;
+}
+
+body.light-mode .main {
+    background-color: #f1f5f9;
+}
+
+/* ================= HEADER ================= */
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.title-area {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.menu-button {
+    width: 44px;
+    height: 44px;
+    border-radius: 8px;
+    border: 1px solid #162235;
+    background: #0b1320;
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+body.light-mode .menu-button {
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    color: #0f172a;
+}
+
+.menu-button:hover {
+    background: #162238;
+}
+
+body.light-mode .menu-button:hover {
+    background: #f1f5f9;
+}
+
+.title h2 {
+    font-size: 26px;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+body.light-mode .title h2 {
+    color: #0f172a;
+}
+
+.title p {
+    color: #64748b;
+    font-size: 13px;
+    margin-top: 2px;
+}
+
+body.light-mode .title p {
+    color: #64748b;
+}
+
+/* ================= FORM BOX ================= */
+
+.form-box {
+    background: #0b1320;
+    border: 1px solid #162235;
+    padding: 32px;
+    border-radius: 10px;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+body.light-mode .form-box {
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+}
+
+.form-box h3 {
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: 700;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #0d1622;
+    margin-bottom: 24px;
+}
+
+body.light-mode .form-box h3 {
+    color: #0f172a;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-group label {
+    font-size: 11px;
+    font-weight: 700;
+    color: #8a99ad;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+body.light-mode .form-group label {
+    color: #475569;
+}
+
+/* INPUT CONTROLS */
+
+.form-control {
+    width: 100%;
+    height: 42px;
+    background-color: #ffffff !important;
+    border: 1px solid #162235;
+    border-radius: 6px;
+    padding: 0 14px;
+    color: #000000 !important;
+    font-size: 14px;
+    font-weight: 500;
+    outline: none;
+}
+
+body.light-mode .form-control {
+    background-color: #ffffff !important;
+    border: 1px solid #cbd5e1;
+    color: #0f172a !important;
+}
+
+.form-control:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.form-control-readonly {
+    background-color: #e2e8f0 !important;
+    color: #334155 !important;
+    font-weight: 700;
+    cursor: not-allowed;
+}
+
+body.light-mode .form-control-readonly {
+    background-color: #e2e8f0 !important;
+    color: #334155 !important;
+}
+
+select.form-control option {
+    background-color: #ffffff;
+    color: #000000;
+}
+
+/* BUTTONS */
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 32px;
+    padding-top: 20px;
+    border-top: 1px solid #162235;
+}
+
+body.light-mode .form-actions {
+    border-top: 1px solid #e2e8f0;
+}
+
+.btn {
+    padding: 10px 24px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-secondary {
+    background: transparent;
+    border: 1px solid #162235;
+    color: #8a99ad;
+}
+
+body.light-mode .btn-secondary {
+    border: 1px solid #cbd5e1;
+    color: #64748b;
+}
+
+.btn-secondary:hover {
+    background: #162238;
+    color: #ffffff;
+}
+
+body.light-mode .btn-secondary:hover {
+    background: #f1f5f9;
+    color: #0f172a;
+}
+
+.btn-primary {
+    background: #2563eb;
+    border: none;
+    color: #ffffff;
+}
+
+.btn-primary:hover {
+    background: #1d4ed8;
+}
+
+@media (max-width: 900px) {
+    .sidebar { width: 210px; }
+    .main { margin-left: 210px; width: calc(100% - 210px); padding: 20px; }
+    .form-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+
+<body>
+
+<div class="sidebar">
+    <div class="logo">
+        <h1>COMPONENT</h1>
+        <p>INVENTORY TRACKER</p>
+    </div>
+
+    <div class="menu">
+        <a href="main.HTML">
+            <span class="icon">▦</span>
+            Dashboard
+        </a>
+        <a href="Inventory.html">
+            <span class="icon">◇</span>
+            Inventory
+        </a>
+        <a href="ADD.html" class="active">
+            <span class="icon">▥</span>
+            Add Product
+        </a>
+        <a href="history.html">
+            <span class="icon">▤</span>
+            History
+        </a>
+        <a href="setting.html">
+            <span class="icon">⚙</span>
+            Settings
+        </a>
+    </div>
+
+    <div class="user">
+        <div class="user-name" id="currentUserName">● &nbsp; Loading...</div>
+        <div class="user-email" id="currentUserEmail">Loading...</div>
+    </div>
+</div>
+
+<div class="main">
+    <div class="header">
+        <div class="title-area">
+            <button class="menu-button" onclick="location.reload()">☰</button>
+            <div class="title">
+                <h2>ADD PRODUCT</h2>
+                <p>Add new equipment component to inventory system</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-box">
+        <h3>Equipment Details</h3>
+
+        <form id="addEquipmentForm" onsubmit="saveProduct(event)">
+            <div class="form-grid">
+
+                <div class="form-group">
+                    <label>PRODUCT ID (AUTO GENERATED)</label>
+                    <input id="productId" class="form-control form-control-readonly" placeholder="AUTO GENERATED..." type="text" readonly/>
+                </div>
+
+                <div class="form-group">
+                    <label>TYPE</label>
+                    <select id="type" class="form-control" onchange="onTypeChange()" required>
+                        <option value="">Select Type...</option>
+                        <option value="LED">LED</option>
+                        <option value="Transistor">Transistor</option>
+                        <option value="Resistor">Resistor</option>
+                        <option value="Capacitor">Capacitor</option>
+                        <option value="IC">IC</option>
+                        <option value="Inductor">Inductor</option>
+                        <option value="Diode">Diode</option>
+                        <option value="Module">Module</option>
+                    </select>
+                </div>
+
+                <!-- ช่อง FOOTPRINT จะถูกเปลี่ยนเป็น Dropdown อัตโนมัติเมื่อเลือก Type -->
+                <div class="form-group" id="footprintContainer">
+                    <label>FOOTPRINT</label>
+                    <select id="footprint" class="form-control" disabled required>
+                        <option value="">Please select Type first...</option>
+                    </select>
+                </div>
+
+                <!-- ช่อง DEVICE TYPE / DETAIL ถูกเปลี่ยนเป็น Dropdown (เลขรหัส) ตาม Type -->
+                <div class="form-group" id="deviceTypeContainer">
+                    <label>DEVICE TYPE / DETAIL</label>
+                    <select id="deviceType" class="form-control" disabled required onchange="generateProductID()">
+                        <option value="">Please select Type first...</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>EQUIPMENT COST / SPEC</label>
+                    <input id="cost" class="form-control" placeholder="e.g. 10 kΩ, 4.7v" type="text" oninput="generateProductID()" required/>
+                </div>
+
+                <div class="form-group">
+                    <label>DURABILITY / VOLTAGE</label>
+                    <input id="durability" class="form-control" placeholder="e.g. +-0.25W, 40V / 200mA" type="text" oninput="generateProductID()" required/>
+                </div>
+
+                <div class="form-group" style="grid-column: span 2;">
+                    <label>QUANTITY</label>
+                    <input id="quantity" class="form-control" placeholder="0" type="number" min="1" required/>
+                </div>
+
+            </div>
+
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary" onclick="window.location.href='main.HTML'">Cancel</button>
+                <button type="submit" class="btn btn-primary">SAVE ITEM</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+/* =====================================================
+   LOAD THEME FROM SETTINGS
+===================================================== */
+const savedTheme = localStorage.getItem('appTheme') || 'dark';
+if (savedTheme === 'light') {
+    document.body.classList.add('light-mode');
+}
+
+/* =====================================================
+   CHECK LOGIN
+===================================================== */
+const loggedInUser = localStorage.getItem("loggedInUser");
+
+if (!loggedInUser) {
+    window.location.href = "Login.HTML";
+}
+
+/* =====================================================
+   แสดง ID + E-MAIL ของคนที่ Login
+===================================================== */
+let currentUsername = "Unknown";
+try {
+    const currentUser = JSON.parse(loggedInUser);
+    currentUsername = currentUser.id || currentUser.email || "Unknown";
+
+    document.getElementById("currentUserName").innerHTML =
+        "● &nbsp;" + escapeHtml(currentUsername);
+
+    document.getElementById("currentUserEmail").textContent =
+        currentUser.email || "";
+
+} catch (error) {
+    console.error("Invalid login data:", error);
+    localStorage.removeItem("loggedInUser");
+    window.location.href = "Login.HTML";
+}
+
+/* =====================================================
+   FOOTPRINT OPTIONS DATA (กำหนดรายการ Footprint แยกตามประเภท)
+===================================================== */
+const footprintOptions = {
+    "Resistor": [
+        { code: "01", name: "SMD" },
+        { code: "02", name: "AXIAL" },
+        { code: "03", name: "Trimpot" }
+    ],
+    "Capacitor": [
+        { code: "01", name: "SMD" },
+        { code: "02", name: "AXIAL" },
+        { code: "03", name: "RADIAL" }
+    ],
+    "Inductor": [
+        { code: "01", name: "SMD" },
+        { code: "02", name: "AXIAL" },
+        { code: "03", name: "Drum Core" }
+    ],
+    "Diode": [
+        { code: "01", name: "DO" },
+        { code: "02", name: "SMA" }
+    ],
+    "IC": [
+        { code: "01", name: "DIP" },
+        { code: "02", name: "SOIC" },
+        { code: "03", name: "QFP" },
+        { code: "04", name: "TSSOP" }
+    ],
+    "LED": [
+        { code: "01", name: "3mm Through-Hole" },
+        { code: "02", name: "5mm Through-Hole" },
+        { code: "03", name: "SMD 5050" }
+    ],
+    "Transistor": [
+        { code: "01", name: "TO-92" },
+        { code: "02", name: "TO-220" },
+        { code: "03", name: "SMD" }
+    ],
+    "Module": [
+        { code: "01", name: "Standard Module" },
+        { code: "02", name: "Shield / Board" }
+    ]
+};
+
+/* =====================================================
+   DEVICE TYPE / DETAIL OPTIONS DATA (กำหนดรหัสเลขและรายละเอียด แยกตาม Type)
+===================================================== */
+const deviceTypeOptions = {
+    "Resistor": [
+        { code: "01", name: "Carbon Film" },
+        { code: "02", name: "Metal Film" },
+        { code: "03", name: "Wirewound" },
+        { code: "04", name: "SMD" }
+    ],
+    "Capacitor": [
+        { code: "01", name: "Ceramic" },
+        { code: "02", name: "Electrolytic" },
+        { code: "03", name: "Film / Mylar" },
+        { code: "04", name: "SMD" },
+        { code: "05", name: "Tantalum" }
+    ],
+    "Inductor": [
+        { code: "01", name: "Chip Inductor" },
+        { code: "02", name: "Axial Inductor" },
+        { code: "03", name: "SMD inductor" },
+        { code: "04", name: "Power Inductor" }
+    ],
+    "Diode": [
+        { code: "01", name: "Rectifier" },
+        { code: "02", name: "Zener" },
+        { code: "03", name: "Photo" },
+        { code: "04", name: "Schottky" },
+        { code: "05", name: "Switching Diode / Signal Diode" },
+        { code: "06", name: "Bridge" }
+    ],
+    "IC": [
+        { code: "01", name: "Microcontroller" },
+        { code: "02", name: "Voltage Regulator" },
+        { code: "03", name: "Op-Amp" },
+        { code: "04", name: "Digital IC" }
+    ],
+    "LED": [
+        { code: "01", name: "Red LED" },
+        { code: "02", name: "Orange LED" },
+        { code: "03", name: "Green LED" },
+        { code: "04", name: "Blue LED" },
+        { code: "05", name: "White LED" },
+        { code: "06", name: "Yellow LED" },
+        { code: "07", name: "RGB LED" }
+    ],
+    "Transistor": [
+        { code: "01", name: "NPN" },
+        { code: "02", name: "PNP" },
+        { code: "03", name: "JFET" },
+        { code: "04", name: "MOSFET N-Channel" },
+        { code: "05", name: "MOSFET P-Channel" }
+    ],
+    "Module": [
+        { code: "01", name: "Sensor Module" },
+        { code: "02", name: "Relay Module" },
+        { code: "03", name: "Communication Module" },
+        { code: "04", name: "Power Module" }
+    ]
+};
+
+/* =====================================================
+   TYPE MAPPING (แปลง Type เป็นรหัสตัวย่อหลัก)
+===================================================== */
+const typeCodeMapping = {
+    "LED": "LED",
+    "Transistor": "TR",
+    "Resistor": "RES",
+    "Capacitor": "CAP",
+    "IC": "IC",
+    "Inductor": "IND",
+    "Diode": "DIO",
+    "Module": "MOD"
+};
+
+/* =====================================================
+   UPDATE FOOTPRINT & DEVICE TYPE DROPDOWNS
+===================================================== */
+function onTypeChange() {
+    const typeSelect = document.getElementById("type");
+    const footprintContainer = document.getElementById("footprintContainer");
+    const deviceTypeContainer = document.getElementById("deviceTypeContainer");
+    const selectedType = typeSelect.value;
+
+    // อัปเดต Dropdown Footprint
+    footprintContainer.innerHTML = `
+        <label>FOOTPRINT</label>
+        <select id="footprint" class="form-control" onchange="generateProductID()" required>
+            <option value="">Select Footprint...</option>
+        </select>
+    `;
+
+    if (selectedType && footprintOptions[selectedType]) {
+        const footprintSelect = document.getElementById("footprint");
+        footprintOptions[selectedType].forEach(item => {
+            const opt = document.createElement("option");
+            opt.value = item.code; 
+            opt.textContent = `${item.code} - ${item.name}`;
+            footprintSelect.appendChild(opt);
+        });
+    }
+
+    // อัปเดต Dropdown Device Type / Detail เป็นเลขรหัส
+    deviceTypeContainer.innerHTML = `
+        <label>DEVICE TYPE / DETAIL</label>
+        <select id="deviceType" class="form-control" onchange="generateProductID()" required>
+            <option value="">Select Device Type / Detail...</option>
+        </select>
+    `;
+
+    if (selectedType && deviceTypeOptions[selectedType]) {
+        const deviceTypeSelect = document.getElementById("deviceType");
+        deviceTypeOptions[selectedType].forEach(item => {
+            const opt = document.createElement("option");
+            opt.value = item.code; // ใช้รหัสเลขเป็นค่า Value
+            opt.textContent = `${item.code} - ${item.name}`;
+            deviceTypeSelect.appendChild(opt);
+        });
+    }
+
+    generateProductID();
+}
+
+/* ================= HTML ESCAPE HELPER ================= */
+function escapeHtml(text) {
+    if (!text) return "";
+    return text
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+/* ================= GENERATE PRODUCT ID ================= */
+function generateProductID() {
+    const type = document.getElementById("type").value;
+    const footprintElem = document.getElementById("footprint");
+    const footprintCode = footprintElem ? footprintElem.value : "";
+    
+    const deviceTypeElem = document.getElementById("deviceType");
+    const deviceTypeCode = (deviceTypeElem && deviceTypeElem.value) ? deviceTypeElem.value : "";
+
+    const cost = document.getElementById("cost").value.trim().toUpperCase();
+    const durability = document.getElementById("durability").value.trim().toUpperCase();
+
+    // ดึงตัวย่อสั้นๆ ตาม Type ที่เลือก
+    const typePrefix = typeCodeMapping[type] || "RES";
+
+    // รูปแบบ Product ID จะรวมรหัสตัวย่อประเภท + Footprint + รหัส Device Type
+    let parts = [
+        typePrefix + (footprintCode || "00") + (deviceTypeCode || "00")
+    ];
+
+    if (cost) parts.push(cost.replace(/\s+/g, ''));
+    if (durability) parts.push(durability.replace(/\s+/g, ''));
+
+    document.getElementById("productId").value = parts.join('');
+}
+
+function getCurrentDateTime() {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+}
+
+async function saveProduct(event) {
+    event.preventDefault();
+
+    const productId = document.getElementById("productId").value;
+    const type = document.getElementById("type").value;
+    
+    const footprintSelect = document.getElementById("footprint");
+    let footprintName = "";
+    if (footprintSelect && footprintSelect.selectedIndex > 0) {
+        const selectedOptionText = footprintSelect.options[footprintSelect.selectedIndex].text;
+        footprintName = selectedOptionText.substring(selectedOptionText.indexOf("-") + 2).trim();
+    }
+
+    const deviceTypeSelect = document.getElementById("deviceType");
+    let deviceTypeName = "";
+    if (deviceTypeSelect && deviceTypeSelect.selectedIndex > 0) {
+        const selectedOptionText = deviceTypeSelect.options[deviceTypeSelect.selectedIndex].text;
+        deviceTypeName = selectedOptionText.substring(selectedOptionText.indexOf("-") + 2).trim();
+    }
+
+    const cost = document.getElementById("cost").value;
+    const durability = document.getElementById("durability").value;
+    const quantity = document.getElementById("quantity").value;
+    const timeFormatted = getCurrentDateTime();
+
+    const lineData = `${productId} | ${type} | ${footprintName} | ${deviceTypeName} | ${cost} | ${durability} | ${quantity} | ${timeFormatted}`;
+
+    try {
+        const response = await fetch('/save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                line: lineData,
+                user: currentUsername 
+            })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            alert(`บันทึกข้อมูลสำเร็จโดยผู้ใช้: ${currentUsername}\nPRODUCT ID: ${productId}`);
+            document.getElementById("addEquipmentForm").reset();
+            onTypeChange();
+        } else {
+            alert("เกิดข้อผิดพลาดในการบันทึก: " + (result.error || result.message));
+        }
+
+    } catch (err) {
+        console.error(err);
+        alert("ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้ กรุณาตรวจสอบว่าเปิด Node.js Server อยู่หรือไม่");
+    }
+}
+</script>
+
+</body>
+</html>

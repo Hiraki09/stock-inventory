@@ -1,0 +1,305 @@
+const express = require('express');
+const fs = require('fs');
+const path = require('path');
+
+const app = express();
+const PORT = 3000;
+
+// ==========================================
+// FILE PATH
+// ==========================================
+const inventoryPath = path.join(__dirname, 'inventory.txt');
+const deletePath = path.join(__dirname, 'delete.txt');
+const historyPath = path.join(__dirname, 'history.txt');
+
+// ==========================================
+// MIDDLEWARE
+// ==========================================
+app.use(express.json());
+app.use(express.static(__dirname));
+
+// ==========================================
+// FUNCTION: วันที่และเวลา
+// ==========================================
+function getCurrentDateTime() {
+    const now = new Date();
+
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+}
+
+// ==========================================
+// FUNCTION: บันทึกประวัติลง history.txt
+// รูปแบบที่ต้องการ: ACTION | PRODUCT-ID | เวลา |USER|
+// ==========================================
+function addHistory(action, productId, user = 'Unknown') {
+    const time = getCurrentDateTime();
+    const log = `${action} | ${productId} | ${time} |${user}|\n`;
+
+    fs.appendFile(historyPath, log, 'utf8', (err) => {
+        if (err) {
+            console.error('ไม่สามารถเขียน history.txt:', err.message);
+        } else {
+            console.log(`[HISTORY] ${action} | ${productId} | ${user}`);
+        }
+    });
+}
+
+
+// ============================================================
+// 1. ADD PRODUCT
+// ============================================================
+app.post('/save', (req, res) => {
+    const data = req.body;
+
+    if (!data || !data.line) {
+        return res.status(400).json({
+            success: false,
+            error: 'ไม่พบข้อมูลที่จะบันทึก'
+        });
+    }
+
+    const line = data.line.trim();
+    const productId = line.split('|')[0].trim();
+    const username = data.user || 'Unknown';
+
+    if (!productId) {
+        return res.status(400).json({
+            success: false,
+            error: 'ไม่พบ Product ID'
+        });
+    }
+
+    fs.appendFile(inventoryPath, line + '\n', 'utf8', (err) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({
+                success: false,
+                error: err.message
+            });
+        }
+
+        addHistory('ADD', productId, username);
+        console.log(`[ADD] ${productId} by ${username}`);
+
+        res.json({
+            success: true,
+            message: `เพิ่มสินค้า ${productId} สำเร็จ`
+        });
+    });
+});
+
+
+// ============================================================
+// 2. DELETE PRODUCT
+// ============================================================
+app.post('/api/delete-item', (req, res) => {
+    const targetId = req.body.id;
+    const username = req.body.user || 'Unknown';
+
+    if (!targetId) {
+        return res.status(400).json({
+            success: false,
+            message: 'ไม่พบ Product ID'
+        });
+    }
+
+    fs.readFile(inventoryPath, 'utf8', (err, data) => {
+        if (err) {
+            if (err.code === 'ENOENT') {
+                return res.status(404).json({
+                    success: false,
+                    message: 'ยังไม่มีไฟล์ inventory.txt (คลังสินค้าว่างเปล่า)'
+                });
+            }
+            return res.status(500).json({
+                success: false,
+                message: 'อ่านไฟล์ inventory.txt ไม่ได้'
+            });
+        }
+
+        const lines = data.split(/\r?\n/);
+        let deletedLine = '';
+
+        const updatedLines = lines.filter(line => {
+            if (!line.trim()) return false;
+            const cols = line.split('|').map(c => c.trim());
+            const productId = cols[0];
+
+            if (productId === targetId) {
+                deletedLine = line.trim();
+                return false;
+            }
+            return true;
+        });
+
+        if (!deletedLine) {
+            return res.status(404).json({
+                success: false,
+                message: `ไม่พบ Product ID: ${targetId}`
+            });
+        }
+
+        const newInventoryData =
+            updatedLines.length > 0
+                ? updatedLines.join('\n') + '\n'
+                : '';
+
+        fs.writeFile(inventoryPath, newInventoryData, 'utf8', (err) => {
+            if (err) {
+                return res.status(500).json({
+                    success: false,
+                    message: 'เขียน inventory.txt ไม่สำเร็จ'
+                });
+            }
+
+            const deleteLog = `[${getCurrentDateTime()}] | User: ${username} | ${deletedLine}\n`;
+
+            fs.appendFile(deletePath, deleteLog, 'utf8', (err) => {
+                if (err) {
+                    return res.status(500).json({
+                        success: false,
+                        message: 'บันทึกลง delete.txt ไม่สำเร็จ'
+                    });
+                }
+
+                addHistory('DELETE', targetId, username);
+                console.log(`[DELETE] ${targetId} by ${username}`);
+
+                res.json({
+                    success: true,
+                    message: `ลบสินค้า ${targetId} สำเร็จ`
+                });
+            });
+        });
+    });
+});
+
+
+// ============================================================
+// 3. EDIT PRODUCT
+// ============================================================
+app.post('/api/edit-item', (req, res) => {
+    const oldId = req.body.oldId;
+    const newLine = req.body.line;
+    const username = req.body.user || 'Unknown';
+
+    if (!oldId || !newLine) {
+        return res.status(400).json({
+            success: false,
+            message: 'ข้อมูล EDIT ไม่ครบ'
+        });
+    }
+
+    const newId = newLine.split('|')[0].trim();
+
+    fs.readFile(inventoryPath, 'utf8', (err, data) => {
+        if (err) {
+            if (err.code === 'ENOENT') {
+                return res.status(404).json({
+                    success: false,
+                    message: 'ยังไม่มีไฟล์ inventory.txt (คลังสินค้าว่างเปล่า)'
+                });
+            }
+            return res.status(500).json({
+                success: false,
+                message: 'อ่าน inventory.txt ไม่ได้'
+            });
+        }
+
+        const lines = data
+            .split(/\r?\n/)
+            .filter(line => line.trim() !== '');
+
+        let found = false;
+
+        const updatedLines = lines.map(line => {
+            const cols = line.split('|').map(c => c.trim());
+            const productId = cols[0];
+
+            if (productId === oldId) {
+                found = true;
+                return newLine.trim();
+            }
+            return line;
+        });
+
+        if (!found) {
+            return res.status(404).json({
+                success: false,
+                message: `ไม่พบ Product ID: ${oldId}`
+            });
+        }
+
+        fs.writeFile(inventoryPath, updatedLines.join('\n') + '\n', 'utf8', (err) => {
+            if (err) {
+                return res.status(500).json({
+                    success: false,
+                    message: 'บันทึก EDIT ไม่สำเร็จ'
+                });
+            }
+
+            addHistory('EDIT', newId, username);
+            console.log(`[EDIT] ${oldId} -> ${newId} by ${username}`);
+
+            res.json({
+                success: true,
+                message: `แก้ไขสินค้า ${newId} สำเร็จ`
+            });
+        });
+    });
+});
+
+
+// ============================================================
+// 4. API อ่าน HISTORY
+// ============================================================
+app.get('/api/history', (req, res) => {
+    fs.readFile(historyPath, 'utf8', (err, data) => {
+        if (err) {
+            if (err.code === 'ENOENT') {
+                return res.json({
+                    success: true,
+                    logs: []
+                });
+            }
+            return res.status(500).json({
+                success: false,
+                message: 'อ่าน history.txt ไม่ได้'
+            });
+        }
+
+        const logs = data
+            .split(/\r?\n/)
+            .filter(line => line.trim() !== '');
+
+        res.json({
+            success: true,
+            logs: logs
+        });
+    });
+});
+
+
+// ============================================================
+// START SERVER
+// ============================================================
+app.listen(PORT, () => {
+    console.log('==========================================');
+    console.log('Component Inventory Server');
+    console.log('==========================================');
+    console.log(`Server:     http://localhost:${PORT}`);
+    console.log(`Login:      http://localhost:${PORT}/Login.HTML`);
+    console.log(`Dashboard:  http://localhost:${PORT}/main.HTML`);
+    console.log(`ADD:        http://localhost:${PORT}/ADD.HTML`);
+    console.log(`Inventory:  http://localhost:${PORT}/Inventory.HTML`);
+    console.log(`Setting:    http://localhost:${PORT}/setting.html`);
+    console.log('==========================================');
+});

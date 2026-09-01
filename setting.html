@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Settings - Component Inventory Tracker</title>
+
+<style>
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+
+/* ธีมมืด (Dark Mode - ค่าเริ่มต้น) */
+body {
+    background: #080f1b;
+    color: #e5e7eb;
+    min-height: 100vh;
+    overflow: hidden;
+    display: flex;
+}
+
+/* ธีมสว่าง (Light Mode) */
+body.light-mode {
+    background: #f1f5f9;
+    color: #1e293b;
+}
+
+/* ================= SIDEBAR ================= */
+
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 265px;
+    height: 100vh;
+    overflow: hidden;
+    background: #09111d;
+    border-right: 1px solid #243244;
+    padding: 28px 14px;
+}
+
+body.light-mode .sidebar {
+    background: #ffffff;
+    border-right: 1px solid #cbd5e1;
+}
+
+.logo {
+    padding: 0 15px 28px;
+    border-bottom: 1px solid #202d3d;
+    margin-bottom: 25px;
+}
+
+body.light-mode .logo {
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.logo h1 {
+    font-size: 27px;
+    color: #f8fafc;
+    letter-spacing: -1px;
+}
+
+body.light-mode .logo h1 {
+    color: #0f172a;
+}
+
+.logo p {
+    color: #aab4c3;
+    font-size: 17px;
+    letter-spacing: 1px;
+}
+
+body.light-mode .logo p {
+    color: #64748b;
+}
+
+/* MENU */
+
+.menu a {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px 18px;
+    margin-bottom: 7px;
+    border-radius: 9px;
+    color: #aeb9c9;
+    text-decoration: none;
+    font-size: 16px;
+    transition: 0.2s;
+}
+
+body.light-mode .menu a {
+    color: #475569;
+}
+
+.menu a:hover {
+    background: #141e2c;
+    color: white;
+}
+
+body.light-mode .menu a:hover {
+    background: #f1f5f9;
+    color: #0f172a;
+}
+
+.menu a.active {
+    background: #162235;
+    color: #70a0ff;
+    border: 1px solid #263752;
+}
+
+body.light-mode .menu a.active {
+    background: #eff6ff;
+    color: #2563eb;
+    border: 1px solid #bfdbfe;
+}
+
+.icon {
+    width: 23px;
+    text-align: center;
+    font-size: 19px;
+}
+
+/* USER PROFILE BOX */
+
+.user {
+    position: absolute;
+    bottom: 20px;
+    left: 14px;
+    width: 237px;
+    padding: 15px;
+    background: #101a28;
+    border: 1px solid #263448;
+    border-radius: 9px;
+}
+
+body.light-mode .user {
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+}
+
+.user-name {
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.user-email {
+    color: #8995a7;
+    font-size: 12px;
+    margin-top: 4px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+body.light-mode .user-email {
+    color: #64748b;
+}
+
+/* ================= MAIN ================= */
+
+.main {
+    margin-left: 265px;
+    width: calc(100% - 265px);
+    height: 100vh;
+    padding: 30px 35px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+/* ================= HEADER ================= */
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.title-area {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.menu-button {
+    width: 54px;
+    height: 54px;
+    border-radius: 9px;
+    border: 1px solid #273548;
+    background: #111b29;
+    color: white;
+    font-size: 28px;
+    cursor: pointer;
+}
+
+body.light-mode .menu-button {
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    color: #0f172a;
+}
+
+.title h2 {
+    font-size: 30px;
+    color: #f8fafc;
+}
+
+body.light-mode .title h2 {
+    color: #0f172a;
+}
+
+.title p {
+    color: #8995a7;
+    margin-top: 4px;
+}
+
+body.light-mode .title p {
+    color: #64748b;
+}
+
+/* ================= SETTINGS CONTENT ================= */
+
+.settings-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    max-width: 800px;
+}
+
+.setting-card {
+    background: #0d1622;
+    border: 1px solid #263548;
+    padding: 25px;
+    border-radius: 9px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+body.light-mode .setting-card {
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+}
+
+.setting-info {
+    max-width: 500px;
+}
+
+.setting-card h3 {
+    font-size: 18px;
+    color: #f1f5f9;
+    margin-bottom: 10px;
+}
+
+body.light-mode .setting-card h3 {
+    color: #0f172a;
+}
+
+.setting-card p {
+    color: #8995a7;
+    font-size: 14px;
+}
+
+body.light-mode .setting-card p {
+    color: #64748b;
+}
+
+/* ปุ่มเลือกธีม */
+.theme-options {
+    display: flex;
+    gap: 12px;
+}
+
+.theme-btn {
+    padding: 12px 20px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid #273548;
+    background: #111b29;
+    color: #e5e7eb;
+    transition: 0.2s;
+}
+
+body.light-mode .theme-btn {
+    background: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    color: #475569;
+}
+
+.theme-btn.active {
+    background: #2563eb;
+    color: white;
+    border-color: #3b82f6;
+}
+
+.logout-btn {
+    background: #dc2626;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.logout-btn:hover {
+    background: #b91c1c;
+}
+
+/* ปุ่ม Reset History */
+.reset-history-btn {
+    background: #d97706;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.reset-history-btn:hover {
+    background: #b45309;
+}
+
+/* ปุ่ม Reset Inventory */
+.reset-inventory-btn {
+    background: #b91c1c;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.reset-inventory-btn:hover {
+    background: #991b1b;
+}
+
+/* ================= MODAL ยืนยันรหัสผ่าน ================= */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(3px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.modal-overlay.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal-box {
+    background: #0d1622;
+    border: 1px solid #263548;
+    padding: 30px;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    transform: translateY(-20px);
+    transition: transform 0.3s ease;
+}
+
+body.light-mode .modal-box {
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+
+.modal-overlay.show .modal-box {
+    transform: translateY(0);
+}
+
+.modal-box h3 {
+    font-size: 20px;
+    color: #f1f5f9;
+    margin-bottom: 10px;
+}
+
+body.light-mode .modal-box h3 {
+    color: #0f172a;
+}
+
+.modal-box p {
+    color: #8995a7;
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+body.light-mode .modal-box p {
+    color: #64748b;
+}
+
+.modal-input {
+    width: 100%;
+    padding: 12px 15px;
+    background: #111b29;
+    border: 1px solid #273548;
+    border-radius: 6px;
+    color: white;
+    font-size: 15px;
+    margin-bottom: 20px;
+    outline: none;
+}
+
+body.light-mode .modal-input {
+    background: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    color: #0f172a;
+}
+
+.modal-input:focus {
+    border-color: #d97706;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.modal-btn {
+    flex: 1;
+    padding: 12px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: 0.2s;
+}
+
+.modal-btn.cancel {
+    background: #273548;
+    color: #e5e7eb;
+}
+
+body.light-mode .modal-btn.cancel {
+    background: #e2e8f0;
+    color: #475569;
+}
+
+.modal-btn.cancel:hover {
+    background: #33445c;
+}
+
+.modal-btn.confirm {
+    background: #d97706;
+    color: white;
+}
+
+.modal-btn.confirm:hover {
+    background: #b45309;
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- ================= SIDEBAR ================= -->
+
+<div class="sidebar">
+
+    <div class="logo">
+        <h1>COMPONENT</h1>
+        <p>INVENTORY TRACKER</p>
+    </div>
+
+    <div class="menu">
+
+        <a href="main.HTML">
+            <span class="icon">▦</span>
+            Dashboard
+        </a>
+
+        <a href="Inventory.html">
+            <span class="icon">◇</span>
+            Inventory
+        </a>
+
+        <a href="ADD.html">
+            <span class="icon">▥</span>
+            Add Product
+        </a>
+
+        <a href="history.html">
+            <span class="icon">▤</span>
+            History
+        </a>
+
+        <a href="setting.html" class="active">
+            <span class="icon">⚙</span>
+            Settings
+        </a>
+
+    </div>
+
+    <!-- แผงแสดงข้อมูล User ด้านซ้ายล่าง -->
+    <div class="user">
+        <div class="user-name" id="currentUserName"><span>●</span> Loading...</div>
+        <div class="user-email" id="currentUserEmail">Loading...</div>
+    </div>
+
+</div>
+
+<!-- ================= MAIN ================= -->
+
+<div class="main">
+
+    <div class="header">
+        <div class="title-area">
+            <button class="menu-button" onclick="location.reload()">
+                ☰
+            </button>
+            <div class="title">
+                <h2>Settings</h2>
+                <p>Manage your account settings and session</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="settings-container">
+        
+        <!-- การตั้งค่าธีมสี -->
+        <div class="setting-card">
+            <div class="setting-info">
+                <h3>Appearance Theme</h3>
+                <p>Choose between dark and light mode for the user interface.</p>
+            </div>
+            <div class="theme-options">
+                <button class="theme-btn" id="darkThemeBtn" onclick="setTheme('dark')">🌙 Dark Mode</button>
+                <button class="theme-btn" id="lightThemeBtn" onclick="setTheme('light')">☀️ Light Mode</button>
+            </div>
+        </div>
+
+        <!-- การจัดการประวัติ (Reset History) -->
+        <div class="setting-card">
+            <div class="setting-info">
+                <h3>Clear History Logs</h3>
+                <p>Permanently delete all action history records from the system. This action cannot be undone.</p>
+            </div>
+            <button class="reset-history-btn" id="resetHistoryBtn">Reset History</button>
+        </div>
+
+        <!-- การจัดการ Inventory (Clear All Inventory) -->
+        <div class="setting-card">
+            <div class="setting-info">
+                <h3>Clear All Inventory</h3>
+                <p>Permanently delete all component items from the inventory database. This action cannot be undone.</p>
+            </div>
+            <button class="reset-inventory-btn" id="resetInventoryBtn">Clear Inventory</button>
+        </div>
+
+        <!-- การจัดการเซสชัน -->
+        <div class="setting-card">
+            <div class="setting-info">
+                <h3>Account Session</h3>
+                <p>Signing out will clear your current session and require you to log in again with your credentials.</p>
+            </div>
+            <button class="logout-btn" id="logoutBtn">Log Out</button>
+        </div>
+
+    </div>
+
+</div>
+
+<!-- ================= MODAL ยืนยันรหัสผ่าน ================= -->
+<div class="modal-overlay" id="passwordModal">
+    <div class="modal-box">
+        <h3>Security Verification</h3>
+        <p>Please enter your account password to confirm action.</p>
+        <input type="password" class="modal-input" id="confirmPasswordInput" placeholder="Enter your password">
+        <div class="modal-actions">
+            <button class="modal-btn cancel" id="cancelModalBtn">Cancel</button>
+            <button class="modal-btn confirm" id="submitPasswordBtn">Confirm Delete</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const systemUsers = [
+        { id: "Admin FIRST", email: "admin@CBV.com", password: "admin3120654" },
+        { id: "Bright", email: "Bingo@CBV.com", password: "pas/boro4798" },
+        { id: "ONE", email: "ONE@CBV.com", password: "one3120654" },
+        { id: "Flock", email: "Flock@CBV.com", password: "1234" }
+    ];
+
+    const savedTheme = localStorage.getItem('appTheme') || 'dark';
+    if (savedTheme === 'light') {
+        document.body.classList.add('light-mode');
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        updateThemeButtons(savedTheme);
+
+        const loggedInUser = localStorage.getItem('loggedInUser');
+
+        if (!loggedInUser) {
+            window.location.href = 'Login.HTML';
+            return;
+        }
+
+        let currentUserObj = null;
+        try {
+            currentUserObj = JSON.parse(loggedInUser);
+
+            const nameElement = document.getElementById('currentUserName');
+            const emailElement = document.getElementById('currentUserEmail');
+
+            if (nameElement) {
+                const displayName = currentUserObj.id || currentUserObj.email || "Unknown";
+                nameElement.innerHTML = `<span>●</span> ${escapeHtml(displayName)}`;
+            }
+            if (emailElement) {
+                emailElement.textContent = currentUserObj.email || "";
+            }
+        } catch (error) {
+            console.error("Invalid login data:", error);
+            localStorage.removeItem('loggedInUser');
+            window.location.href = 'Login.HTML';
+        }
+
+        const resetHistoryBtn = document.getElementById('resetHistoryBtn');
+        const resetInventoryBtn = document.getElementById('resetInventoryBtn');
+        const passwordModal = document.getElementById('passwordModal');
+        const cancelModalBtn = document.getElementById('cancelModalBtn');
+        const submitPasswordBtn = document.getElementById('submitPasswordBtn');
+        const confirmPasswordInput = document.getElementById('confirmPasswordInput');
+        const modalTitle = passwordModal.querySelector('h3');
+        const modalDesc = passwordModal.querySelector('p');
+
+        let currentActionType = '';
+
+        if (resetHistoryBtn) {
+            resetHistoryBtn.addEventListener('click', () => {
+                currentActionType = 'history';
+                modalTitle.textContent = 'Security Verification';
+                modalDesc.textContent = 'Please enter your account password to confirm history deletion.';
+                confirmPasswordInput.value = '';
+                passwordModal.classList.add('show');
+                confirmPasswordInput.focus();
+            });
+        }
+
+        if (resetInventoryBtn) {
+            resetInventoryBtn.addEventListener('click', () => {
+                currentActionType = 'inventory';
+                modalTitle.textContent = 'Inventory Deletion Warning';
+                modalDesc.textContent = 'Please enter your account password to delete ALL inventory items.';
+                confirmPasswordInput.value = '';
+                passwordModal.classList.add('show');
+                confirmPasswordInput.focus();
+            });
+        }
+
+        if (cancelModalBtn) {
+            cancelModalBtn.addEventListener('click', () => {
+                passwordModal.classList.remove('show');
+            });
+        }
+
+        if (submitPasswordBtn) {
+            submitPasswordBtn.addEventListener('click', async () => {
+                const enteredPassword = confirmPasswordInput.value;
+
+                if (!enteredPassword) {
+                    alert('กรุณากรอกรหัสผ่านเพื่อยืนยัน');
+                    return;
+                }
+
+                const matchedUser = systemUsers.find(u => u.email.toLowerCase() === currentUserObj.email.toLowerCase());
+                const correctPassword = matchedUser ? matchedUser.password : "";
+
+                if (enteredPassword !== correctPassword) {
+                    alert('รหัสผ่านไม่ถูกต้อง!');
+                    return;
+                }
+
+                passwordModal.classList.remove('show');
+
+                if (currentActionType === 'history') {
+                    try {
+                        const response = await fetch('/api/history/reset', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' }
+                        });
+                        const result = await response.json();
+                        
+                        if (result.success) {
+                            alert('ล้างประวัติ (History) ทั้งหมดสำเร็จแล้ว');
+                        } else {
+                            alert('เกิดข้อผิดพลาด: ' + (result.message || 'ไม่สามารถรีเซ็ตได้'));
+                        }
+                    } catch (err) {
+                        console.error(err);
+                        alert('ไม่สามารถเชื่อมต่อกับ Server ได้');
+                    }
+                } else if (currentActionType === 'inventory') {
+                    try {
+                        const response = await fetch('/api/inventory/reset', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' }
+                        });
+                        const result = await response.json();
+                        
+                        if (result.success) {
+                            alert('ลบข้อมูลสินค้าใน Inventory ทั้งหมดสำเร็จแล้ว');
+                        } else {
+                            alert('เกิดข้อผิดพลาด: ' + (result.message || 'ไม่สามารถลบข้อมูลได้'));
+                        }
+                    } catch (err) {
+                        console.error(err);
+                        alert('ไม่สามารถเชื่อมต่อกับ Server ได้');
+                    }
+                }
+            });
+        }
+
+        const logoutBtn = document.getElementById('logoutBtn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', async () => {
+                try {
+                    await fetch('/api/history/add', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            action: 'LOGOUT',
+                            email: currentUserObj.email,
+                            user: currentUserObj.id
+                        })
+                    });
+                } catch (err) {
+                    console.error('Logout history error:', err);
+                }
+
+                localStorage.removeItem('loggedInUser');
+                window.location.href = 'Login.HTML';
+            });
+        }
+    });
+
+    function setTheme(mode) {
+        if (mode === 'light') {
+            document.body.classList.add('light-mode');
+            localStorage.setItem('appTheme', 'light');
+        } else {
+            document.body.classList.remove('light-mode');
+            localStorage.setItem('appTheme', 'dark');
+        }
+        updateThemeButtons(mode);
+    }
+
+    function updateThemeButtons(mode) {
+        const darkBtn = document.getElementById('darkThemeBtn');
+        const lightBtn = document.getElementById('lightThemeBtn');
+
+        if (darkBtn && lightBtn) {
+            if (mode === 'light') {
+                lightBtn.classList.add('active');
+                darkBtn.classList.remove('active');
+            } else {
+                darkBtn.classList.add('active');
+                lightBtn.classList.remove('active');
+            }
+        }
+    }
+
+    function escapeHtml(text) {
+        if (!text) return "";
+        return text
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+</script>
+
+</body>
+</html>

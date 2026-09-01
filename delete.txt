@@ -1,0 +1,26 @@
+[27/8/2569 20:22:45] | IC-QFN32-MCU-STM32 | Microcontroller | QFN-32 | - | STM32G431 | 4200 | 2026-08-25 09:20
+[27/8/2569 20:32:08] | DIO-SS14 | Diode | SMA | - | 1A / 40V | 8900 | 2026-08-24 16:45
+[27/8/2569 20:46:19] | XTAL-3225-16MHz | Crystal | 3225 | 16 MHz | ±10ppm | 5100 | 2026-08-27 16:09
+[27/8/2569 21:03:45] | CAP-TAN-10UF | Capacitor | EIA-3528-21 | Tantalum | 10 µF | 16V / ±10% | 2 | 2026-08-27 10:00:00
+[27/8/2569 21:12:14] | IND-FERRITE-10UH | Inductor | 0805 | Ferrite Bead | 10 µH | 300mA / 0.2Ω | 2500 | 2026-08-27 10:30:00
+[27/8/2569 22:51:13] | TR-TO-92-PNP | Transistor | TO-92 | PNP | 2N3906 | 200mA | 1 | 2026-08-27 22:37
+[27/8/2569 22:51:38] | LED-0603-RED | LED | 0603 | red | - | 3.0v | 10 | 2026-08-27 22:51
+[28/8/2569 11:34:35] | CAP-MYLAR-100NF | Capacitor | RADIAL-5mm | Film (Mylar) | 100 nF | 100V / ±10% | 1 | 2026-08-27 10:15:00
+[2026-08-28 11:42:31] | RES-AXIAL0.3-METALFILM | Resistor | AXIAL0.3 | Metal Film | 10K | 0.25w | 20 | 2026-08-27 22:36
+[2026-08-28 14:53:53] | TR-2N3904 | Transistor | TO-92 | NPN | - | 40V / 200mA | 15000 | 2026-08-27 15:30
+[2026-08-28 14:54:01] | TR-2N3906 | Transistor | TO-92 | PNP | - | 40V / 200mA | 12500 | 2026-08-27 15:31
+[2026-08-28 14:54:10] | RES-CF-10K-5% | Resistor | AXIAL-0.25W | Carbon Film | 10 kΩ | ±5% / 0.25W | 5000 | 2026-08-27 09:15:00
+[2026-08-28 20:07:25] | DIO-SCHOTTKY-SS14 | Diode | SMA | Schottky | - | 40V / 1A | 100 | 2026-08-27 10:45:00
+[2026-08-28 20:49:03] | TR-BC847 | Transistor | SOT-23 | NPN | - | 45V / 100mA | 22000 | 2026-08-27 15:35
+[2026-08-29 23:38:14] | ITEM-8PIN-1N4007 | Diode | 8pin | 1N4007 | - | 1000V/1A | 100 | 2026-08-28 15:05
+[2026-08-30 19:56:37] | TR-TO-92-LM317 | Transistor | TO-92 | LM317 | - | 40V | 2 | 2026-08-28 21:13
+[2026-08-30 23:03:04] | DI-0805-1N4007 | Diode | 0805 | 1N4007 | - | 1000V/1A | 10 | 2026-08-29 23:38
+[2026-08-30 23:43:42] | User: Admin FIRST | RES-0805-SMD | Resistor | 0805 | SMD | 10K | +-2% | 10 | 2026-08-30 23:35:53
+[2026-08-31 01:08:22] | User: Admin FIRST | TR-TO-92-LM317 | Transistor | TO-92 | LM317 | - | 200mA | 1 | 2026-08-31 00:21:10
+[2026-08-31 22:20:05] | User: ONE | TR-0805-LM317 | Transistor | 0805 | LM317 | - | 200mA | 110 | 2026-08-31 22:18:58
+[2026-08-31 22:22:27] | User: ONE | LED-0603-BLUE | LED | 0603 | Blue | - |3.0-3.4V | 4 | 2026-08-24 11:10
+[2026-08-31 23:07:49] | User: ONE | RES-0805-METALFILM-10K-+-2% | Resistor | AXIAL | Metal Film | 10K | 0.25w | 20 | 2026-08-31 23:07:27
+[2026-09-01 01:04:59] | User: Admin FIRST | RES-AXIAL-METALFILM-10K-0.25W | Resistor | AXIAL | Metal Film | 10K | 0.25w | 41 | 2026-08-31 23:31:22
+[2026-09-01 01:05:15] | User: Admin FIRST | Resistor-0603-red-0.25w | Resistor | 0603 | red | - | 0.25w | 32 | 2026-08-31 23:14:50
+[2026-09-01 01:21:19] | User: Admin FIRST | MOD-8PIN-LM317---3.0V | Module | 8 PIN | LM317 | - | 3.0v | 100 | 2026-08-31 23:56:20
+[2026-09-01 12:03:20] | User: Admin FIRST | CAP010210UF1000V/1A | Capacitor | SMD | Electrolytic | 10uf | 1000V/1A | 45 | 2026-09-01 12:03:11

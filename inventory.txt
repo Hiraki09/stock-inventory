@@ -1,0 +1,10 @@
+RES-MF-1K-1% | Resistor | AXIAL-0.25W | Metal Film | 1 kΩ | ±1% / 0.25W | 32 | 2026-08-31 23:36:25
+IC-8PIN-OPAMP | IC | 8 PIN | OPAMP | - | 200mA | 50 | 2026-08-31 23:54:07
+LED0203-3.0V | LED | 5mm Through-Hole | Blue LED | - | 3.0v | 10 | 2026-09-01 01:04:25
+RES020210K+-2% | Resistor | AXIAL | Metal Film | 10K | +-2% | 10 | 2026-09-01 01:04:50
+DI01025.1V500MW | Diode | DO | Zener | 5.1V | 500mW | 850 | 2026-09-01 01:24:36
+LED02012.0V/20MA | LED | 5mm Through-Hole | Red LED | - | 2.0V / 20mA | 400 | 2026-09-01 11:39:48
+RES020110K0.25W | Resistor | AXIAL | Carbon Film | 10K | 0.25w | 10 | 2026-09-01 11:41:13
+LED03022.0V-3.6V | LED | SMD 5050 | Orange LED | - | 2.0V - 3.6V | 100 | 2026-09-01 11:42:40
+CAP0201100NF50V | Capacitor | AXIAL | Ceramic | 100 nF | 50V  | 100 | 2026-09-01 11:48:43
+TR01012N390620V/200MEGA | Transistor | TO-92 | NPN | 2N3906 | 20v/200megA | 10 | 2026-09-01 11:49:01
