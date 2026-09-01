@@ -745,8 +745,9 @@ function generateProductID() {
     const deviceTypeElem = document.getElementById("deviceType");
     const deviceTypeCode = (deviceTypeElem && deviceTypeElem.value) ? deviceTypeElem.value : "";
 
-    const cost = document.getElementById("cost").value.trim().toUpperCase();
-    const durability = document.getElementById("durability").value.trim().toUpperCase();
+    // เอา .toUpperCase() ออก เพื่อให้คงตัวพิมพ์เล็ก/ใหญ่ตามที่ผู้ใช้พิมพ์
+    const cost = document.getElementById("cost").value.trim();
+    const durability = document.getElementById("durability").value.trim();
 
     // ดึงตัวย่อสั้นๆ ตาม Type ที่เลือก
     const typePrefix = typeCodeMapping[type] || "RES";
