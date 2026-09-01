@@ -1337,13 +1337,13 @@ function generateProductId() {
     let footprintCode = getFootprintCode(type, footprintName);
     let deviceTypeCode = getDeviceTypeCode(type, deviceTypeName);
 
-    // รวมกันเป็นก้อนเดียวติดกันโดยไม่มีขีดคั่น
+    // รวมกันโดยคงรูปแบบพิมพ์เล็ก-ใหญ่ตามผู้ใช้พิมพ์
     let rawParts = [prefix, footprintCode, deviceTypeCode, costSpec, durability];
     let cleanedParts = rawParts.filter(p => p && p !== '-').map(p => p.replace(/\s+/g, ''));
     
     let newId = cleanedParts.join("");
     
-    document.getElementById("editId").value = newId.toUpperCase();
+    document.getElementById("editId").value = newId;
 }
 
 /* ================= EDIT ITEM (MODAL) ================= */
@@ -1378,7 +1378,7 @@ function closeEditModal() {
 
 /* ================= SAVE EDITED ITEM ================= */
 async function saveEditedItem() {
-    let newId = document.getElementById("editId").value.trim().toUpperCase();
+    let newId = document.getElementById("editId").value.trim();
     let type = document.getElementById("editType").value;
     let footprint = document.getElementById("editFootprint").value;
     let deviceType = document.getElementById("editDeviceType").value;
