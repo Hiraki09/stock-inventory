@@ -379,6 +379,18 @@ body.light-mode .product-id {
     color: white;
 }
 
+.action-login {
+    background: rgba(16, 185, 129, 0.15);
+    color: #34d399;
+    border: 1px solid #34d399;
+}
+
+.action-logout {
+    background: rgba(100, 116, 139, 0.15);
+    color: #94a3b8;
+    border: 1px solid #64748b;
+}
+
 
 /* ================= DATE ================= */
 
@@ -1019,15 +1031,22 @@ function displayHistory() {
 
     paginatedData.forEach(function(item) {
         let actionClass = "action-default";
+        let actionUpper = (item.action || "").toUpperCase().trim();
 
-        if (item.action === "ADD") {
+        if (actionUpper === "ADD") {
             actionClass = "action-add";
         }
-        else if (item.action === "EDIT") {
+        else if (actionUpper === "EDIT") {
             actionClass = "action-edit";
         }
-        else if (item.action === "DELETE") {
+        else if (actionUpper === "DELETE") {
             actionClass = "action-delete";
+        }
+        else if (actionUpper === "LOGIN") {
+            actionClass = "action-login";
+        }
+        else if (actionUpper === "LOGOUT") {
+            actionClass = "action-logout";
         }
 
         const row = document.createElement("tr");
