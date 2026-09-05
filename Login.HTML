@@ -519,46 +519,7 @@ function togglePassword() {
 
 
 /* =====================================================
-   USER ACCOUNTS
-===================================================== */
-
-const users = [
-
-    {
-        id: "Admin FIRST",
-        email: "admin@CBV.com",
-        password: "admin3120654"
-    },
-
-    {
-        id: "Bright",
-        email: "Bingo@CBV.com",
-        password: "pas/boro4798"
-    },
-
-    {
-        id: "ONE",
-        email: "ONE@CBV.com",
-        password: "one3120654"
-    },
-
-    {
-        id: "Flock",
-        email: "Flock@CBV.com",
-        password: "1234"
-    },
-    {
-        id: "TEST",
-        email: "test@CBV.com",
-        password: "1234"
-    }
-
-
-];
-
-
-/* =====================================================
-   LOGIN FUNCTION (ปรับให้เป็น async เพื่อใช้ fetch)
+   LOGIN FUNCTION (เชื่อมต่อ Backend และ Supabase)
 ===================================================== */
 
 async function login(event) {
@@ -580,81 +541,71 @@ async function login(event) {
     const error =
         document.getElementById("error");
 
-
-    /* =================================================
-       ตรวจสอบบัญชี
-    ================================================= */
-
-    const foundUser = users.find(function(user) {
-
-        return (
-            user.email.toLowerCase() === email.toLowerCase() &&
-            user.password === password
-        );
-
-    });
+    error.style.display = "none";
 
 
-    /* =================================================
-       LOGIN SUCCESS
-    ================================================= */
+    try {
+        /* ส่งข้อมูลไปตรวจสอบที่เซิร์ฟเวอร์หลังบ้าน (Backend) */
+        const response = await fetch('/api/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ email, password })
+        });
 
-    if (foundUser) {
+        const result = await response.json();
 
-        const currentUser = {
+        if (result.success) {
 
-            id: foundUser.id,
+            const currentUser = {
+                id: result.user.id,
+                email: result.user.email
+            };
 
-            email: foundUser.email
-
-        };
-
-        localStorage.setItem(
-            "loggedInUser",
-            JSON.stringify(currentUser)
-        );
-
-        error.style.display = "none";
+            localStorage.setItem(
+                "loggedInUser",
+                JSON.stringify(currentUser)
+            );
 
 
-        /* ---------------------------------------------
-           ส่งประวัติ LOGIN ไปบันทึกที่ Server
-        --------------------------------------------- */
+            /* ---------------------------------------------
+               ส่งประวัติ LOGIN ไปบันทึกที่ Server
+            --------------------------------------------- */
 
-        try {
-            await fetch('/api/history/add', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    action: 'LOGIN',
-                    email: currentUser.email,
-                    user: currentUser.id
-                })
-            });
-        } catch (err) {
-            console.error('Login history error:', err);
+            try {
+                await fetch('/api/history/add', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        action: 'LOGIN',
+                        email: currentUser.email,
+                        user: currentUser.id
+                    })
+                });
+            } catch (err) {
+                console.error('Login history error:', err);
+            }
+
+
+            /* ---------------------------------------------
+               เข้า Dashboard
+            --------------------------------------------- */
+
+            window.location.href = "main.HTML";
+
+        } else {
+            /* LOGIN FAILED */
+            error.textContent = result.message || "Invalid E-mail or Password";
+            error.style.display = "block";
         }
 
-
-        /* ---------------------------------------------
-           เข้า Dashboard
-        --------------------------------------------- */
-
-        window.location.href = "main.HTML";
-
-    }
-
-
-    /* =================================================
-       LOGIN FAILED
-    ================================================= */
-
-    else {
-
+    } catch (err) {
+        console.error('Connection error:', err);
+        error.textContent = "Cannot connect to server";
         error.style.display = "block";
-
     }
 
 }
