@@ -766,6 +766,15 @@ body.light-mode .modal-btn.cancel {
                     console.error('Logout history error:', err);
                 }
 
+                // ปลดล็อกสถานะใน activeLogins เมื่อกด Logout เพื่อให้อีเมลนี้สามารถเข้าสู่ระบบใหม่ได้
+                try {
+                    let activeLogins = JSON.parse(localStorage.getItem("activeLogins") || "{}");
+                    delete activeLogins[currentUserObj.email.toLowerCase()];
+                    localStorage.setItem("activeLogins", JSON.stringify(activeLogins));
+                } catch (e) {
+                    console.error('Clear active login error:', e);
+                }
+
                 localStorage.removeItem('loggedInUser');
                 window.location.href = 'Login.HTML';
             });
