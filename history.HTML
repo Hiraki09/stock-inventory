@@ -994,6 +994,17 @@ async function loadHistory() {
             });
         });
 
+        // จัดเรียงข้อมูลจากวันเวลาล่าสุด (ใหม่ไปเก่า)
+        historyData.sort((a, b) => {
+            const timeA = new Date(a.date).getTime();
+            const timeB = new Date(b.date).getTime();
+            
+            if (!isNaN(timeA) && !isNaN(timeB)) {
+                return timeB - timeA;
+            }
+            return b.date.localeCompare(a.date);
+        });
+
         filteredData = [...historyData];
         currentPage = 1;
         displayHistory();
