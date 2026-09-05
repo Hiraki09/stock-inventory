@@ -41,10 +41,10 @@ async function initDatabase() {
 
     await pool.query(`
         CREATE TABLE IF NOT EXISTS deleted_items (
-            id            SERIAL PRIMARY KEY,
-            timestamp     TEXT,
-            "user"        TEXT,
-            deleted_line  TEXT
+            id             SERIAL PRIMARY KEY,
+            timestamp      TEXT,
+            "user"         TEXT,
+            deleted_line   TEXT
         );
     `);
 
