@@ -19,9 +19,17 @@ async function initDatabase() {
     // เพิ่มตาราง users สำหรับเก็บข้อมูลบัญชีผู้ใช้งาน
     await pool.query(`
         CREATE TABLE IF NOT EXISTS users (
-            id      TEXT PRIMARY KEY,
-            email   TEXT UNIQUE NOT NULL,
+            id    TEXT PRIMARY KEY,
+            email    TEXT UNIQUE NOT NULL,
             password TEXT NOT NULL
+        );
+    `);
+
+    // ตารางเก็บสถานะการล็อกอินปัจจุบัน (ป้องกันล็อกอินซ้ำ)
+    await pool.query(`
+        CREATE TABLE IF NOT EXISTS active_sessions (
+            email TEXT PRIMARY KEY,
+            login_time TEXT
         );
     `);
 
@@ -50,14 +58,17 @@ async function initDatabase() {
 
     await pool.query(`
         CREATE TABLE IF NOT EXISTS deleted_items (
-            id            SERIAL PRIMARY KEY,
-            timestamp     TEXT,
-            "user"        TEXT,
-            deleted_line  TEXT
+            id              SERIAL PRIMARY KEY,
+            timestamp       TEXT,
+            "user"          TEXT,
+            deleted_line    TEXT
         );
     `);
 
-    console.log('[DB] ตาราง users, inventory, history, deleted_items พร้อมใช้งาน');
+    // เคลียร์สถานะค้างทั้งหมดตอนเริ่มระบบใหม่ ป้องกันกรณีเซิร์ฟเวอร์รีสตาร์ท
+    await pool.query('DELETE FROM active_sessions');
+
+    console.log('[DB] ตาราง users, active_sessions, inventory, history, deleted_items พร้อมใช้งาน');
 }
 
 // ==========================================
@@ -226,7 +237,7 @@ app.get(['/setting.html', '/Setting.html'], (req, res) => {
 app.use(express.static(__dirname));
 
 // ============================================================
-// API LOGIN (ตรวจสอบผู้ใช้จาก Supabase)
+// API LOGIN (ตรวจสอบผู้ใช้และป้องกันการล็อกอินซ้ำจากฐานข้อมูล)
 // ============================================================
 app.post('/api/login', async (req, res) => {
     const { email, password } = req.body;
@@ -236,7 +247,8 @@ app.post('/api/login', async (req, res) => {
     }
 
     try {
-        const result = await pool.query('SELECT * FROM users WHERE LOWER(email) = LOWER($1)', [email.trim()]);
+        const cleanEmail = email.trim().toLowerCase();
+        const result = await pool.query('SELECT * FROM users WHERE LOWER(email) = LOWER($1)', [cleanEmail]);
 
         if (result.rows.length === 0) {
             return res.json({ success: false, message: 'Invalid E-mail or Password' });
@@ -247,6 +259,19 @@ app.post('/api/login', async (req, res) => {
         if (user.password !== password) {
             return res.json({ success: false, message: 'Invalid E-mail or Password' });
         }
+
+        // ตรวจสอบว่าบัญชีนี้กำลังออนไลน์อยู่หรือไม่
+        const activeCheck = await pool.query('SELECT * FROM active_sessions WHERE LOWER(email) = LOWER($1)', [cleanEmail]);
+        if (activeCheck.rows.length > 0) {
+            return res.json({ success: false, message: 'บัญชีนี้ถูกใช้งานอยู่จากอุปกรณ์อื่นแล้ว!' });
+        }
+
+        // บันทึกสถานะว่ากำลังออนไลน์ลงฐานข้อมูล
+        const currentTime = getCurrentDateTime();
+        await pool.query(
+            'INSERT INTO active_sessions (email, login_time) VALUES ($1, $2) ON CONFLICT (email) DO UPDATE SET login_time = $2',
+            [cleanEmail, currentTime]
+        );
 
         res.json({
             success: true,
@@ -420,15 +445,22 @@ app.get('/api/history', async (req, res) => {
 });
 
 // ============================================================
-// 5. API สำหรับบันทึกประวัติ LOGIN / LOGOUT
+// 5. API สำหรับบันทึกประวัติ LOGIN / LOGOUT และเคลียร์สถานะออนไลน์
 // ============================================================
 app.post('/api/history/add', async (req, res) => {
-    const { user, action } = req.body;
+    const { user, email, action } = req.body;
     const username = user || 'Unknown';
     const actionType = action || 'LOGIN';
+    const targetEmail = email || '';
 
     try {
         await addHistory(actionType, '-', username);
+
+        // ถ้าเป็นการ LOGOUT ให้ลบสถานะออกจากตาราง active_sessions เพื่อปลดล็อกให้เข้าใช้งานใหม่ได้
+        if (actionType === 'LOGOUT' && targetEmail) {
+            await pool.query('DELETE FROM active_sessions WHERE LOWER(email) = LOWER($1)', [targetEmail.trim()]);
+        }
+
         res.json({ success: true, message: 'บันทึกประวัติเซสชันสำเร็จ' });
     } catch (err) {
         console.error(err);
