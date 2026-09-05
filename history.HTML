@@ -880,13 +880,24 @@ let currentPage = 1;
 let rowsPerPage = 10;
 let filteredData = [];
 
-// กำหนดรหัสผ่านเฉพาะ Admin ตามระบบของคุณ
-const ADMIN_EMAIL = ["admin@CBV.com","faa@CBV.com"];
+// ==========================================
+// รายชื่อแอดมิน (สามารถเพิ่มอีเมลใหม่ต่อท้ายใน Array นี้ได้เลย)
+// *คำแนะนำ: ควรพิมพ์เป็นตัวพิมพ์เล็กทั้งหมด*
+// ==========================================
+const ADMIN_EMAIL = [
+    "admin@cbv.com",
+    "faa@cbv.com"
+    // ตัวอย่างการเพิ่มแอดมินคนถัดไปในอนาคต:
+    // "newadmin@cbv.com",
+];
 const ADMIN_PASSWORD = "admin3120654"; 
 
 document.addEventListener("DOMContentLoaded", () => {
-    // ตรวจสอบสิทธิ์และ Session การปลดล็อก
-    if (!currentUserObj || currentUserObj.email.toLowerCase() !== ADMIN_EMAIL.toLowerCase()) {
+    // แปลงอีเมลของผู้ใช้งานปัจจุบันให้เป็นตัวพิมพ์เล็กเพื่อความปลอดภัยในการเปรียบเทียบ
+    const userEmailLower = currentUserObj && currentUserObj.email ? currentUserObj.email.toLowerCase() : "";
+
+    // ตรวจสอบสิทธิ์ว่ามีอีเมลอยู่ในรายชื่อแอดมินหรือไม่
+    if (!currentUserObj || !ADMIN_EMAIL.includes(userEmailLower)) {
         alert("หน้านี้สำหรับผู้ดูแลระบบ (Admin) เท่านั้น!");
         window.location.href = "main.HTML";
         return;
@@ -905,19 +916,26 @@ document.addEventListener("DOMContentLoaded", () => {
     const cancelAuthBtn = document.getElementById('cancelAuthBtn');
     const passwordInput = document.getElementById('historyPasswordInput');
 
-    submitAuthBtn.addEventListener('click', verifyAdminPassword);
-    passwordInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') verifyAdminPassword();
-    });
-
-    cancelAuthBtn.addEventListener('click', () => {
-        window.location.href = 'main.HTML';
-    });
+    if (submitAuthBtn) {
+        submitAuthBtn.addEventListener('click', verifyAdminPassword);
+    }
+    
+    if (passwordInput) {
+        passwordInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') verifyAdminPassword();
+        });
+    }
+    
+    if (cancelAuthBtn) {
+        cancelAuthBtn.addEventListener('click', () => {
+            window.location.href = 'main.HTML';
+        });
+    }
 });
 
 function verifyAdminPassword() {
     const passwordInput = document.getElementById('historyPasswordInput');
-    const enteredPassword = passwordInput.value;
+    const enteredPassword = passwordInput ? passwordInput.value : '';
 
     if (!enteredPassword) {
         alert('กรุณากรอกรหัสผ่าน Admin');
@@ -930,8 +948,10 @@ function verifyAdminPassword() {
         loadHistory();
     } else {
         alert('รหัสผ่าน Admin ไม่ถูกต้อง!');
-        passwordInput.value = '';
-        passwordInput.focus();
+        if (passwordInput) {
+            passwordInput.value = '';
+            passwordInput.focus();
+        }
     }
 }
 
