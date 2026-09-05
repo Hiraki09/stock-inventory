@@ -16,6 +16,15 @@ const pool = new Pool({
 });
 
 async function initDatabase() {
+    // เพิ่มตาราง users สำหรับเก็บข้อมูลบัญชีผู้ใช้งาน
+    await pool.query(`
+        CREATE TABLE IF NOT EXISTS users (
+            id      TEXT PRIMARY KEY,
+            email   TEXT UNIQUE NOT NULL,
+            password TEXT NOT NULL
+        );
+    `);
+
     await pool.query(`
         CREATE TABLE IF NOT EXISTS inventory (
             product_id  TEXT PRIMARY KEY,
@@ -48,7 +57,7 @@ async function initDatabase() {
         );
     `);
 
-    console.log('[DB] ตาราง inventory, history, deleted_items พร้อมใช้งาน');
+    console.log('[DB] ตาราง users, inventory, history, deleted_items พร้อมใช้งาน');
 }
 
 // ==========================================
@@ -153,33 +162,11 @@ async function migrateLegacyFilesIfNeeded() {
             console.log(`[MIGRATE] นำเข้า ${n} รายการจาก history.txt`);
         }
     }
-
-    const delCountResult = await pool.query('SELECT COUNT(*) AS c FROM deleted_items');
-    const delCount = parseInt(delCountResult.rows[0].c);
-
-    if (delCount === 0) {
-        const legacyPath = path.join(__dirname, 'delete.txt');
-        if (fs.existsSync(legacyPath)) {
-            const lines = fs.readFileSync(legacyPath, 'utf8')
-                .split(/\r?\n/)
-                .filter(l => l.trim());
-
-            let n = 0;
-            for (const line of lines) {
-                await pool.query(
-                    'INSERT INTO deleted_items (timestamp, "user", deleted_line) VALUES ($1, $2, $3)',
-                    [getCurrentDateTime(), 'legacy-import', line.trim()]
-                );
-                n++;
-            }
-            console.log(`[MIGRATE] นำเข้า ${n} รายการจาก delete.txt`);
-        }
-    }
 }
 
-// ============================================================
-// VIRTUAL TEXT ROUTES (ให้ frontend เดิมทำงานได้โดยไม่ต้องแก้)
-// ============================================================
+// ==========================================
+// VIRTUAL TEXT ROUTES
+// ==========================================
 app.get('/inventory.txt', async (req, res) => {
     try {
         const result = await pool.query('SELECT * FROM inventory ORDER BY product_id ASC');
@@ -203,7 +190,7 @@ app.get('/history.txt', async (req, res) => {
 });
 
 // ==========================================
-// ROUTE: หน้าแรกและรองรับตัวพิมพ์เล็ก/ใหญ่ (แก้ปัญหา Cannot GET)
+// ROUTE: หน้าแรกและรองรับตัวพิมพ์เล็ก/ใหญ่
 // ==========================================
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'Login.HTML'));
@@ -234,10 +221,45 @@ app.get(['/setting.html', '/Setting.html'], (req, res) => {
 });
 
 // ==========================================
-// STATIC FILES (HTML/CSS/JS)
+// STATIC FILES
 // ==========================================
 app.use(express.static(__dirname));
 
+// ============================================================
+// API LOGIN (ตรวจสอบผู้ใช้จาก Supabase)
+// ============================================================
+app.post('/api/login', async (req, res) => {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+        return res.status(400).json({ success: false, message: 'กรุณากรอกอีเมลและรหัสผ่าน' });
+    }
+
+    try {
+        const result = await pool.query('SELECT * FROM users WHERE LOWER(email) = LOWER($1)', [email.trim()]);
+
+        if (result.rows.length === 0) {
+            return res.json({ success: false, message: 'Invalid E-mail or Password' });
+        }
+
+        const user = result.rows[0];
+
+        if (user.password !== password) {
+            return res.json({ success: false, message: 'Invalid E-mail or Password' });
+        }
+
+        res.json({
+            success: true,
+            user: {
+                id: user.id,
+                email: user.email
+            }
+        });
+    } catch (err) {
+        console.error('Login error:', err);
+        res.status(500).json({ success: false, message: 'เกิดข้อผิดพลาดในการเข้าสู่ระบบ' });
+    }
+});
 
 // ============================================================
 // 1. ADD PRODUCT
@@ -275,8 +297,6 @@ app.post('/save', async (req, res) => {
             );
 
             await addHistory('EDIT', productId, username);
-            console.log(`[UPDATE/ADD] Summed quantity for ${productId} by ${username}`);
-
             res.json({ success: true, message: `อัปเดตจำนวนสินค้า ${productId} สำเร็จ (รวมยอดเดิม)` });
         } else {
             await pool.query(`
@@ -286,8 +306,6 @@ app.post('/save', async (req, res) => {
             `, [productId, newParts[1] || '-', newParts[2] || '-', newParts[3] || '-', newParts[4] || '-', newParts[5] || '-', newQuantity, currentDateTime]);
 
             await addHistory('ADD', productId, username);
-            console.log(`[ADD] New item ${productId} by ${username}`);
-
             res.json({ success: true, message: `เพิ่มสินค้า ${productId} สำเร็จ` });
         }
     } catch (err) {
@@ -295,7 +313,6 @@ app.post('/save', async (req, res) => {
         res.status(500).json({ success: false, error: err.message });
     }
 });
-
 
 // ============================================================
 // 2. DELETE PRODUCT
@@ -326,15 +343,12 @@ app.post('/api/delete-item', async (req, res) => {
         );
 
         await addHistory('DELETE', targetId, username);
-        console.log(`[DELETE] ${targetId} by ${username}`);
-
         res.json({ success: true, message: `ลบสินค้า ${targetId} สำเร็จ` });
     } catch (err) {
         console.error(err);
         res.status(500).json({ success: false, message: 'ลบสินค้าไม่สำเร็จ' });
     }
 });
-
 
 // ============================================================
 // 3. EDIT PRODUCT
@@ -384,15 +398,12 @@ app.post('/api/edit-item', async (req, res) => {
         }
 
         await addHistory('EDIT', newId, username);
-        console.log(`[EDIT] ${oldId} -> ${newId} by ${username}`);
-
         res.json({ success: true, message: `แก้ไขสินค้า ${newId} สำเร็จ` });
     } catch (err) {
         console.error(err);
         res.status(500).json({ success: false, message: 'บันทึก EDIT ไม่สำเร็จ' });
     }
 });
-
 
 // ============================================================
 // 4. API อ่าน HISTORY
@@ -407,7 +418,6 @@ app.get('/api/history', async (req, res) => {
         res.status(500).json({ success: false, message: 'อ่านประวัติไม่ได้' });
     }
 });
-
 
 // ============================================================
 // 5. API สำหรับบันทึกประวัติ LOGIN / LOGOUT
@@ -426,40 +436,9 @@ app.post('/api/history/add', async (req, res) => {
     }
 });
 
-
-// ============================================================
-// 6. API RESET/CLEAR HISTORY
-// ============================================================
-app.post('/api/history/reset', async (req, res) => {
-    try {
-        await pool.query('DELETE FROM history');
-        console.log('[RESET] History logs cleared.');
-        res.json({ success: true, message: 'ล้างประวัติทั้งหมดสำเร็จ' });
-    } catch (err) {
-        console.error('ไม่สามารถเคลียร์ history ได้:', err.message);
-        res.status(500).json({ success: false, message: 'ไม่สามารถรีเซ็ตประวัติได้' });
-    }
-});
-
-
-// ============================================================
-// 7. API RESET/CLEAR INVENTORY
-// ============================================================
-app.post('/api/inventory/reset', async (req, res) => {
-    try {
-        await pool.query('DELETE FROM inventory');
-        console.log('[RESET] Inventory database cleared.');
-        res.json({ success: true, message: 'ลบข้อมูลสินค้าทั้งหมดสำเร็จ' });
-    } catch (err) {
-        console.error('ไม่สามารถเคลียร์ inventory ได้:', err.message);
-        res.status(500).json({ success: false, message: 'ไม่สามารถรีเซ็ตข้อมูลสินค้าได้' });
-    }
-});
-
-
-// ============================================================
+// ==========================================
 // START SERVER
-// ============================================================
+// ==========================================
 async function startServer() {
     try {
         await initDatabase();
@@ -472,9 +451,6 @@ async function startServer() {
             console.log(`Server:    http://localhost:${PORT}`);
             console.log(`Login:     http://localhost:${PORT}/Login.HTML`);
             console.log(`Dashboard: http://localhost:${PORT}/main.HTML`);
-            console.log(`ADD:       http://localhost:${PORT}/ADD.HTML`);
-            console.log(`Inventory: http://localhost:${PORT}/Inventory.HTML`);
-            console.log(`Setting:   http://localhost:${PORT}/setting.html`);
             console.log('==========================================');
         });
     } catch (err) {
