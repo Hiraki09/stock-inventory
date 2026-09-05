@@ -263,7 +263,7 @@ app.post('/api/login', async (req, res) => {
         // ตรวจสอบว่าบัญชีนี้กำลังออนไลน์อยู่หรือไม่
         const activeCheck = await pool.query('SELECT * FROM active_sessions WHERE LOWER(email) = LOWER($1)', [cleanEmail]);
         if (activeCheck.rows.length > 0) {
-            return res.json({ success: false, message: 'บัญชีนี้ถูกใช้งานอยู่จากอุปกรณ์อื่นแล้ว!' });
+            return res.json({ success: false, message: 'This account is already being used from another device!' });
         }
 
         // บันทึกสถานะว่ากำลังออนไลน์ลงฐานข้อมูล
@@ -282,7 +282,7 @@ app.post('/api/login', async (req, res) => {
         });
     } catch (err) {
         console.error('Login error:', err);
-        res.status(500).json({ success: false, message: 'เกิดข้อผิดพลาดในการเข้าสู่ระบบ' });
+        res.status(500).json({ success: false, message: 'Login failed. Please try again.' });
     }
 });
 
@@ -293,7 +293,7 @@ app.post('/save', async (req, res) => {
     const data = req.body;
 
     if (!data || !data.line) {
-        return res.status(400).json({ success: false, error: 'ไม่พบข้อมูลที่จะบันทึก' });
+        return res.status(400).json({ success: false, error: 'No data found to be saved.' });
     }
 
     const newParts = data.line.trim().split('|').map(p => p.trim());
