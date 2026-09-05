@@ -58,10 +58,10 @@ async function initDatabase() {
 
     await pool.query(`
         CREATE TABLE IF NOT EXISTS deleted_items (
-            id              SERIAL PRIMARY KEY,
-            timestamp       TEXT,
-            "user"          TEXT,
-            deleted_line    TEXT
+            id               SERIAL PRIMARY KEY,
+            timestamp        TEXT,
+            "user"           TEXT,
+            deleted_line     TEXT
         );
     `);
 
@@ -441,6 +441,19 @@ app.get('/api/history', async (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(500).json({ success: false, message: 'อ่านประวัติไม่ได้' });
+    }
+});
+
+// ============================================================
+// 4.1 API CLEAR HISTORY (เพิ่มใหม่สำหรับรองรับปุ่ม Reset History)
+// ============================================================
+app.post('/api/clear-history', async (req, res) => {
+    try {
+        await pool.query('DELETE FROM history');
+        res.json({ success: true, message: 'ล้างประวัติสำเร็จ' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false, message: 'ล้างประวัติไม่สำเร็จ' });
     }
 });
 
