@@ -472,22 +472,20 @@ input:focus {
 <script>
 
 /* =====================================================
-   CHECK LOGIN
-   ถ้ามีคน Login อยู่แล้ว ให้เข้า Dashboard ทันที
+    CHECK LOGIN
+    ถ้ามีคน Login อยู่แล้ว ให้เข้า Dashboard ทันที
 ===================================================== */
 
 const loggedInUser =
     localStorage.getItem("loggedInUser");
 
 if (loggedInUser) {
-
     window.location.href = "main.HTML";
-
 }
 
 
 /* =====================================================
-   SHOW / HIDE PASSWORD
+    SHOW / HIDE PASSWORD
 ===================================================== */
 
 function togglePassword() {
@@ -519,7 +517,7 @@ function togglePassword() {
 
 
 /* =====================================================
-   LOGIN FUNCTION (เชื่อมต่อ Backend และ Supabase)
+    LOGIN FUNCTION (เชื่อมต่อ Backend และ Supabase)
 ===================================================== */
 
 async function login(event) {
@@ -529,10 +527,9 @@ async function login(event) {
 
     /* รับ E-mail และ Password */
 
-    const email =
-        document.getElementById("email")
-        .value
-        .trim();
+    const emailInput = document.getElementById("email");
+    const email = emailInput.value.trim();
+    const emailLower = email.toLowerCase();
 
     const password =
         document.getElementById("password")
@@ -542,6 +539,18 @@ async function login(event) {
         document.getElementById("error");
 
     error.style.display = "none";
+
+
+    /* -----------------------------------------------------
+        ตรวจสอบว่าไอดีนี้กำลังถูกใช้งานอยู่หรือไม่ (Active Check)
+    ----------------------------------------------------- */
+    let activeLogins = JSON.parse(localStorage.getItem("activeLogins") || "{}");
+
+    if (activeLogins[emailLower] === true) {
+        error.textContent = "This account is already logged in elsewhere. Please wait until the user logs out.";
+        error.style.display = "block";
+        return;
+    }
 
 
     try {
@@ -558,6 +567,10 @@ async function login(event) {
 
         if (result.success) {
 
+            // ล็อกสถานะว่าไอดีนี้กำลังออนไลน์อยู่ ห้ามคนอื่นเข้าซ้ำ
+            activeLogins[emailLower] = true;
+            localStorage.setItem("activeLogins", JSON.stringify(activeLogins));
+
             const currentUser = {
                 id: result.user.id,
                 email: result.user.email
@@ -570,7 +583,7 @@ async function login(event) {
 
 
             /* ---------------------------------------------
-               ส่งประวัติ LOGIN ไปบันทึกที่ Server
+                ส่งประวัติ LOGIN ไปบันทึกที่ Server
             --------------------------------------------- */
 
             try {
@@ -591,7 +604,7 @@ async function login(event) {
 
 
             /* ---------------------------------------------
-               เข้า Dashboard
+                เข้า Dashboard
             --------------------------------------------- */
 
             window.location.href = "main.HTML";
