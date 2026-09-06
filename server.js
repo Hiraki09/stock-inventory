@@ -445,7 +445,7 @@ app.get('/api/history', async (req, res) => {
 });
 
 // ============================================================
-// 4.1 API CLEAR HISTORY (เพิ่มใหม่สำหรับรองรับปุ่ม Reset History)
+// 4.1 API CLEAR HISTORY (route เดิม - เก็บไว้เผื่อมีที่อื่นเรียกใช้)
 // ============================================================
 app.post('/api/clear-history', async (req, res) => {
     try {
@@ -454,6 +454,34 @@ app.post('/api/clear-history', async (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(500).json({ success: false, message: 'ล้างประวัติไม่สำเร็จ' });
+    }
+});
+
+// ============================================================
+// 4.2 API RESET HISTORY (เพิ่มใหม่ - endpoint นี้คือตัวที่ setting.html เรียกจริง)
+// ============================================================
+app.post('/api/history/reset', async (req, res) => {
+    try {
+        await pool.query('DELETE FROM history');
+        res.json({ success: true, message: 'ล้างประวัติสำเร็จ' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false, message: 'ล้างประวัติไม่สำเร็จ' });
+    }
+});
+
+// ============================================================
+// 4.3 API RESET INVENTORY (เพิ่มใหม่ - ก่อนหน้านี้ไม่มี route นี้เลย
+//     ทำให้ปุ่ม "Clear Inventory" ใน setting.html ใช้งานไม่ได้)
+// ============================================================
+app.post('/api/inventory/reset', async (req, res) => {
+    try {
+        await pool.query('DELETE FROM inventory');
+        await addHistory('RESET_INVENTORY', '-', req.body.user || 'Unknown');
+        res.json({ success: true, message: 'ลบข้อมูล Inventory ทั้งหมดสำเร็จ' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false, message: 'ลบข้อมูลไม่สำเร็จ' });
     }
 });
 
