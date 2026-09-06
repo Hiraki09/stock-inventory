@@ -51,6 +51,12 @@ body.light-mode {
     background: #09111d;
     border-right: 1px solid #243244;
     padding: 28px 14px;
+    transition: transform 0.25s ease;
+    z-index: 500;
+}
+
+body.sidebar-hidden .sidebar {
+    transform: translateX(-100%);
 }
 
 body.light-mode .sidebar {
@@ -176,6 +182,12 @@ body.light-mode .user-email {
     padding: 30px 35px;
     overflow-y: auto;
     overflow-x: hidden;
+    transition: margin-left 0.25s ease, width 0.25s ease;
+}
+
+body.sidebar-hidden .main {
+    margin-left: 0;
+    width: 100%;
 }
 
 /* ================= HEADER ================= */
@@ -683,6 +695,12 @@ body.light-mode .qty-text.low {
 
 <body>
 
+<script>
+    if (localStorage.getItem('sidebarHidden') === '1') {
+        document.body.classList.add('sidebar-hidden');
+    }
+</script>
+
 <!-- ================= SIDEBAR ================= -->
 
 <div class="sidebar">
@@ -746,7 +764,8 @@ body.light-mode .qty-text.low {
 
             <button
                 class="menu-button"
-                onclick="location.reload()">
+                onclick="toggleSidebar()"
+                title="Show/Hide Menu">
                 ☰
             </button>
 
@@ -1319,6 +1338,16 @@ body.light-mode .qty-text.low {
     }
 
     /* ================= START ================= */
+
+    /* ================= SIDEBAR TOGGLE ================= */
+
+    function toggleSidebar() {
+        document.body.classList.toggle('sidebar-hidden');
+        localStorage.setItem(
+            'sidebarHidden',
+            document.body.classList.contains('sidebar-hidden') ? '1' : '0'
+        );
+    }
 
     loadInventory();
     loadLiveLogs();
