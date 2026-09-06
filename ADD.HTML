@@ -49,6 +49,12 @@ body.light-mode {
     background: #09111d;
     border-right: 1px solid #243244;
     padding: 28px 14px;
+    transition: transform 0.25s ease;
+    z-index: 500;
+}
+
+body.sidebar-hidden .sidebar {
+    transform: translateX(-100%);
 }
 
 body.light-mode .sidebar {
@@ -175,6 +181,12 @@ body.light-mode .user-email {
     overflow-y: auto;
     overflow-x: hidden;
     background-color: #080f1b;
+    transition: margin-left 0.25s ease, width 0.25s ease;
+}
+
+body.sidebar-hidden .main {
+    margin-left: 0;
+    width: 100%;
 }
 
 body.light-mode .main {
@@ -406,6 +418,12 @@ body.light-mode .btn-secondary:hover {
 
 <body>
 
+<script>
+    if (localStorage.getItem('sidebarHidden') === '1') {
+        document.body.classList.add('sidebar-hidden');
+    }
+</script>
+
 <div class="sidebar">
     <div class="logo">
         <h1>COMPONENT</h1>
@@ -444,7 +462,7 @@ body.light-mode .btn-secondary:hover {
 <div class="main">
     <div class="header">
         <div class="title-area">
-            <button class="menu-button" onclick="location.reload()">☰</button>
+            <button class="menu-button" onclick="toggleSidebar()" title="Show/Hide Menu">☰</button>
             <div class="title">
                 <h2>ADD PRODUCT</h2>
                 <p>Add new equipment component to inventory system</p>
@@ -826,6 +844,16 @@ async function saveProduct(event) {
         console.error(err);
         alert("ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้ กรุณาตรวจสอบว่าเปิด Node.js Server อยู่หรือไม่");
     }
+}
+
+/* ================= SIDEBAR TOGGLE ================= */
+
+function toggleSidebar() {
+    document.body.classList.toggle('sidebar-hidden');
+    localStorage.setItem(
+        'sidebarHidden',
+        document.body.classList.contains('sidebar-hidden') ? '1' : '0'
+    );
 }
 </script>
 
