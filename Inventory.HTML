@@ -47,6 +47,16 @@ body.light-mode {
     padding: 28px 14px;
     flex-shrink: 0;
     position: relative;
+    overflow: hidden;
+    transition: width 0.25s ease, padding 0.25s ease, opacity 0.2s ease;
+}
+
+body.sidebar-hidden .sidebar {
+    width: 0;
+    padding: 0;
+    opacity: 0;
+    border: none;
+    pointer-events: none;
 }
 
 body.light-mode .sidebar {
@@ -739,6 +749,12 @@ body.light-mode .delete-modal-content p {
 
 <body>
 
+<script>
+    if (localStorage.getItem('sidebarHidden') === '1') {
+        document.body.classList.add('sidebar-hidden');
+    }
+</script>
+
 <!-- ================= SIDEBAR ================= -->
 <div class="sidebar">
     <div class="logo">
@@ -787,8 +803,8 @@ body.light-mode .delete-modal-content p {
         <div class="title-area">
             <button
                 class="menu-button"
-                onclick="refreshPage()"
-                title="Refresh Inventory"
+                onclick="toggleSidebar()"
+                title="Show/Hide Menu"
             >
                 ☰
             </button>
@@ -1172,6 +1188,15 @@ function parseInventoryData(textData) {
 /* ================= REFRESH ================= */
 function refreshPage() {
     loadInventory();
+}
+
+/* ================= SIDEBAR TOGGLE ================= */
+function toggleSidebar() {
+    document.body.classList.toggle('sidebar-hidden');
+    localStorage.setItem(
+        'sidebarHidden',
+        document.body.classList.contains('sidebar-hidden') ? '1' : '0'
+    );
 }
 
 /* ================= DELETE (OPEN MODAL) ================= */
