@@ -8,12 +8,12 @@
 <link rel="icon" type="image/png" href="logo.png">
 <link rel="shortcut icon" type="image/png" href="logo.png">
 <link rel="apple-touch-icon" href="logo.png">
-<!-- เปิดโหมดเว็บแอปเต็มจอเมื่อกด Add to Home Screen บน iOS / iPad -->
+<!-- Enable full-screen web app mode when "Add to Home Screen" is used on iOS / iPad -->
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Component Tracker">
 
-<!-- กำหนดรูปไอคอนขนาดใหญ่ขึ้น (แนะนำ 180x180 หรือ 512x512 พิกเซล เพื่อความคมชัดบนหน้าจอไอแพด) -->
+<!-- Set a larger icon (180x180 or 512x512 px recommended for sharpness on iPad) -->
 <link rel="apple-touch-icon" href="logo.png">
 <style>
 * {
@@ -824,7 +824,7 @@ body.light-mode .delete-modal-content p {
             <button
                 class="refresh-btn"
                 onclick="refreshPage()"
-                title="รีเฟรชหน้าจอ"
+                title="Refresh the page"
             >
                 ⟳ Refresh
             </button>
@@ -956,7 +956,7 @@ body.light-mode .delete-modal-content p {
         <div class="modal-header">
             <h3>Confirm Deletion</h3>
         </div>
-        <p id="deleteModalText">กรุณากรอกรหัสผ่านเพื่อยืนยันการลบสินค้า:</p>
+        <p id="deleteModalText">Please enter your password to confirm deleting this item:</p>
         <div class="form-group full-width" style="margin-bottom: 15px;">
             <input type="password" id="deletePasscodeInput" class="form-control" placeholder="Enter Delete Passcode" style="text-align: center;">
         </div>
@@ -968,7 +968,7 @@ body.light-mode .delete-modal-content p {
 </div>
 
 <script>
-    // ตรวจสอบและโหลดธีมตั้งแต่เริ่มต้นเพื่อป้องกันหน้าจอกะพริบ
+    // Load the saved theme on startup to prevent a flash of the wrong theme
     const savedTheme = localStorage.getItem('appTheme') || 'dark';
     if (savedTheme === 'light') {
         document.body.classList.add('light-mode');
@@ -984,7 +984,7 @@ if (!loggedInUser) {
 }
 
 /* =====================================================
-    แสดง ID + E-MAIL ของคนที่ Login
+    SHOW ID + E-MAIL OF THE LOGGED-IN USER
 ===================================================== */
 try {
     const currentUser = JSON.parse(loggedInUser);
@@ -1021,7 +1021,7 @@ const DELETE_PASSCODE = "312065";
 let targetDeleteId = null; 
 let currentEditOldId = null; 
 
-// ฐานข้อมูล Footprint แบบมีรหัสและชื่อ
+// Footprint database with code and name
 const footprintOptions = {
     "Resistor": [
         { code: "01", name: "SMD" },
@@ -1064,7 +1064,7 @@ const footprintOptions = {
     ]
 };
 
-// ฐานข้อมูล Device Type แบบมีรหัสและชื่อ
+// Device Type database with code and name
 const deviceTypeOptions = {
     "Resistor": [
         { code: "01", name: "Carbon Film" },
@@ -1204,7 +1204,7 @@ function deleteItem(button) {
     let row = button.closest("tr");
     targetDeleteId = row.cells[0].innerText.trim();
 
-    document.getElementById("deleteModalText").innerText = `ต้องการลบสินค้า ${targetDeleteId} ใช่หรือไม่?\nกรุณากรอกรหัสผ่านเพื่อยืนยัน:`;
+    document.getElementById("deleteModalText").innerText = `Are you sure you want to delete ${targetDeleteId}?\nPlease enter your password to confirm:`;
     document.getElementById("deletePasscodeInput").value = "";
     
     document.getElementById("deleteModal").style.display = "flex";
@@ -1256,16 +1256,16 @@ async function confirmDeleteItem() {
                 closeDeleteModal();
                 loadInventory();
             } else {
-                alert("เกิดข้อผิดพลาด: " + result.message);
+                alert("Error: " + result.message);
             }
         } catch (err) {
             alert(
-                "ไม่สามารถติดต่อเซิร์ฟเวอร์ได้! " +
-                "กรุณาตรวจสอบว่าสั่งรัน node server.js แล้วหรือยัง"
+                "Could not connect to the server! " +
+                "Please make sure node server.js is running."
             );
         }
     } else {
-        alert("รหัสผ่านไม่ถูกต้อง! ไม่สามารถลบสินค้าได้");
+        alert("Incorrect password! Item was not deleted.");
         document.getElementById("deletePasscodeInput").value = "";
         document.getElementById("deletePasscodeInput").focus();
     }
@@ -1359,11 +1359,11 @@ function generateProductId() {
     else if (type === "Diode") prefix = "DI";
     else if (type === "Module") prefix = "MOD";
 
-    // ดึงรหัสตัวเลขของ Footprint และ Device Type
+    // Get the numeric code for Footprint and Device Type
     let footprintCode = getFootprintCode(type, footprintName);
     let deviceTypeCode = getDeviceTypeCode(type, deviceTypeName);
 
-    // รวมกันโดยคงรูปแบบพิมพ์เล็ก-ใหญ่ตามผู้ใช้พิมพ์
+    // Combine while keeping the case as typed by the user
     let rawParts = [prefix, footprintCode, deviceTypeCode, costSpec, durability];
     let cleanedParts = rawParts.filter(p => p && p !== '-').map(p => p.replace(/\s+/g, ''));
     
@@ -1413,7 +1413,7 @@ async function saveEditedItem() {
     let quantity = document.getElementById("editQuantity").value;
 
     if (!newId || !type || !quantity) {
-        alert("กรุณากรอกข้อมูล Type และ Quantity ให้ครบถ้วนเพื่อให้ระบบสร้าง Product ID");
+        alert("Please fill in Type and Quantity so the system can generate a Product ID.");
         return;
     }
 
@@ -1450,10 +1450,10 @@ async function saveEditedItem() {
             closeEditModal();
             loadInventory();
         } else {
-            alert("เกิดข้อผิดพลาด: " + result.message);
+            alert("Error: " + result.message);
         }
     } catch (err) {
-        alert("ไม่สามารถติดต่อเซิร์ฟเวอร์ได้! กรุณาตรวจสอบว่าสั่งรัน node server.js แล้วหรือยัง");
+        alert("Could not connect to the server! Please make sure node server.js is running.");
     }
 }
 
