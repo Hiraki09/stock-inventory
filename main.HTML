@@ -869,7 +869,7 @@ body.light-mode .qty-text.low {
 
     <div class="box" style="margin-top:20px;">
 
-        <h3>Recent Stock Movements</h3>
+        <h3>Low Stock Items</h3>
 
         <table>
 
@@ -1037,7 +1037,8 @@ body.light-mode .qty-text.low {
                     lowStockItems++;
                 }
 
-                if (displayedCount >= 8) {
+                // แสดงเฉพาะรายการที่ Low Stock เท่านั้นในตาราง
+                if (!isLow) {
                     continue;
                 }
 
@@ -1123,7 +1124,7 @@ body.light-mode .qty-text.low {
                 table.innerHTML = `
                     <tr>
                         <td colspan="6" style="text-align:center;color:#8995a7;">
-                            No valid inventory data
+                            ✅ No low stock items right now
                         </td>
                     </tr>
                 `;
