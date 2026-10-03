@@ -391,6 +391,32 @@ body.light-mode th {
     color: #475569;
 }
 
+/* ================= TYPE FILTER (header dropdown) ================= */
+
+.type-filter {
+    background: #0c1420;
+    color: #9eabc0;
+    border: 1px solid #273548;
+    border-radius: 5px;
+    padding: 4px 6px;
+    font-size: 11px;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    outline: none;
+    max-width: 100%;
+}
+
+.type-filter:focus {
+    border-color: #557bdc;
+}
+
+body.light-mode .type-filter {
+    background: #ffffff;
+    color: #475569;
+    border: 1px solid #cbd5e1;
+}
+
 td {
     padding: 14px 10px;
     border-top: 1px solid #263548;
@@ -851,7 +877,19 @@ body.light-mode .delete-modal-content p {
                 <thead>
                     <tr>
                         <th>PRODUCT ID</th>
-                        <th>TYPE</th>
+                        <th>
+                            <select id="typeFilter" class="type-filter" onchange="searchInventory()">
+                                <option value="">TYPE (ทั้งหมด)</option>
+                                <option value="LED">LED</option>
+                                <option value="Transistor">Transistor</option>
+                                <option value="Resistor">Resistor</option>
+                                <option value="Capacitor">Capacitor</option>
+                                <option value="IC">IC</option>
+                                <option value="Inductor">Inductor</option>
+                                <option value="Diode">Diode</option>
+                                <option value="Module">Module</option>
+                            </select>
+                        </th>
                         <th>FOOTPRINT</th>
                         <th>DEVICE TYPE</th>
                         <th>EQUIPMENT COST</th>
@@ -1181,9 +1219,8 @@ function parseInventoryData(textData) {
         allRowsData.push(cols);
     });
 
-    filteredData = [...allRowsData];
-    currentPage = 1;
-    renderTable();
+    // Apply current search text + TYPE filter (keeps filters after refresh/edit/delete)
+    searchInventory();
 }
 
 /* ================= REFRESH ================= */
@@ -1593,11 +1630,18 @@ function renderPagination(totalPages) {
     container.appendChild(lastBtn);
 }
 
-/* ================= SEARCH ================= */
+/* ================= SEARCH + TYPE FILTER ================= */
 function searchInventory() {
     let query = document.getElementById("search").value.toLowerCase();
+    let typeValue = document.getElementById("typeFilter").value.toLowerCase();
 
     filteredData = allRowsData.filter(cols => {
+        // Filter by category (column 2 = TYPE)
+        if (typeValue && (cols[1] || "").toLowerCase() !== typeValue) {
+            return false;
+        }
+
+        // Filter by search text
         let lineText = cols.join(" ").toLowerCase();
         return lineText.includes(query);
     });
