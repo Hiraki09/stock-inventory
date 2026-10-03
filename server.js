@@ -7,16 +7,18 @@ const { Pool } = require('pg');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// session ที่ไม่มี heartbeat เกินเวลานี้ ถือว่าหมดอายุ (ปิดแท็บโดยไม่ logout)
+const SESSION_TIMEOUT_MS = 10 * 60 * 1000;
+
 // ==========================================
 // DATABASE (PostgreSQL / Supabase)
 // ==========================================
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
-    ssl: { rejectUnauthorized: false } // จำเป็นสำหรับ Supabase
+    ssl: { rejectUnauthorized: false }
 });
 
 async function initDatabase() {
-    // เพิ่มตาราง users สำหรับเก็บข้อมูลบัญชีผู้ใช้งาน
     await pool.query(`
         CREATE TABLE IF NOT EXISTS users (
             id    TEXT PRIMARY KEY,
@@ -25,7 +27,6 @@ async function initDatabase() {
         );
     `);
 
-    // ตารางเก็บสถานะการล็อกอินปัจจุบัน (ป้องกันล็อกอินซ้ำ)
     await pool.query(`
         CREATE TABLE IF NOT EXISTS active_sessions (
             email TEXT PRIMARY KEY,
@@ -65,7 +66,7 @@ async function initDatabase() {
         );
     `);
 
-    // เคลียร์สถานะค้างทั้งหมดตอนเริ่มระบบใหม่ ป้องกันกรณีเซิร์ฟเวอร์รีสตาร์ท
+    // เคลียร์สถานะค้างทั้งหมดตอนเริ่มระบบใหม่
     await pool.query('DELETE FROM active_sessions');
 
     console.log('[DB] ตาราง users, active_sessions, inventory, history, deleted_items พร้อมใช้งาน');
@@ -78,7 +79,8 @@ app.use(cors());
 app.use(express.json());
 
 // ==========================================
-// SESSION GUARD: แทรกสคริปต์เช็ก session (กันคนถูกเตะ) ลงทุกหน้า HTML อัตโนมัติ
+// SESSION GUARD: แทรกสคริปต์เช็ก session ลงทุกหน้า HTML อัตโนมัติ
+// (ทำหน้าที่เป็น heartbeat ด้วย: ทุก 5 วินาทีจะต่ออายุ session)
 // ==========================================
 const GUARD_JS = [
     "(function () {",
@@ -110,13 +112,13 @@ app.get('/session-guard.js', (req, res) => {
 
 function injectGuard(html, filePath) {
     const name = path.basename(filePath).toLowerCase();
-    if (name === 'login.html') return html;                 // หน้า Login ไม่ต้องเช็ก
-    if (html.includes('session-guard.js')) return html;     // มีอยู่แล้ว ไม่แทรกซ้ำ
+    if (name === 'login.html') return html;
+    if (html.includes('session-guard.js')) return html;
     const tag = '<script src="/session-guard.js"></script>\n';
     return /<\/body>/i.test(html) ? html.replace(/<\/body>/i, tag + '</body>') : html + tag;
 }
 
-// (1) ไฟล์ .html ที่ถูกเรียกตรงๆ เช่น /main.HTML  (ก่อนจะไปถึง express.static)
+// (1) ไฟล์ .html ที่ถูกเรียกตรงๆ เช่น /main.HTML
 app.use((req, res, next) => {
     if (req.method !== 'GET' || !/\.html?$/i.test(req.path)) return next();
     let rel;
@@ -129,7 +131,7 @@ app.use((req, res, next) => {
     });
 });
 
-// (2) route ที่ใช้ res.sendFile(...) เช่น /inventory.html, /add.html
+// (2) route ที่ใช้ res.sendFile(...)
 app.use((req, res, next) => {
     const originalSendFile = res.sendFile.bind(res);
     res.sendFile = function (filePath, ...rest) {
@@ -158,6 +160,14 @@ function getCurrentDateTime() {
     return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 }
 
+// เช็กว่า login_time (รูปแบบ "YYYY-MM-DD HH:MM:SS") ยังไม่หมดอายุ
+function isSessionFresh(loginTime) {
+    if (!loginTime) return false;
+    const t = new Date(String(loginTime).replace(' ', 'T')).getTime();
+    if (isNaN(t)) return false;
+    return Date.now() - t < SESSION_TIMEOUT_MS;
+}
+
 // ==========================================
 // FUNCTION: บันทึกประวัติลงตาราง history
 // ==========================================
@@ -174,9 +184,6 @@ async function addHistory(action, productId, user = 'Unknown') {
     }
 }
 
-// ==========================================
-// FUNCTION: แปลงแถวเป็นบรรทัดข้อความแบบเดิม
-// ==========================================
 function formatInventoryLine(row) {
     return `${row.product_id} | ${row.type} | ${row.footprint} | ${row.device_type} | ${row.cost} | ${row.durability} | ${row.quantity} | ${row.updated_at}`;
 }
@@ -304,7 +311,7 @@ app.get(['/setting.html', '/Setting.html'], (req, res) => {
 app.use(express.static(__dirname));
 
 // ============================================================
-// API LOGIN (ตรวจสอบผู้ใช้และป้องกันการล็อกอินซ้ำจากฐานข้อมูล)
+// API LOGIN (ตรวจสอบผู้ใช้และป้องกันการล็อกอินซ้ำ พร้อม timeout)
 // ============================================================
 app.post('/api/login', async (req, res) => {
     const { email, password } = req.body;
@@ -327,17 +334,20 @@ app.post('/api/login', async (req, res) => {
             return res.json({ success: false, message: 'Invalid E-mail or Password' });
         }
 
-        // ตรวจสอบว่าบัญชีนี้กำลังออนไลน์อยู่หรือไม่
-        const activeCheck = await pool.query('SELECT * FROM active_sessions WHERE LOWER(email) = LOWER($1)', [cleanEmail]);
-        if (activeCheck.rows.length > 0) {
+        // ตรวจว่าบัญชีนี้ออนไลน์อยู่จริงหรือไม่ (session ที่หมดอายุถือว่าตายแล้ว)
+        const activeCheck = await pool.query(
+            'SELECT login_time FROM active_sessions WHERE LOWER(email) = LOWER($1)',
+            [cleanEmail]
+        );
+        if (activeCheck.rows.length > 0 && isSessionFresh(activeCheck.rows[0].login_time)) {
             return res.json({ success: false, message: 'This account is already being used from another device!' });
         }
 
-        // บันทึกสถานะว่ากำลังออนไลน์ลงฐานข้อมูล
-        const currentTime = getCurrentDateTime();
+        // ลบ session เก่า (ถ้ามี) แล้วบันทึกใหม่
+        await pool.query('DELETE FROM active_sessions WHERE LOWER(email) = LOWER($1)', [cleanEmail]);
         await pool.query(
-            'INSERT INTO active_sessions (email, login_time) VALUES ($1, $2) ON CONFLICT (email) DO UPDATE SET login_time = $2',
-            [cleanEmail, currentTime]
+            'INSERT INTO active_sessions (email, login_time) VALUES ($1, $2)',
+            [cleanEmail, getCurrentDateTime()]
         );
 
         res.json({
@@ -511,9 +521,7 @@ app.get('/api/history', async (req, res) => {
     }
 });
 
-// ============================================================
-// 4.1 API CLEAR HISTORY (route เดิม - เก็บไว้เผื่อมีที่อื่นเรียกใช้)
-// ============================================================
+// 4.1 CLEAR HISTORY (route เดิม)
 app.post('/api/clear-history', async (req, res) => {
     try {
         await pool.query('DELETE FROM history');
@@ -524,9 +532,7 @@ app.post('/api/clear-history', async (req, res) => {
     }
 });
 
-// ============================================================
-// 4.2 API RESET HISTORY (เพิ่มใหม่ - endpoint นี้คือตัวที่ setting.html เรียกจริง)
-// ============================================================
+// 4.2 RESET HISTORY (setting.html เรียกใช้)
 app.post('/api/history/reset', async (req, res) => {
     try {
         await pool.query('DELETE FROM history');
@@ -537,10 +543,7 @@ app.post('/api/history/reset', async (req, res) => {
     }
 });
 
-// ============================================================
-// 4.3 API RESET INVENTORY (เพิ่มใหม่ - ก่อนหน้านี้ไม่มี route นี้เลย
-//     ทำให้ปุ่ม "Clear Inventory" ใน setting.html ใช้งานไม่ได้)
-// ============================================================
+// 4.3 RESET INVENTORY
 app.post('/api/inventory/reset', async (req, res) => {
     try {
         await pool.query('DELETE FROM inventory');
@@ -553,7 +556,7 @@ app.post('/api/inventory/reset', async (req, res) => {
 });
 
 // ============================================================
-// 5. API สำหรับบันทึกประวัติ LOGIN / LOGOUT และเคลียร์สถานะออนไลน์
+// 5. บันทึกประวัติ LOGIN / LOGOUT และเคลียร์สถานะออนไลน์
 // ============================================================
 app.post('/api/history/add', async (req, res) => {
     const { user, email, action } = req.body;
@@ -564,7 +567,6 @@ app.post('/api/history/add', async (req, res) => {
     try {
         await addHistory(actionType, '-', username);
 
-        // ถ้าเป็นการ LOGOUT ให้ลบสถานะออกจากตาราง active_sessions เพื่อปลดล็อกให้เข้าใช้งานใหม่ได้
         if (actionType === 'LOGOUT' && targetEmail) {
             await pool.query('DELETE FROM active_sessions WHERE LOWER(email) = LOWER($1)', [targetEmail.trim()]);
         }
@@ -579,8 +581,6 @@ app.post('/api/history/add', async (req, res) => {
 // ============================================================
 // 6. ACTIVE USERS / KICK / SESSION CHECK
 // ============================================================
-
-// ตรวจว่าคนที่สั่งเตะ ยังล็อกอินอยู่จริง (กัน request ปลอมจากคนที่ไม่ได้ล็อกอิน)
 async function isActiveAdmin(adminEmail) {
     if (!adminEmail) return false;
     const r = await pool.query(
@@ -590,25 +590,26 @@ async function isActiveAdmin(adminEmail) {
     return r.rows.length > 0;
 }
 
-// รายชื่อผู้ใช้ที่ออนไลน์อยู่
+// รายชื่อผู้ใช้ที่ออนไลน์อยู่ (ตัดคนที่ session หมดอายุออก)
 app.get('/api/active-users', async (req, res) => {
     try {
         const result = await pool.query('SELECT email, login_time FROM active_sessions ORDER BY login_time ASC');
-        res.json({ success: true, users: result.rows });
+        const users = result.rows.filter(r => isSessionFresh(r.login_time));
+        res.json({ success: true, users });
     } catch (err) {
         console.error(err);
         res.status(500).json({ success: false, message: 'Could not read the active users list' });
     }
 });
 
-// หน้าเว็บเรียกเช็คว่า session ตัวเองยังอยู่ไหม (ถูกเตะ = ไม่อยู่แล้ว)
+// เช็ก session + ต่ออายุ (heartbeat)
 app.get('/api/session-check', async (req, res) => {
     const email = (req.query.email || '').trim();
     if (!email) return res.json({ active: false });
     try {
         const result = await pool.query(
-            'SELECT 1 FROM active_sessions WHERE LOWER(email) = LOWER($1)',
-            [email]
+            'UPDATE active_sessions SET login_time = $2 WHERE LOWER(email) = LOWER($1) RETURNING 1',
+            [email, getCurrentDateTime()]
         );
         res.json({ active: result.rows.length > 0 });
     } catch (err) {
