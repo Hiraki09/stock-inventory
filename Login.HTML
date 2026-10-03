@@ -8,558 +8,141 @@
 <link rel="icon" type="image/png" href="logo.png">
 <link rel="shortcut icon" type="image/png" href="logo.png">
 <link rel="apple-touch-icon" href="logo.png">
-<!-- เปิดโหมดเว็บแอปเต็มจอเมื่อกด Add to Home Screen บน iOS / iPad -->
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Component Tracker">
-
-<!-- กำหนดรูปไอคอนขนาดใหญ่ขึ้น (แนะนำ 180x180 หรือ 512x512 พิกเซล เพื่อความคมชัดบนหน้าจอไอแพด) -->
-<link rel="apple-touch-icon" href="logo.png">
 <style>
-
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: "Segoe UI", sans-serif;
-}
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: "Segoe UI", sans-serif; }
 
 body {
     min-height: 100vh;
-
-    background:
-        radial-gradient(
-            circle at center,
-            #18263d 0%,
-            #0c1526 45%,
-            #030817 100%
-        );
-
+    background: radial-gradient(circle at center, #18263d 0%, #0c1526 45%, #030817 100%);
     color: white;
-
     display: flex;
     justify-content: center;
     align-items: center;
-
     overflow: hidden;
 }
 
-
-/* ================= LOGIN CONTAINER ================= */
-
-.login-container {
-    width: 100%;
-    max-width: 420px;
-
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-
-    padding: 20px;
-}
-
-
-/* ================= LOGO ================= */
-
-.logo {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    margin-bottom: 32px;
-}
-
-
-/* ================= LOGO ICON ================= */
-
-.logo-icon {
-    width: 62px;
-    height: 62px;
-
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-
-    gap: 6px;
-
-    margin-right: 14px;
-}
-
-.logo-box {
-    border: 3px solid #00ff66;
-
-    border-radius: 6px;
-
-    box-shadow:
-        0 0 7px rgba(0,255,102,0.7),
-        0 0 14px rgba(0,255,102,0.25);
-}
-
-
-/* ================= LOGO TEXT ================= */
-
-.logo-text {
-    text-align: left;
-}
-
-.logo-title {
-    font-size: 26px;
-
-    font-weight: 700;
-
-    line-height: 1;
-
-    letter-spacing: 0.5px;
-
-    color: #00ff66;
-
-    text-shadow:
-        0 0 7px rgba(0,255,102,0.35);
-}
-
-.logo-subtitle {
-    font-size: 18px;
-
-    font-weight: 700;
-
-    line-height: 1.15;
-
-    letter-spacing: 0.5px;
-
-    color: #f1f5f9;
-}
-
-
-/* ================= LOGIN TITLE ================= */
-
-.login-title {
-    font-size: 21px;
-
-    font-weight: 600;
-
-    letter-spacing: 4px;
-
-    margin-bottom: 20px;
-
-    color: #f8fafc;
-}
-
-
-/* ================= FORM ================= */
-
-.form {
-    width: 100%;
-}
-
-
-/* ================= LABEL ================= */
-
-label {
-    display: block;
-
-    font-size: 12px;
-
-    font-weight: 600;
-
-    letter-spacing: 3px;
-
-    color: #dce3ed;
-
-    margin-bottom: 7px;
-}
-
-
-/* ================= INPUT ================= */
-
-.input-box {
-    position: relative;
-
-    width: 100%;
-
-    margin-bottom: 18px;
-}
-
-input {
-    width: 100%;
-
-    height: 48px;
-
-    border: none;
-
-    outline: none;
-
-    border-radius: 25px;
-
-    padding: 0 18px;
-
-    background: #e8edf5;
-
-    color: #111827;
-
-    font-size: 14px;
-
-    transition: 0.2s;
-}
-
-input::placeholder {
-    color: #7b8798;
-}
-
-input:focus {
-    box-shadow:
-        0 0 0 2px #00ff66,
-        0 0 12px rgba(0,255,102,0.25);
-}
-
-
-/* ================= PASSWORD BUTTON ================= */
-
-.password-toggle {
-    position: absolute;
-
-    right: 15px;
-    top: 50%;
-
-    transform: translateY(-50%);
-
-    border: none;
-
-    background: transparent;
-
-    color: #64748b;
-
-    font-size: 18px;
-
-    cursor: pointer;
-}
-
-.password-toggle:hover {
-    color: #111827;
-}
-
-
-/* ================= LOGIN BUTTON ================= */
-
-.login-button {
-    width: 100%;
-
-    height: 50px;
-
-    margin-top: 5px;
-
-    border-radius: 25px;
-
-    border: 2px solid #00ff66;
-
-    background: rgba(0,30,20,0.35);
-
-    color: #00ff66;
-
-    font-size: 15px;
-
-    font-weight: 600;
-
-    letter-spacing: 2px;
-
-    cursor: pointer;
-
-    transition: 0.25s;
-
-    box-shadow:
-        0 0 8px rgba(0,255,102,0.2);
-}
-
-.login-button:hover {
-    background: #00ff66;
-
-    color: #06100b;
-
-    box-shadow:
-        0 0 15px rgba(0,255,102,0.5);
-
-    transform: translateY(-1px);
-}
-
-.login-button:active {
-    transform: scale(0.98);
-}
-
-
-/* ================= ERROR ================= */
-
-.error {
-    display: none;
-
-    margin-top: 12px;
-
-    color: #ff6b6b;
-
-    font-size: 13px;
-
-    text-align: center;
-}
-
-
-/* ================= MOBILE ================= */
+.login-container { width: 100%; max-width: 420px; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+
+.logo { display: flex; align-items: center; justify-content: center; margin-bottom: 32px; }
+.logo-icon { width: 62px; height: 62px; display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-right: 14px; }
+.logo-box { border: 3px solid #00ff66; border-radius: 6px; box-shadow: 0 0 7px rgba(0,255,102,0.7), 0 0 14px rgba(0,255,102,0.25); }
+.logo-text { text-align: left; }
+.logo-title { font-size: 26px; font-weight: 700; line-height: 1; letter-spacing: 0.5px; color: #00ff66; text-shadow: 0 0 7px rgba(0,255,102,0.35); }
+.logo-subtitle { font-size: 18px; font-weight: 700; line-height: 1.15; letter-spacing: 0.5px; color: #f1f5f9; }
+
+.login-title { font-size: 21px; font-weight: 600; letter-spacing: 4px; margin-bottom: 20px; color: #f8fafc; }
+
+.form { width: 100%; }
+label { display: block; font-size: 12px; font-weight: 600; letter-spacing: 3px; color: #dce3ed; margin-bottom: 7px; }
+.input-box { position: relative; width: 100%; margin-bottom: 18px; }
+input { width: 100%; height: 48px; border: none; outline: none; border-radius: 25px; padding: 0 18px; background: #e8edf5; color: #111827; font-size: 14px; transition: 0.2s; }
+input::placeholder { color: #7b8798; }
+input:focus { box-shadow: 0 0 0 2px #00ff66, 0 0 12px rgba(0,255,102,0.25); }
+
+.password-toggle { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); border: none; background: transparent; color: #64748b; font-size: 18px; cursor: pointer; }
+.password-toggle:hover { color: #111827; }
+
+.login-button { width: 100%; height: 50px; margin-top: 5px; border-radius: 25px; border: 2px solid #00ff66; background: rgba(0,30,20,0.35); color: #00ff66; font-size: 15px; font-weight: 600; letter-spacing: 2px; cursor: pointer; transition: 0.25s; box-shadow: 0 0 8px rgba(0,255,102,0.2); }
+.login-button:hover { background: #00ff66; color: #06100b; box-shadow: 0 0 15px rgba(0,255,102,0.5); transform: translateY(-1px); }
+.login-button:active { transform: scale(0.98); }
+
+.error { display: none; margin-top: 12px; color: #ff6b6b; font-size: 13px; text-align: center; }
 
 @media (max-width: 500px) {
-
-    .login-container {
-        max-width: 360px;
-        padding: 15px;
-    }
-
-    .logo-icon {
-        width: 52px;
-        height: 52px;
-
-        gap: 5px;
-
-        margin-right: 11px;
-    }
-
-    .logo-box {
-        border-width: 2px;
-    }
-
-    .logo-title {
-        font-size: 21px;
-    }
-
-    .logo-subtitle {
-        font-size: 15px;
-    }
-
-    .login-title {
-        font-size: 19px;
-    }
-
-    input {
-        height: 45px;
-    }
-
-    .login-button {
-        height: 47px;
-    }
-
+    .login-container { max-width: 360px; padding: 15px; }
+    .logo-icon { width: 52px; height: 52px; gap: 5px; margin-right: 11px; }
+    .logo-box { border-width: 2px; }
+    .logo-title { font-size: 21px; }
+    .logo-subtitle { font-size: 15px; }
+    .login-title { font-size: 19px; }
+    input { height: 45px; }
+    .login-button { height: 47px; }
 }
-
 </style>
 </head>
 
-
 <body>
-
 
 <div class="login-container">
 
-
-    <!-- ================= LOGO ================= -->
-
     <div class="logo">
-
         <div class="logo-icon">
-
             <div class="logo-box"></div>
             <div class="logo-box"></div>
             <div class="logo-box"></div>
             <div class="logo-box"></div>
-
         </div>
-
-
         <div class="logo-text">
-
-            <div class="logo-title">
-                COMPONENT
-            </div>
-
-            <div class="logo-subtitle">
-                INVENTORY
-            </div>
-
-            <div class="logo-subtitle">
-                TRACKER
-            </div>
-
+            <div class="logo-title">COMPONENT</div>
+            <div class="logo-subtitle">INVENTORY</div>
+            <div class="logo-subtitle">TRACKER</div>
         </div>
-
     </div>
 
+    <div class="login-title">LOGIN</div>
 
-    <!-- ================= LOGIN ================= -->
+    <form class="form" onsubmit="login(event)">
 
-    <div class="login-title">
-        LOGIN
-    </div>
-
-
-    <form
-        class="form"
-        onsubmit="login(event)"
-    >
-
-
-        <!-- E-MAIL -->
-
-        <label for="email">
-            E-MAIL
-        </label>
-
+        <label for="email">E-MAIL</label>
         <div class="input-box">
-
-            <input
-                type="email"
-                id="email"
-                placeholder="Enter your email"
-                required
-            >
-
+            <input type="email" id="email" placeholder="Enter your email" required>
         </div>
 
-
-        <!-- PASSWORD -->
-
-        <label for="password">
-            PASSWORD
-        </label>
-
+        <label for="password">PASSWORD</label>
         <div class="input-box">
-
-            <input
-                type="password"
-                id="password"
-                placeholder="Enter your password"
-                required
-            >
-
-            <button
-                type="button"
-                class="password-toggle"
-                id="toggleButton"
-                onclick="togglePassword()"
-            >
-                👁
-            </button>
-
+            <input type="password" id="password" placeholder="Enter your password" required>
+            <button type="button" class="password-toggle" id="toggleButton" onclick="togglePassword()">👁</button>
         </div>
 
+        <button type="submit" class="login-button">LOGIN</button>
 
-        <!-- LOGIN BUTTON -->
-
-        <button
-            type="submit"
-            class="login-button"
-        >
-            LOGIN
-        </button>
-
-
-        <!-- ERROR -->
-
-        <div
-            class="error"
-            id="error"
-        >
-            Invalid E-mail or Password
-        </div>
-
+        <div class="error" id="error">Invalid E-mail or Password</div>
 
     </form>
 
 </div>
 
-
 <script>
 
-/* =====================================================
-    CHECK LOGIN
-    ถ้ามีคน Login อยู่แล้ว ให้เข้า Dashboard ทันที
-===================================================== */
+/* ล้างค่าเก่าที่เคยทำให้ขึ้น "already logged in elsewhere" (ไม่ใช้แล้ว) */
+localStorage.removeItem("activeLogins");
 
-const loggedInUser =
-    localStorage.getItem("loggedInUser");
-
-if (loggedInUser) {
+/* ถ้ามีคน Login อยู่แล้ว ให้เข้า Dashboard ทันที */
+if (localStorage.getItem("loggedInUser")) {
     window.location.href = "main.HTML";
 }
 
-
-/* =====================================================
-    SHOW / HIDE PASSWORD
-===================================================== */
-
+/* SHOW / HIDE PASSWORD */
 function togglePassword() {
-
-    const password =
-        document.getElementById("password");
-
-    const button =
-        document.getElementById("toggleButton");
-
+    const password = document.getElementById("password");
+    const button = document.getElementById("toggleButton");
 
     if (password.type === "password") {
-
         password.type = "text";
-
         button.textContent = "🙈";
-
-    }
-
-    else {
-
+    } else {
         password.type = "password";
-
         button.textContent = "👁";
-
     }
-
 }
 
-
-/* =====================================================
-    LOGIN FUNCTION (เชื่อมต่อ Backend และ Supabase)
-===================================================== */
-
+/* LOGIN (ให้เซิร์ฟเวอร์เป็นคนตรวจสอบการล็อกอินซ้ำจากตาราง active_sessions) */
 async function login(event) {
-
     event.preventDefault();
 
-
-    /* รับ E-mail และ Password */
-
-    const emailInput = document.getElementById("email");
-    const email = emailInput.value.trim();
-    const emailLower = email.toLowerCase();
-
-    const password =
-        document.getElementById("password")
-        .value;
-
-    const error =
-        document.getElementById("error");
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value;
+    const error = document.getElementById("error");
 
     error.style.display = "none";
 
-
-    /* -----------------------------------------------------
-        ตรวจสอบว่าไอดีนี้กำลังถูกใช้งานอยู่หรือไม่ (Active Check)
-    ----------------------------------------------------- */
-    let activeLogins = JSON.parse(localStorage.getItem("activeLogins") || "{}");
-
-    if (activeLogins[emailLower] === true) {
-        error.textContent = "This account is already logged in elsewhere. Please wait until the user logs out.";
-        error.style.display = "block";
-        return;
-    }
-
-
     try {
-        /* ส่งข้อมูลไปตรวจสอบที่เซิร์ฟเวอร์หลังบ้าน (Backend) */
         const response = await fetch('/api/login', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, password })
         });
 
@@ -567,31 +150,18 @@ async function login(event) {
 
         if (result.success) {
 
-            // ล็อกสถานะว่าไอดีนี้กำลังออนไลน์อยู่ ห้ามคนอื่นเข้าซ้ำ
-            activeLogins[emailLower] = true;
-            localStorage.setItem("activeLogins", JSON.stringify(activeLogins));
-
             const currentUser = {
                 id: result.user.id,
                 email: result.user.email
             };
 
-            localStorage.setItem(
-                "loggedInUser",
-                JSON.stringify(currentUser)
-            );
+            localStorage.setItem("loggedInUser", JSON.stringify(currentUser));
 
-
-            /* ---------------------------------------------
-                ส่งประวัติ LOGIN ไปบันทึกที่ Server
-            --------------------------------------------- */
-
+            /* บันทึกประวัติ LOGIN */
             try {
                 await fetch('/api/history/add', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         action: 'LOGIN',
                         email: currentUser.email,
@@ -602,15 +172,9 @@ async function login(event) {
                 console.error('Login history error:', err);
             }
 
-
-            /* ---------------------------------------------
-                เข้า Dashboard
-            --------------------------------------------- */
-
             window.location.href = "main.HTML";
 
         } else {
-            /* LOGIN FAILED */
             error.textContent = result.message || "Invalid E-mail or Password";
             error.style.display = "block";
         }
@@ -620,11 +184,9 @@ async function login(event) {
         error.textContent = "Cannot connect to server";
         error.style.display = "block";
     }
-
 }
 
 </script>
-
 
 </body>
 </html>
