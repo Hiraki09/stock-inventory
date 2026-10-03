@@ -94,7 +94,7 @@ const GUARD_JS = [
     "        if (d && d.active === false) {",
     "          handled = true; clearInterval(timer);",
     "          localStorage.removeItem('loggedInUser');",
-    "          alert('คุณถูกออกจากระบบโดยผู้ดูแลระบบ');",
+    "          alert('You have been signed out by an administrator.');",
     "          window.location.href = 'Login.HTML';",
     "        }",
     "      }).catch(function () {});",
@@ -597,7 +597,7 @@ app.get('/api/active-users', async (req, res) => {
         res.json({ success: true, users: result.rows });
     } catch (err) {
         console.error(err);
-        res.status(500).json({ success: false, message: 'อ่านรายชื่อผู้ใช้ไม่ได้' });
+        res.status(500).json({ success: false, message: 'Could not read the active users list' });
     }
 });
 
@@ -623,19 +623,19 @@ app.post('/api/kick-user', async (req, res) => {
     const by = req.body.by || 'Unknown';
     const adminEmail = (req.body.adminEmail || '').trim().toLowerCase();
 
-    if (!email) return res.status(400).json({ success: false, message: 'ไม่พบอีเมลที่จะเตะ' });
-    if (email === adminEmail) return res.status(400).json({ success: false, message: 'เตะตัวเองไม่ได้' });
+    if (!email) return res.status(400).json({ success: false, message: 'No e-mail to kick' });
+    if (email === adminEmail) return res.status(400).json({ success: false, message: 'You cannot kick yourself' });
 
     try {
         if (!(await isActiveAdmin(adminEmail))) {
-            return res.status(403).json({ success: false, message: 'ไม่มีสิทธิ์ดำเนินการ' });
+            return res.status(403).json({ success: false, message: 'Not authorized' });
         }
         const result = await pool.query('DELETE FROM active_sessions WHERE LOWER(email) = LOWER($1)', [email]);
         await addHistory('KICK', email, by);
-        res.json({ success: true, count: result.rowCount, message: `เตะ ${email} สำเร็จ` });
+        res.json({ success: true, count: result.rowCount, message: `Kicked ${email}` });
     } catch (err) {
         console.error(err);
-        res.status(500).json({ success: false, message: 'เตะผู้ใช้ไม่สำเร็จ' });
+        res.status(500).json({ success: false, message: 'Kick failed' });
     }
 });
 
@@ -646,7 +646,7 @@ app.post('/api/kick-all', async (req, res) => {
 
     try {
         if (!(await isActiveAdmin(adminEmail))) {
-            return res.status(403).json({ success: false, message: 'ไม่มีสิทธิ์ดำเนินการ' });
+            return res.status(403).json({ success: false, message: 'Not authorized' });
         }
         const result = await pool.query(
             'DELETE FROM active_sessions WHERE LOWER(email) <> LOWER($1) RETURNING email',
@@ -655,10 +655,10 @@ app.post('/api/kick-all', async (req, res) => {
         for (const row of result.rows) {
             await addHistory('KICK', row.email, by);
         }
-        res.json({ success: true, count: result.rowCount, message: 'เตะผู้ใช้อื่นทั้งหมดสำเร็จ' });
+        res.json({ success: true, count: result.rowCount, message: 'Kicked all other users' });
     } catch (err) {
         console.error(err);
-        res.status(500).json({ success: false, message: 'เตะผู้ใช้ไม่สำเร็จ' });
+        res.status(500).json({ success: false, message: 'Kick failed' });
     }
 });
 
