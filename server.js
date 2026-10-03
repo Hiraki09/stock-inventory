@@ -78,6 +78,73 @@ app.use(cors());
 app.use(express.json());
 
 // ==========================================
+// SESSION GUARD: แทรกสคริปต์เช็ก session (กันคนถูกเตะ) ลงทุกหน้า HTML อัตโนมัติ
+// ==========================================
+const GUARD_JS = [
+    "(function () {",
+    "  var email = '';",
+    "  try { var u = JSON.parse(localStorage.getItem('loggedInUser') || 'null'); email = ((u && u.email) || '').trim(); } catch (e) {}",
+    "  if (!email) return;",
+    "  var timer = null, handled = false;",
+    "  function check() {",
+    "    if (handled) return;",
+    "    fetch('/api/session-check?email=' + encodeURIComponent(email) + '&v=' + Date.now(), { cache: 'no-store' })",
+    "      .then(function (r) { return r.ok ? r.json() : null; })",
+    "      .then(function (d) {",
+    "        if (d && d.active === false) {",
+    "          handled = true; clearInterval(timer);",
+    "          localStorage.removeItem('loggedInUser');",
+    "          alert('คุณถูกออกจากระบบโดยผู้ดูแลระบบ');",
+    "          window.location.href = 'Login.HTML';",
+    "        }",
+    "      }).catch(function () {});",
+    "  }",
+    "  check(); timer = setInterval(check, 5000);",
+    "  document.addEventListener('visibilitychange', function () { if (!document.hidden) check(); });",
+    "})();"
+].join('\n');
+
+app.get('/session-guard.js', (req, res) => {
+    res.type('application/javascript').send(GUARD_JS);
+});
+
+function injectGuard(html, filePath) {
+    const name = path.basename(filePath).toLowerCase();
+    if (name === 'login.html') return html;                 // หน้า Login ไม่ต้องเช็ก
+    if (html.includes('session-guard.js')) return html;     // มีอยู่แล้ว ไม่แทรกซ้ำ
+    const tag = '<script src="/session-guard.js"></script>\n';
+    return /<\/body>/i.test(html) ? html.replace(/<\/body>/i, tag + '</body>') : html + tag;
+}
+
+// (1) ไฟล์ .html ที่ถูกเรียกตรงๆ เช่น /main.HTML  (ก่อนจะไปถึง express.static)
+app.use((req, res, next) => {
+    if (req.method !== 'GET' || !/\.html?$/i.test(req.path)) return next();
+    let rel;
+    try { rel = decodeURIComponent(req.path); } catch (e) { return next(); }
+    const filePath = path.join(__dirname, rel);
+    if (!filePath.startsWith(__dirname + path.sep)) return next();
+    fs.readFile(filePath, 'utf8', (err, html) => {
+        if (err) return next();
+        res.type('html').send(injectGuard(html, filePath));
+    });
+});
+
+// (2) route ที่ใช้ res.sendFile(...) เช่น /inventory.html, /add.html
+app.use((req, res, next) => {
+    const originalSendFile = res.sendFile.bind(res);
+    res.sendFile = function (filePath, ...rest) {
+        if (/\.html?$/i.test(filePath)) {
+            return fs.readFile(filePath, 'utf8', (err, html) => {
+                if (err) return originalSendFile(filePath, ...rest);
+                res.type('html').send(injectGuard(html, filePath));
+            });
+        }
+        return originalSendFile(filePath, ...rest);
+    };
+    next();
+});
+
+// ==========================================
 // FUNCTION: วันที่และเวลา
 // ==========================================
 function getCurrentDateTime() {
@@ -506,6 +573,92 @@ app.post('/api/history/add', async (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(500).json({ success: false, message: 'บันทึกประวัติไม่สำเร็จ' });
+    }
+});
+
+// ============================================================
+// 6. ACTIVE USERS / KICK / SESSION CHECK
+// ============================================================
+
+// ตรวจว่าคนที่สั่งเตะ ยังล็อกอินอยู่จริง (กัน request ปลอมจากคนที่ไม่ได้ล็อกอิน)
+async function isActiveAdmin(adminEmail) {
+    if (!adminEmail) return false;
+    const r = await pool.query(
+        'SELECT 1 FROM active_sessions WHERE LOWER(email) = LOWER($1)',
+        [adminEmail.trim()]
+    );
+    return r.rows.length > 0;
+}
+
+// รายชื่อผู้ใช้ที่ออนไลน์อยู่
+app.get('/api/active-users', async (req, res) => {
+    try {
+        const result = await pool.query('SELECT email, login_time FROM active_sessions ORDER BY login_time ASC');
+        res.json({ success: true, users: result.rows });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false, message: 'อ่านรายชื่อผู้ใช้ไม่ได้' });
+    }
+});
+
+// หน้าเว็บเรียกเช็คว่า session ตัวเองยังอยู่ไหม (ถูกเตะ = ไม่อยู่แล้ว)
+app.get('/api/session-check', async (req, res) => {
+    const email = (req.query.email || '').trim();
+    if (!email) return res.json({ active: false });
+    try {
+        const result = await pool.query(
+            'SELECT 1 FROM active_sessions WHERE LOWER(email) = LOWER($1)',
+            [email]
+        );
+        res.json({ active: result.rows.length > 0 });
+    } catch (err) {
+        console.error(err);
+        res.json({ active: true }); // DB มีปัญหาชั่วคราว อย่าเตะคนออกมั่วๆ
+    }
+});
+
+// เตะผู้ใช้ 1 คน
+app.post('/api/kick-user', async (req, res) => {
+    const email = (req.body.email || '').trim().toLowerCase();
+    const by = req.body.by || 'Unknown';
+    const adminEmail = (req.body.adminEmail || '').trim().toLowerCase();
+
+    if (!email) return res.status(400).json({ success: false, message: 'ไม่พบอีเมลที่จะเตะ' });
+    if (email === adminEmail) return res.status(400).json({ success: false, message: 'เตะตัวเองไม่ได้' });
+
+    try {
+        if (!(await isActiveAdmin(adminEmail))) {
+            return res.status(403).json({ success: false, message: 'ไม่มีสิทธิ์ดำเนินการ' });
+        }
+        const result = await pool.query('DELETE FROM active_sessions WHERE LOWER(email) = LOWER($1)', [email]);
+        await addHistory('KICK', email, by);
+        res.json({ success: true, count: result.rowCount, message: `เตะ ${email} สำเร็จ` });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false, message: 'เตะผู้ใช้ไม่สำเร็จ' });
+    }
+});
+
+// เตะทุกคนยกเว้นตัวเอง
+app.post('/api/kick-all', async (req, res) => {
+    const by = req.body.by || 'Unknown';
+    const adminEmail = (req.body.adminEmail || '').trim().toLowerCase();
+
+    try {
+        if (!(await isActiveAdmin(adminEmail))) {
+            return res.status(403).json({ success: false, message: 'ไม่มีสิทธิ์ดำเนินการ' });
+        }
+        const result = await pool.query(
+            'DELETE FROM active_sessions WHERE LOWER(email) <> LOWER($1) RETURNING email',
+            [adminEmail]
+        );
+        for (const row of result.rows) {
+            await addHistory('KICK', row.email, by);
+        }
+        res.json({ success: true, count: result.rowCount, message: 'เตะผู้ใช้อื่นทั้งหมดสำเร็จ' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false, message: 'เตะผู้ใช้ไม่สำเร็จ' });
     }
 });
 
