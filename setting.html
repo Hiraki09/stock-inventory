@@ -7,12 +7,9 @@
 <link rel="icon" type="image/png" href="logo.png">
 <link rel="shortcut icon" type="image/png" href="logo.png">
 <link rel="apple-touch-icon" href="logo.png">
-<!-- เปิดโหมดเว็บแอปเต็มจอเมื่อกด Add to Home Screen บน iOS / iPad -->
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Component Tracker">
-
-<!-- กำหนดรูปไอคอนขนาดใหญ่ขึ้น (แนะนำ 180x180 หรือ 512x512 พิกเซล เพื่อความคมชัดบนหน้าจอไอแพด) -->
 <link rel="apple-touch-icon" href="logo.png">
 
 <style>
@@ -25,7 +22,6 @@
     transition: background 0.2s, color 0.2s, border-color 0.2s;
 }
 
-/* ธีมมืด (Dark Mode - ค่าเริ่มต้น) */
 body {
     background: #080f1b;
     color: #e5e7eb;
@@ -34,7 +30,6 @@ body {
     display: flex;
 }
 
-/* ธีมสว่าง (Light Mode) */
 body.light-mode {
     background: #f1f5f9;
     color: #1e293b;
@@ -254,6 +249,7 @@ body.light-mode .title p {
     flex-direction: column;
     gap: 20px;
     max-width: 800px;
+    padding-bottom: 30px;
 }
 
 .setting-card {
@@ -264,6 +260,7 @@ body.light-mode .title p {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 20px;
 }
 
 body.light-mode .setting-card {
@@ -294,7 +291,6 @@ body.light-mode .setting-card p {
     color: #64748b;
 }
 
-/* ปุ่มเลือกธีม */
 .theme-options {
     display: flex;
     gap: 12px;
@@ -340,7 +336,6 @@ body.light-mode .theme-btn {
     background: #b91c1c;
 }
 
-/* ปุ่ม Reset History */
 .reset-history-btn {
     background: #d97706;
     color: white;
@@ -357,7 +352,6 @@ body.light-mode .theme-btn {
     background: #b45309;
 }
 
-/* ปุ่ม Reset Inventory */
 .reset-inventory-btn {
     background: #b91c1c;
     color: white;
@@ -374,7 +368,106 @@ body.light-mode .theme-btn {
     background: #991b1b;
 }
 
-/* ================= MODAL ยืนยันรหัสผ่าน ================= */
+/* ================= ACTIVE USERS / KICK ================= */
+
+.setting-card.column {
+    flex-direction: column;
+    align-items: stretch;
+}
+
+.active-users-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 5px;
+}
+
+.active-user-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 15px;
+    background: #101a28;
+    border: 1px solid #263448;
+    border-radius: 7px;
+}
+
+body.light-mode .active-user-row {
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+}
+
+.active-user-email {
+    font-size: 14px;
+    color: #e5e7eb;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+body.light-mode .active-user-email {
+    color: #1e293b;
+}
+
+.you-tag {
+    margin-left: 8px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #70a0ff;
+}
+
+.kick-btn {
+    background: #7c3aed;
+    color: white;
+    border: none;
+    padding: 9px 16px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.kick-btn:hover {
+    background: #6d28d9;
+}
+
+.kick-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.kick-all-btn {
+    background: #7c3aed;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.kick-all-btn:hover {
+    background: #6d28d9;
+}
+
+.empty-users {
+    color: #8995a7;
+    font-size: 14px;
+    padding: 6px 2px;
+}
+
+.card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+}
+
+/* ================= MODAL ================= */
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -549,7 +642,6 @@ body.light-mode .modal-btn.cancel {
 
     </div>
 
-    <!-- แผงแสดงข้อมูล User ด้านซ้ายล่าง -->
     <div class="user">
         <div class="user-name" id="currentUserName"><span>●</span> Loading...</div>
         <div class="user-email" id="currentUserEmail">Loading...</div>
@@ -574,8 +666,8 @@ body.light-mode .modal-btn.cancel {
     </div>
 
     <div class="settings-container">
-        
-        <!-- การตั้งค่าธีมสี -->
+
+        <!-- Theme -->
         <div class="setting-card">
             <div class="setting-info">
                 <h3>Appearance Theme</h3>
@@ -587,7 +679,19 @@ body.light-mode .modal-btn.cancel {
             </div>
         </div>
 
-        <!-- การจัดการประวัติ (Reset History) -->
+        <!-- Kick logged-in users -->
+        <div class="setting-card column">
+            <div class="card-head">
+                <div class="setting-info">
+                    <h3>Active Users</h3>
+                    <p>Force other logged-in users to sign out. They will be returned to the login page.</p>
+                </div>
+                <button class="kick-all-btn" id="kickAllBtn">Kick All Others</button>
+            </div>
+            <div class="active-users-list" id="activeUsersList"></div>
+        </div>
+
+        <!-- Reset History -->
         <div class="setting-card">
             <div class="setting-info">
                 <h3>Clear History Logs</h3>
@@ -596,7 +700,7 @@ body.light-mode .modal-btn.cancel {
             <button class="reset-history-btn" id="resetHistoryBtn">Reset History</button>
         </div>
 
-        <!-- การจัดการ Inventory (Clear All Inventory) -->
+        <!-- Clear Inventory -->
         <div class="setting-card">
             <div class="setting-info">
                 <h3>Clear All Inventory</h3>
@@ -605,7 +709,7 @@ body.light-mode .modal-btn.cancel {
             <button class="reset-inventory-btn" id="resetInventoryBtn">Clear Inventory</button>
         </div>
 
-        <!-- การจัดการเซสชัน -->
+        <!-- Session -->
         <div class="setting-card">
             <div class="setting-info">
                 <h3>Account Session</h3>
@@ -618,7 +722,7 @@ body.light-mode .modal-btn.cancel {
 
 </div>
 
-<!-- ================= MODAL ยืนยันรหัสผ่าน ================= -->
+<!-- ================= PASSWORD MODAL ================= -->
 <div class="modal-overlay" id="passwordModal">
     <div class="modal-box">
         <h3>Security Verification</h3>
@@ -639,6 +743,19 @@ body.light-mode .modal-btn.cancel {
     const savedTheme = localStorage.getItem('appTheme') || 'dark';
     if (savedTheme === 'light') {
         document.body.classList.add('light-mode');
+    }
+
+    /* ---------- Active login helpers ---------- */
+    function getActiveLogins() {
+        try {
+            return JSON.parse(localStorage.getItem('activeLogins') || '{}') || {};
+        } catch (e) {
+            return {};
+        }
+    }
+
+    function saveActiveLogins(obj) {
+        localStorage.setItem('activeLogins', JSON.stringify(obj));
     }
 
     document.addEventListener("DOMContentLoaded", () => {
@@ -669,10 +786,15 @@ body.light-mode .modal-btn.cancel {
             console.error("Invalid login data:", error);
             localStorage.removeItem('loggedInUser');
             window.location.href = 'Login.HTML';
+            return;
         }
+
+        const myEmail = (currentUserObj.email || "").toLowerCase().trim();
 
         const resetHistoryBtn = document.getElementById('resetHistoryBtn');
         const resetInventoryBtn = document.getElementById('resetInventoryBtn');
+        const kickAllBtn = document.getElementById('kickAllBtn');
+        const activeUsersList = document.getElementById('activeUsersList');
         const passwordModal = document.getElementById('passwordModal');
         const cancelModalBtn = document.getElementById('cancelModalBtn');
         const submitPasswordBtn = document.getElementById('submitPasswordBtn');
@@ -681,26 +803,140 @@ body.light-mode .modal-btn.cancel {
         const modalDesc = passwordModal.querySelector('p');
 
         let currentActionType = '';
+        let kickTargetEmail = null; // null + 'kickAll' => everyone except me
+
+        function openModal(type, title, desc, btnText) {
+            currentActionType = type;
+            modalTitle.textContent = title;
+            modalDesc.textContent = desc;
+            submitPasswordBtn.textContent = btnText;
+            confirmPasswordInput.value = '';
+            passwordModal.classList.add('show');
+            confirmPasswordInput.focus();
+        }
+
+        /* ---------- Render active users ---------- */
+        function renderActiveUsers() {
+            const logins = getActiveLogins();
+            const emails = Object.keys(logins);
+
+            // make sure the current user is always shown
+            if (myEmail && !emails.includes(myEmail)) emails.unshift(myEmail);
+
+            activeUsersList.innerHTML = "";
+
+            if (emails.length === 0) {
+                activeUsersList.innerHTML = '<div class="empty-users">No active users.</div>';
+                kickAllBtn.disabled = true;
+                return;
+            }
+
+            const others = emails.filter(e => e !== myEmail);
+            kickAllBtn.disabled = others.length === 0;
+            kickAllBtn.style.opacity = others.length === 0 ? "0.4" : "1";
+
+            emails.forEach(email => {
+                const isMe = email === myEmail;
+                const row = document.createElement('div');
+                row.className = 'active-user-row';
+                row.innerHTML = `
+                    <div class="active-user-email">
+                        ● ${escapeHtml(email)}
+                        ${isMe ? '<span class="you-tag">(YOU)</span>' : ''}
+                    </div>
+                    <button class="kick-btn" ${isMe ? 'disabled title="You cannot kick yourself"' : ''}>Kick</button>
+                `;
+                if (!isMe) {
+                    row.querySelector('.kick-btn').addEventListener('click', () => {
+                        kickTargetEmail = email;
+                        openModal(
+                            'kick',
+                            'Kick User',
+                            `Enter your password to force ${email} to log out.`,
+                            'Confirm Kick'
+                        );
+                    });
+                }
+                activeUsersList.appendChild(row);
+            });
+        }
+
+        renderActiveUsers();
+        window.addEventListener('storage', renderActiveUsers);
+
+        if (kickAllBtn) {
+            kickAllBtn.addEventListener('click', () => {
+                kickTargetEmail = null;
+                openModal(
+                    'kickAll',
+                    'Kick All Other Users',
+                    'Enter your password to force every other logged-in user to log out.',
+                    'Confirm Kick'
+                );
+            });
+        }
+
+        /* ---------- Kick logic ---------- */
+        async function kickUser(email) {
+            const key = email.toLowerCase().trim();
+
+            // 1) unlock the email so it can log in again
+            const logins = getActiveLogins();
+            delete logins[key];
+            saveActiveLogins(logins);
+
+            // 2) flag the user as kicked (picked up by the guard script on other pages)
+            let kicked = {};
+            try { kicked = JSON.parse(localStorage.getItem('kickedUsers') || '{}') || {}; } catch (e) {}
+            kicked[key] = Date.now();
+            localStorage.setItem('kickedUsers', JSON.stringify(kicked));
+
+            // 3) tell the server (needed for users on other devices)
+            try {
+                await fetch('/api/kick-user', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: key, by: currentUserObj.id })
+                });
+            } catch (err) {
+                console.error('Kick server error:', err);
+            }
+
+            // 4) write to history
+            try {
+                await fetch('/api/history/add', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'KICK ' + key,
+                        email: currentUserObj.email,
+                        user: currentUserObj.id
+                    })
+                });
+            } catch (err) {
+                console.error('Kick history error:', err);
+            }
+        }
 
         if (resetHistoryBtn) {
             resetHistoryBtn.addEventListener('click', () => {
-                currentActionType = 'history';
-                modalTitle.textContent = 'Security Verification';
-                modalDesc.textContent = 'Please enter your account password to confirm history deletion.';
-                confirmPasswordInput.value = '';
-                passwordModal.classList.add('show');
-                confirmPasswordInput.focus();
+                openModal(
+                    'history',
+                    'Security Verification',
+                    'Please enter your account password to confirm history deletion.',
+                    'Confirm Delete'
+                );
             });
         }
 
         if (resetInventoryBtn) {
             resetInventoryBtn.addEventListener('click', () => {
-                currentActionType = 'inventory';
-                modalTitle.textContent = 'Inventory Deletion Warning';
-                modalDesc.textContent = 'Please enter your account password to delete ALL inventory items.';
-                confirmPasswordInput.value = '';
-                passwordModal.classList.add('show');
-                confirmPasswordInput.focus();
+                openModal(
+                    'inventory',
+                    'Inventory Deletion Warning',
+                    'Please enter your account password to delete ALL inventory items.',
+                    'Confirm Delete'
+                );
             });
         }
 
@@ -719,11 +955,8 @@ body.light-mode .modal-btn.cancel {
                     return;
                 }
 
-                // ปรับปรุงการค้นหาให้ปลอดภัยจากช่องว่างแฝงด้วย .trim()
                 const userEmail = currentUserObj && currentUserObj.email ? currentUserObj.email.toLowerCase().trim() : "";
                 const matchedUser = systemUsers.find(u => u.email.toLowerCase().trim() === userEmail);
-                
-                // หากไม่เจอในระบบ แต่รหัสผ่านตรงกับรหัสแอดมินกลาง ให้ถือว่าผ่านด้วยเช่นกัน (เผื่อกรณีข้อมูลอีเมลในระบบกับอาเรย์ไม่ตรงกัน)
                 const correctPassword = matchedUser ? matchedUser.password : "admin3120654";
 
                 if (enteredPassword !== correctPassword) {
@@ -733,14 +966,29 @@ body.light-mode .modal-btn.cancel {
 
                 passwordModal.classList.remove('show');
 
-                if (currentActionType === 'history') {
+                if (currentActionType === 'kick') {
+                    if (kickTargetEmail) {
+                        await kickUser(kickTargetEmail);
+                        alert('เตะผู้ใช้ ' + kickTargetEmail + ' ออกจากระบบแล้ว');
+                    }
+                    renderActiveUsers();
+
+                } else if (currentActionType === 'kickAll') {
+                    const targets = Object.keys(getActiveLogins()).filter(e => e !== myEmail);
+                    for (const email of targets) {
+                        await kickUser(email);
+                    }
+                    alert('เตะผู้ใช้อื่นทั้งหมดออกจากระบบแล้ว (' + targets.length + ' คน)');
+                    renderActiveUsers();
+
+                } else if (currentActionType === 'history') {
                     try {
                         const response = await fetch('/api/history/reset', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' }
                         });
                         const result = await response.json();
-                        
+
                         if (result.success) {
                             alert('ล้างประวัติ (History) ทั้งหมดสำเร็จแล้ว');
                         } else {
@@ -757,7 +1005,7 @@ body.light-mode .modal-btn.cancel {
                             headers: { 'Content-Type': 'application/json' }
                         });
                         const result = await response.json();
-                        
+
                         if (result.success) {
                             alert('ลบข้อมูลสินค้าใน Inventory ทั้งหมดสำเร็จแล้ว');
                         } else {
@@ -788,7 +1036,6 @@ body.light-mode .modal-btn.cancel {
                     console.error('Logout history error:', err);
                 }
 
-                // ปลดล็อกสถานะใน activeLogins เมื่อกด Logout เพื่อให้อีเมลนี้สามารถเข้าสู่ระบบใหม่ได้
                 try {
                     let activeLogins = JSON.parse(localStorage.getItem("activeLogins") || "{}");
                     delete activeLogins[currentUserObj.email.toLowerCase()];
@@ -839,7 +1086,6 @@ body.light-mode .modal-btn.cancel {
             .replace(/'/g, "&#039;");
     }
 
-    /* ================= SIDEBAR TOGGLE ================= */
     function toggleSidebar() {
         document.body.classList.toggle('sidebar-hidden');
         localStorage.setItem(
