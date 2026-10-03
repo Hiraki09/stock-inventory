@@ -683,10 +683,10 @@ body.light-mode .modal-btn.cancel {
         <div class="setting-card column">
             <div class="card-head">
                 <div class="setting-info">
-                    <h3>Active Users</h3>
-                    <p>Force other logged-in users to sign out. They will be returned to the login page.</p>
+                    <h3>ผู้ใช้ที่ออนไลน์อยู่</h3>
+                    <p>บังคับให้ผู้ใช้อื่นที่ล็อกอินอยู่ออกจากระบบ ผู้ใช้ที่ถูกเตะจะถูกส่งกลับไปที่หน้าเข้าสู่ระบบ</p>
                 </div>
-                <button class="kick-all-btn" id="kickAllBtn">Kick All Others</button>
+                <button class="kick-all-btn" id="kickAllBtn">เตะคนอื่นทั้งหมด</button>
             </div>
             <div class="active-users-list" id="activeUsersList"></div>
         </div>
@@ -745,17 +745,16 @@ body.light-mode .modal-btn.cancel {
         document.body.classList.add('light-mode');
     }
 
-    /* ---------- Active login helpers ---------- */
-    function getActiveLogins() {
+    /* ---------- Active session helpers (data lives on the server) ---------- */
+    async function fetchActiveUsers() {
         try {
-            return JSON.parse(localStorage.getItem('activeLogins') || '{}') || {};
+            const r = await fetch('/api/active-users?v=' + Date.now(), { cache: 'no-store' });
+            const d = await r.json();
+            return d.success ? d.users : [];
         } catch (e) {
-            return {};
+            console.error('Active users error:', e);
+            return [];
         }
-    }
-
-    function saveActiveLogins(obj) {
-        localStorage.setItem('activeLogins', JSON.stringify(obj));
     }
 
     document.addEventListener("DOMContentLoaded", () => {
@@ -816,18 +815,16 @@ body.light-mode .modal-btn.cancel {
         }
 
         /* ---------- Render active users ---------- */
-        function renderActiveUsers() {
-            const logins = getActiveLogins();
-            const emails = Object.keys(logins);
-
-            // make sure the current user is always shown
-            if (myEmail && !emails.includes(myEmail)) emails.unshift(myEmail);
+        async function renderActiveUsers() {
+            const users = await fetchActiveUsers();
+            const emails = users.map(u => (u.email || '').toLowerCase().trim());
 
             activeUsersList.innerHTML = "";
 
             if (emails.length === 0) {
-                activeUsersList.innerHTML = '<div class="empty-users">No active users.</div>';
+                activeUsersList.innerHTML = '<div class="empty-users">ไม่มีผู้ใช้ที่ออนไลน์อยู่</div>';
                 kickAllBtn.disabled = true;
+                kickAllBtn.style.opacity = "0.4";
                 return;
             }
 
@@ -835,25 +832,27 @@ body.light-mode .modal-btn.cancel {
             kickAllBtn.disabled = others.length === 0;
             kickAllBtn.style.opacity = others.length === 0 ? "0.4" : "1";
 
-            emails.forEach(email => {
+            users.forEach(u => {
+                const email = (u.email || '').toLowerCase().trim();
                 const isMe = email === myEmail;
                 const row = document.createElement('div');
                 row.className = 'active-user-row';
                 row.innerHTML = `
                     <div class="active-user-email">
                         ● ${escapeHtml(email)}
-                        ${isMe ? '<span class="you-tag">(YOU)</span>' : ''}
+                        ${isMe ? '<span class="you-tag">(คุณ)</span>' : ''}
+                        <span style="color:#8995a7;font-size:12px;margin-left:8px;">${escapeHtml(u.login_time || '')}</span>
                     </div>
-                    <button class="kick-btn" ${isMe ? 'disabled title="You cannot kick yourself"' : ''}>Kick</button>
+                    <button class="kick-btn" ${isMe ? 'disabled title="ไม่สามารถเตะตัวเองได้"' : ''}>เตะ</button>
                 `;
                 if (!isMe) {
                     row.querySelector('.kick-btn').addEventListener('click', () => {
                         kickTargetEmail = email;
                         openModal(
                             'kick',
-                            'Kick User',
-                            `Enter your password to force ${email} to log out.`,
-                            'Confirm Kick'
+                            'เตะผู้ใช้ออกจากระบบ',
+                            `กรอกรหัสผ่านของคุณเพื่อบังคับให้ ${email} ออกจากระบบ`,
+                            'ยืนยันการเตะ'
                         );
                     });
                 }
@@ -862,59 +861,32 @@ body.light-mode .modal-btn.cancel {
         }
 
         renderActiveUsers();
-        window.addEventListener('storage', renderActiveUsers);
+        setInterval(renderActiveUsers, 5000);
 
         if (kickAllBtn) {
             kickAllBtn.addEventListener('click', () => {
                 kickTargetEmail = null;
                 openModal(
                     'kickAll',
-                    'Kick All Other Users',
-                    'Enter your password to force every other logged-in user to log out.',
-                    'Confirm Kick'
+                    'เตะผู้ใช้อื่นทั้งหมด',
+                    'กรอกรหัสผ่านของคุณเพื่อบังคับให้ผู้ใช้อื่นทั้งหมดออกจากระบบ',
+                    'ยืนยันการเตะ'
                 );
             });
         }
 
-        /* ---------- Kick logic ---------- */
-        async function kickUser(email) {
-            const key = email.toLowerCase().trim();
-
-            // 1) unlock the email so it can log in again
-            const logins = getActiveLogins();
-            delete logins[key];
-            saveActiveLogins(logins);
-
-            // 2) flag the user as kicked (picked up by the guard script on other pages)
-            let kicked = {};
-            try { kicked = JSON.parse(localStorage.getItem('kickedUsers') || '{}') || {}; } catch (e) {}
-            kicked[key] = Date.now();
-            localStorage.setItem('kickedUsers', JSON.stringify(kicked));
-
-            // 3) tell the server (needed for users on other devices)
+        /* ---------- Kick logic (server side) ---------- */
+        async function kickRequest(url, body) {
             try {
-                await fetch('/api/kick-user', {
+                const r = await fetch(url, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email: key, by: currentUserObj.id })
+                    body: JSON.stringify(Object.assign({ by: currentUserObj.id, adminEmail: currentUserObj.email }, body))
                 });
+                return await r.json();
             } catch (err) {
-                console.error('Kick server error:', err);
-            }
-
-            // 4) write to history
-            try {
-                await fetch('/api/history/add', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        action: 'KICK ' + key,
-                        email: currentUserObj.email,
-                        user: currentUserObj.id
-                    })
-                });
-            } catch (err) {
-                console.error('Kick history error:', err);
+                console.error('Kick error:', err);
+                return { success: false, message: 'ไม่สามารถเชื่อมต่อกับ Server ได้' };
             }
         }
 
@@ -967,18 +939,17 @@ body.light-mode .modal-btn.cancel {
                 passwordModal.classList.remove('show');
 
                 if (currentActionType === 'kick') {
-                    if (kickTargetEmail) {
-                        await kickUser(kickTargetEmail);
-                        alert('เตะผู้ใช้ ' + kickTargetEmail + ' ออกจากระบบแล้ว');
-                    }
+                    const result = await kickRequest('/api/kick-user', { email: kickTargetEmail });
+                    alert(result.success
+                        ? 'เตะผู้ใช้ ' + kickTargetEmail + ' ออกจากระบบแล้ว'
+                        : 'เกิดข้อผิดพลาด: ' + (result.message || 'เตะไม่สำเร็จ'));
                     renderActiveUsers();
 
                 } else if (currentActionType === 'kickAll') {
-                    const targets = Object.keys(getActiveLogins()).filter(e => e !== myEmail);
-                    for (const email of targets) {
-                        await kickUser(email);
-                    }
-                    alert('เตะผู้ใช้อื่นทั้งหมดออกจากระบบแล้ว (' + targets.length + ' คน)');
+                    const result = await kickRequest('/api/kick-all', {});
+                    alert(result.success
+                        ? 'เตะผู้ใช้อื่นทั้งหมดออกจากระบบแล้ว (' + result.count + ' คน)'
+                        : 'เกิดข้อผิดพลาด: ' + (result.message || 'เตะไม่สำเร็จ'));
                     renderActiveUsers();
 
                 } else if (currentActionType === 'history') {
@@ -1095,5 +1066,6 @@ body.light-mode .modal-btn.cancel {
     }
 </script>
 
+<script src="session-guard.js"></script>
 </body>
 </html>
