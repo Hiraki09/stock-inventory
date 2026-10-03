@@ -683,10 +683,10 @@ body.light-mode .modal-btn.cancel {
         <div class="setting-card column">
             <div class="card-head">
                 <div class="setting-info">
-                    <h3>ผู้ใช้ที่ออนไลน์อยู่</h3>
-                    <p>บังคับให้ผู้ใช้อื่นที่ล็อกอินอยู่ออกจากระบบ ผู้ใช้ที่ถูกเตะจะถูกส่งกลับไปที่หน้าเข้าสู่ระบบ</p>
+                    <h3>Active Users</h3>
+                    <p>Force other logged-in users to sign out. They will be returned to the login page.</p>
                 </div>
-                <button class="kick-all-btn" id="kickAllBtn">เตะคนอื่นทั้งหมด</button>
+                <button class="kick-all-btn" id="kickAllBtn">Kick All Others</button>
             </div>
             <div class="active-users-list" id="activeUsersList"></div>
         </div>
@@ -822,7 +822,7 @@ body.light-mode .modal-btn.cancel {
             activeUsersList.innerHTML = "";
 
             if (emails.length === 0) {
-                activeUsersList.innerHTML = '<div class="empty-users">ไม่มีผู้ใช้ที่ออนไลน์อยู่</div>';
+                activeUsersList.innerHTML = '<div class="empty-users">No active users.</div>';
                 kickAllBtn.disabled = true;
                 kickAllBtn.style.opacity = "0.4";
                 return;
@@ -840,19 +840,19 @@ body.light-mode .modal-btn.cancel {
                 row.innerHTML = `
                     <div class="active-user-email">
                         ● ${escapeHtml(email)}
-                        ${isMe ? '<span class="you-tag">(คุณ)</span>' : ''}
+                        ${isMe ? '<span class="you-tag">(YOU)</span>' : ''}
                         <span style="color:#8995a7;font-size:12px;margin-left:8px;">${escapeHtml(u.login_time || '')}</span>
                     </div>
-                    <button class="kick-btn" ${isMe ? 'disabled title="ไม่สามารถเตะตัวเองได้"' : ''}>เตะ</button>
+                    <button class="kick-btn" ${isMe ? 'disabled title="You cannot kick yourself"' : ''}>Kick</button>
                 `;
                 if (!isMe) {
                     row.querySelector('.kick-btn').addEventListener('click', () => {
                         kickTargetEmail = email;
                         openModal(
                             'kick',
-                            'เตะผู้ใช้ออกจากระบบ',
-                            `กรอกรหัสผ่านของคุณเพื่อบังคับให้ ${email} ออกจากระบบ`,
-                            'ยืนยันการเตะ'
+                            'Kick User',
+                            `Enter your password to force ${email} to log out.`,
+                            'Confirm Kick'
                         );
                     });
                 }
@@ -868,9 +868,9 @@ body.light-mode .modal-btn.cancel {
                 kickTargetEmail = null;
                 openModal(
                     'kickAll',
-                    'เตะผู้ใช้อื่นทั้งหมด',
-                    'กรอกรหัสผ่านของคุณเพื่อบังคับให้ผู้ใช้อื่นทั้งหมดออกจากระบบ',
-                    'ยืนยันการเตะ'
+                    'Kick All Other Users',
+                    'Enter your password to force every other logged-in user to log out.',
+                    'Confirm Kick'
                 );
             });
         }
@@ -886,7 +886,7 @@ body.light-mode .modal-btn.cancel {
                 return await r.json();
             } catch (err) {
                 console.error('Kick error:', err);
-                return { success: false, message: 'ไม่สามารถเชื่อมต่อกับ Server ได้' };
+                return { success: false, message: 'Could not connect to the server' };
             }
         }
 
@@ -941,15 +941,15 @@ body.light-mode .modal-btn.cancel {
                 if (currentActionType === 'kick') {
                     const result = await kickRequest('/api/kick-user', { email: kickTargetEmail });
                     alert(result.success
-                        ? 'เตะผู้ใช้ ' + kickTargetEmail + ' ออกจากระบบแล้ว'
-                        : 'เกิดข้อผิดพลาด: ' + (result.message || 'เตะไม่สำเร็จ'));
+                        ? 'User ' + kickTargetEmail + ' has been kicked out.'
+                        : 'Error: ' + (result.message || 'Kick failed'));
                     renderActiveUsers();
 
                 } else if (currentActionType === 'kickAll') {
                     const result = await kickRequest('/api/kick-all', {});
                     alert(result.success
-                        ? 'เตะผู้ใช้อื่นทั้งหมดออกจากระบบแล้ว (' + result.count + ' คน)'
-                        : 'เกิดข้อผิดพลาด: ' + (result.message || 'เตะไม่สำเร็จ'));
+                        ? 'All other users have been kicked out (' + result.count + ').'
+                        : 'Error: ' + (result.message || 'Kick failed'));
                     renderActiveUsers();
 
                 } else if (currentActionType === 'history') {
@@ -1066,6 +1066,5 @@ body.light-mode .modal-btn.cancel {
     }
 </script>
 
-<script src="session-guard.js"></script>
 </body>
 </html>
