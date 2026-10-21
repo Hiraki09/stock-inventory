@@ -898,6 +898,7 @@ body.light-mode .delete-modal-content p {
                         <th>EQUIPMENT COST</th>
                         <th>DURABILITY</th>
                         <th>QUANTITY</th>
+                        <th>LOCATION</th>
                         <th>DATE</th>
                         <th>ACTIONS</th>
                     </tr>
@@ -979,9 +980,41 @@ body.light-mode .delete-modal-content p {
                 <label>DURABILITY / VOLTAGE</label>
                 <input type="text" id="editDurability" class="form-control" placeholder="e.g. +-0.25W, 40V / 200mA" oninput="generateProductId()">
             </div>
-            <div class="form-group full-width">
+            <div class="form-group">
                 <label>QUANTITY</label>
                 <input type="number" id="editQuantity" class="form-control" placeholder="0">
+            </div>
+            <div class="form-group">
+                <label>LOCATION / DRAWER</label>
+                <select id="editLocation" class="form-control">
+                    <option value="R11">R11</option>
+                    <option value="R12">R12</option>
+                    <option value="R13">R13</option>
+                    <option value="R21">R21</option>
+                    <option value="R22">R22</option>
+                    <option value="R23">R23</option>
+                    <option value="R31">R31</option>
+                    <option value="R32">R32</option>
+                    <option value="R33">R33</option>
+                    <option value="R41">R41</option>
+                    <option value="R42">R42</option>
+                    <option value="R43">R43</option>
+                    <option value="R51">R51</option>
+                    <option value="R52">R52</option>
+                    <option value="R53">R53</option>
+                    <option value="R61">R61</option>
+                    <option value="R62">R62</option>
+                    <option value="R63">R63</option>
+                    <option value="R71">R71</option>
+                    <option value="R72">R72</option>
+                    <option value="R73">R73</option>
+                    <option value="R8L1">R8L1</option>
+                    <option value="R8L2">R8L2</option>
+                    <option value="R8L3">R8L3</option>
+                    <option value="R9L1">R9L1</option>
+                    <option value="R9L2">R9L2</option>
+                    <option value="R9L3">R9L3</option>
+                </select>
             </div>
         </div>
         <div class="modal-actions">
@@ -1198,7 +1231,7 @@ function loadInventory() {
             console.error("Error loading file:", error);
             document.getElementById("inventoryTable").innerHTML = `
                 <tr>
-                    <td colspan="9" style="text-align:center; color:#ff716d;">
+                    <td colspan="10" style="text-align:center; color:#ff716d;">
                         Failed to load inventory.txt
                     </td>
                 </tr>`;
@@ -1215,14 +1248,23 @@ function parseInventoryData(textData) {
 
         let cols = line.split("|").map(c => c.trim());
 
-        while (cols.length < 8) {
-            cols.push("-");
+        // Standard format from server.js formatInventoryLine:
+        // product_id | type | footprint | device_type | cost | durability | quantity | updated_at | location
+        // Ensure we have at least 9 elements (index 0 to 8)
+        while (cols.length < 9) {
+            if (cols.length === 7) {
+                // If location was missing in legacy txt, push updated_at and location
+                let dt = cols[6];
+                cols[6] = dt; 
+                cols.push('R11');
+            } else {
+                cols.push('-');
+            }
         }
 
         allRowsData.push(cols);
     });
 
-    // Apply current search text + TYPE filter (keeps filters after refresh/edit/delete)
     searchInventory();
 }
 
@@ -1400,11 +1442,9 @@ function generateProductId() {
     else if (type === "Diode") prefix = "DI";
     else if (type === "Module") prefix = "MOD";
 
-    // Get the numeric code for Footprint and Device Type
     let footprintCode = getFootprintCode(type, footprintName);
     let deviceTypeCode = getDeviceTypeCode(type, deviceTypeName);
 
-    // Combine while keeping the case as typed by the user
     let rawParts = [prefix, footprintCode, deviceTypeCode, costSpec, durability];
     let cleanedParts = rawParts.filter(p => p && p !== '-').map(p => p.replace(/\s+/g, ''));
     
@@ -1425,6 +1465,7 @@ function editItem(button) {
     let currentType = row.cells[1].innerText.trim();
     let currentFootprint = row.cells[2].innerText.trim();
     let currentDeviceType = row.cells[3].innerText.trim();
+    let currentLocation = row.cells[7].innerText.trim(); // คอลัมน์ที่ 7 คือ Location
 
     setDropdownCustomValue("editType", currentType);
     updateTypeDropdowns(currentDeviceType, currentFootprint);
@@ -1434,6 +1475,9 @@ function editItem(button) {
     
     let qtyText = row.cells[6].innerText.replace(/,/g, '').replace('(LOW)', '').trim();
     document.getElementById("editQuantity").value = qtyText;
+
+    // เซ็ตค่า location ลงใน select dropdown
+    setDropdownCustomValue("editLocation", currentLocation || "R11");
 
     document.getElementById("editModal").style.display = "flex";
 }
@@ -1452,13 +1496,15 @@ async function saveEditedItem() {
     let costSpec = document.getElementById("editCostSpec").value;
     let durability = document.getElementById("editDurability").value;
     let quantity = document.getElementById("editQuantity").value;
+    let location = document.getElementById("editLocation").value || "R11";
 
     if (!newId || !type || !quantity) {
         alert("Please fill in Type and Quantity so the system can generate a Product ID.");
         return;
     }
 
-    let newLine = `${newId} | ${type} | ${footprint || '-'} | ${deviceType || '-'} | ${costSpec || '-'} | ${durability || '-'} | ${quantity} | ${getCurrentDateTimeString()}`;
+    // รูปแบบการต่อข้อความส่งไปที่เซิร์ฟเวอร์ ให้ตรงกับ formatInventoryLine (product_id | type | footprint | device_type | cost | durability | quantity | updated_at | location)
+    let newLine = `${newId} | ${type} | ${footprint || '-'} | ${deviceType || '-'} | ${costSpec || '-'} | ${durability || '-'} | ${quantity} | ${getCurrentDateTimeString()} | ${location}`;
 
     try {
         let currentUsername = "Unknown";
@@ -1533,7 +1579,8 @@ function renderTable() {
             devValue,
             resistance,
             qtyStr,
-            dateStr
+            dateStr,
+            location
         ] = cols;
 
         let qtyNum = parseInt(qtyStr, 10) || 0;
@@ -1557,6 +1604,7 @@ function renderTable() {
                 ${formattedQty}
                 ${isLow ? '<span class="low-text">(LOW)</span>' : ''}
             </td>
+            <td><b style="color: #38bdf8;">${escapeHtml(location || 'R11')}</b></td>
             <td class="date">${displayDate}</td>
             <td>
                 <span class="edit" onclick="editItem(this)">EDIT</span>
@@ -1639,12 +1687,10 @@ function searchInventory() {
     let typeValue = document.getElementById("typeFilter").value.toLowerCase();
 
     filteredData = allRowsData.filter(cols => {
-        // Filter by category (column 2 = TYPE)
         if (typeValue && (cols[1] || "").toLowerCase() !== typeValue) {
             return false;
         }
 
-        // Filter by search text
         let lineText = cols.join(" ").toLowerCase();
         return lineText.includes(query);
     });
