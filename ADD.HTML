@@ -525,7 +525,41 @@ body.light-mode .btn-secondary:hover {
                     <input id="durability" class="form-control" placeholder="e.g. +-0.25W, 40V / 200mA" type="text" oninput="generateProductID()" required/>
                 </div>
 
-                <div class="form-group" style="grid-column: span 2;">
+                <!-- เพิ่มฟิลด์เลือกตำแหน่งตู้ลิ้นชัก (Drawer Location) -->
+                <div class="form-group">
+                    <label>DRAWER LOCATION (ตำแหน่งตู้)</label>
+                    <select id="location" class="form-control" required>
+                        <option value="R11">R11</option>
+                        <option value="R12">R12</option>
+                        <option value="R13">R13</option>
+                        <option value="R21">R21</option>
+                        <option value="R22">R22</option>
+                        <option value="R23">R23</option>
+                        <option value="R31">R31</option>
+                        <option value="R32">R32</option>
+                        <option value="R33">R33</option>
+                        <option value="R41">R41</option>
+                        <option value="R42">R42</option>
+                        <option value="R43">R43</option>
+                        <option value="R51">R51</option>
+                        <option value="R52">R52</option>
+                        <option value="R53">R53</option>
+                        <option value="R61">R61</option>
+                        <option value="R62">R62</option>
+                        <option value="R63">R63</option>
+                        <option value="R71">R71</option>
+                        <option value="R72">R72</option>
+                        <option value="R73">R73</option>
+                        <option value="R8L1">R8L1 (ใหญ่)</option>
+                        <option value="R8L2">R8L2 (ใหญ่)</option>
+                        <option value="R8L3">R8L3 (ใหญ่)</option>
+                        <option value="R9L1">R9L1 (ใหญ่)</option>
+                        <option value="R9L2">R9L2 (ใหญ่)</option>
+                        <option value="R9L3">R9L3 (ใหญ่)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
                     <label>QUANTITY</label>
                     <input id="quantity" class="form-control" placeholder="0" type="number" min="1" required/>
                 </div>
@@ -771,7 +805,6 @@ function generateProductID() {
     const deviceTypeElem = document.getElementById("deviceType");
     const deviceTypeCode = (deviceTypeElem && deviceTypeElem.value) ? deviceTypeElem.value : "";
 
-    // เอา .toUpperCase() ออก เพื่อให้คงตัวพิมพ์เล็ก/ใหญ่ตามที่ผู้ใช้พิมพ์
     const cost = document.getElementById("cost").value.trim();
     const durability = document.getElementById("durability").value.trim();
 
@@ -822,10 +855,12 @@ async function saveProduct(event) {
 
     const cost = document.getElementById("cost").value;
     const durability = document.getElementById("durability").value;
+    const location = document.getElementById("location").value; // ดึงค่าช่องตู้ลิ้นชัก
     const quantity = document.getElementById("quantity").value;
     const timeFormatted = getCurrentDateTime();
 
-    const lineData = `${productId} | ${type} | ${footprintName} | ${deviceTypeName} | ${cost} | ${durability} | ${quantity} | ${timeFormatted}`;
+    // รูปแบบการจัดเก็บข้อมูลแบบมีช่องตู้ location ต่อท้าย (ตำแหน่งที่ 9)
+    const lineData = `${productId} | ${type} | ${footprintName} | ${deviceTypeName} | ${cost} | ${durability} | ${quantity} | ${timeFormatted} | ${location}`;
 
     try {
         const response = await fetch('/save', {
@@ -833,6 +868,7 @@ async function saveProduct(event) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
                 line: lineData,
+                location: location, // ส่งค่า location แยกไปให้ server ด้วย
                 user: currentUsername 
             })
         });
@@ -840,7 +876,7 @@ async function saveProduct(event) {
         const result = await response.json();
 
         if (result.success) {
-            alert(`บันทึกข้อมูลสำเร็จโดยผู้ใช้: ${currentUsername}\nPRODUCT ID: ${productId}`);
+            alert(`บันทึกข้อมูลสำเร็จโดยผู้ใช้: ${currentUsername}\nPRODUCT ID: ${productId}\nตำแหน่งตู้: ${location}`);
             document.getElementById("addEquipmentForm").reset();
             onTypeChange();
         } else {
