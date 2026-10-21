@@ -43,8 +43,19 @@ async function initDatabase() {
             cost        TEXT,
             durability  TEXT,
             quantity    INTEGER NOT NULL DEFAULT 0,
+            location    TEXT DEFAULT 'R11',
             updated_at  TEXT
         );
+    `);
+
+    // ตรวจสอบและเพิ่มคอลัมน์ location ในกรณีที่ตารางเดิมมีอยู่แล้วแต่อาจยังไม่มีคอลัมน์นี้
+    await pool.query(`
+        DO $$ 
+        BEGIN 
+            IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='inventory' AND column_name='location') THEN
+                ALTER TABLE inventory ADD COLUMN location TEXT DEFAULT 'R11';
+            END IF;
+        END $$;
     `);
 
     await pool.query(`
@@ -185,7 +196,7 @@ async function addHistory(action, productId, user = 'Unknown') {
 }
 
 function formatInventoryLine(row) {
-    return `${row.product_id} | ${row.type} | ${row.footprint} | ${row.device_type} | ${row.cost} | ${row.durability} | ${row.quantity} | ${row.updated_at}`;
+    return `${row.product_id} | ${row.type} | ${row.footprint} | ${row.device_type} | ${row.cost} | ${row.durability} | ${row.quantity} | ${row.updated_at} | ${row.location || 'R11'}`;
 }
 
 function formatHistoryLine(row) {
@@ -213,10 +224,10 @@ async function migrateLegacyFilesIfNeeded() {
 
                 await pool.query(`
                     INSERT INTO inventory
-                    (product_id, type, footprint, device_type, cost, durability, quantity, updated_at)
-                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+                    (product_id, type, footprint, device_type, cost, durability, quantity, location, updated_at)
+                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
                     ON CONFLICT (product_id) DO NOTHING
-                `, [c[0], c[1] || '-', c[2] || '-', c[3] || '-', c[4] || '-', c[5] || '-', parseInt(c[6]) || 0, c[7] || getCurrentDateTime()]);
+                `, [c[0], c[1] || '-', c[2] || '-', c[3] || '-', c[4] || '-', c[5] || '-', parseInt(c[6]) || 0, c[8] || 'R11', c[7] || getCurrentDateTime()]);
                 n++;
             }
             console.log(`[MIGRATE] นำเข้า ${n} รายการจาก inventory.txt`);
@@ -295,6 +306,11 @@ app.get(['/inventory.html', '/Inventory.html'], (req, res) => {
 
 app.get(['/add.html', '/Add.html'], (req, res) => {
     res.sendFile(path.join(__dirname, 'ADD.HTML'));
+});
+
+// เพิ่มเส้นทางเรียกใช้งานหน้า Location Finder
+app.get(['/location.html', '/Location.html'], (req, res) => {
+    res.sendFile(path.join(__dirname, 'location.html'));
 });
 
 app.get(['/history.html', '/History.html'], (req, res) => {
@@ -376,6 +392,7 @@ app.post('/save', async (req, res) => {
     const newParts = data.line.trim().split('|').map(p => p.trim());
     const productId = newParts[0];
     const newQuantity = parseInt(newParts[6]) || 0;
+    const location = newParts[8] || data.location || 'R11';
     const currentDateTime = getCurrentDateTime();
     const username = data.user || 'Unknown';
 
@@ -394,8 +411,8 @@ app.post('/save', async (req, res) => {
             const totalQuantity = (existing.quantity || 0) + newQuantity;
 
             await pool.query(
-                'UPDATE inventory SET quantity = $1, updated_at = $2 WHERE product_id = $3',
-                [totalQuantity, currentDateTime, productId]
+                'UPDATE inventory SET quantity = $1, location = $2, updated_at = $3 WHERE product_id = $4',
+                [totalQuantity, location, currentDateTime, productId]
             );
 
             await addHistory('EDIT', productId, username);
@@ -403,9 +420,9 @@ app.post('/save', async (req, res) => {
         } else {
             await pool.query(`
                 INSERT INTO inventory
-                (product_id, type, footprint, device_type, cost, durability, quantity, updated_at)
-                VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-            `, [productId, newParts[1] || '-', newParts[2] || '-', newParts[3] || '-', newParts[4] || '-', newParts[5] || '-', newQuantity, currentDateTime]);
+                (product_id, type, footprint, device_type, cost, durability, quantity, location, updated_at)
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+            `, [productId, newParts[1] || '-', newParts[2] || '-', newParts[3] || '-', newParts[4] || '-', newParts[5] || '-', newQuantity, location, currentDateTime]);
 
             await addHistory('ADD', productId, username);
             res.json({ success: true, message: `เพิ่มสินค้า ${productId} สำเร็จ` });
@@ -467,6 +484,7 @@ app.post('/api/edit-item', async (req, res) => {
     const newParts = newLine.split('|').map(c => c.trim());
     const newId = newParts[0];
     const editingQuantity = parseInt(newParts[6]) || 0;
+    const location = newParts[8] || 'R11';
     const currentDateTime = getCurrentDateTime();
 
     if (!newId) {
@@ -488,15 +506,15 @@ app.post('/api/edit-item', async (req, res) => {
             const conflictRow = conflictResult.rows[0];
             const totalQty = (conflictRow.quantity || 0) + editingQuantity;
             await pool.query(
-                'UPDATE inventory SET quantity = $1, updated_at = $2 WHERE product_id = $3',
-                [totalQty, currentDateTime, newId]
+                'UPDATE inventory SET quantity = $1, location = $2, updated_at = $3 WHERE product_id = $4',
+                [totalQty, location, currentDateTime, newId]
             );
         } else {
             await pool.query(`
                 INSERT INTO inventory
-                (product_id, type, footprint, device_type, cost, durability, quantity, updated_at)
-                VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-            `, [newId, newParts[1] || '-', newParts[2] || '-', newParts[3] || '-', newParts[4] || '-', newParts[5] || '-', editingQuantity, currentDateTime]);
+                (product_id, type, footprint, device_type, cost, durability, quantity, location, updated_at)
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+            `, [newId, newParts[1] || '-', newParts[2] || '-', newParts[3] || '-', newParts[4] || '-', newParts[5] || '-', editingQuantity, location, currentDateTime]);
         }
 
         await addHistory('EDIT', newId, username);
