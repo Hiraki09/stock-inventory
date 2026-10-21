@@ -168,7 +168,7 @@ body.light-mode .cabinet-container { background: #ffffff; border: 1px solid #cbd
         <div class="panel">
             <input type="text" id="searchInput" class="search-input" placeholder="🔍 Search Product ID, Type..." onkeyup="filterItems()">
             <div class="item-list" id="itemList">
-                <div style="color: #64748b; text-align: center; padding: 20px;">Loading from Supabase...</div>
+                <div style="color: #64748b; text-align: center; padding: 20px;">Loading from Database...</div>
             </div>
         </div>
 
@@ -217,23 +217,36 @@ let inventoryItems = [];
 
 async function loadInventoryData() {
     try {
-        const response = await fetch('/api/inventory');
-        const res = await response.json();
-        
-        if (!res.success) throw new Error(res.message);
+        // เปลี่ยนมาดึงข้อมูลผ่าน virtual route /inventory.txt ที่ดึงตรงจาก PostgreSQL/Supabase เสมอ
+        const response = await fetch('/inventory.txt?v=' + Date.now());
+        if (!response.ok) throw new Error("Failed to load inventory data");
+        const textData = await response.text();
 
-        inventoryItems = res.data.map(item => ({
-            id: item.product_id,
-            type: item.type,
-            detail: item.device_type !== '-' ? item.device_type : item.footprint,
-            qty: item.quantity,
-            drawer: item.location || 'R11'
-        }));
+        inventoryItems = [];
+        let lines = textData.trim().split("\n");
+
+        lines.forEach(line => {
+            if (!line.trim()) return;
+            let cols = line.split("|").map(c => c.trim());
+            
+            // ป้องกันข้อมูลไม่ครบถ้วน (Format: product_id | type | footprint | device_type | cost | durability | quantity | updated_at | location)
+            while (cols.length < 9) {
+                cols.push('-');
+            }
+
+            inventoryItems.push({
+                id: cols[0],
+                type: cols[1],
+                detail: cols[3] !== '-' ? cols[3] : cols[2],
+                qty: cols[6],
+                drawer: cols[8] || 'R11' // ช่องที่ 9 คือ Location / Drawer
+            });
+        });
 
         renderList(inventoryItems);
     } catch (err) {
         console.error("Error loading inventory:", err);
-        document.getElementById("itemList").innerHTML = `<div style="color:#ff716d; text-align:center; padding:20px;">Failed to load data from Supabase</div>`;
+        document.getElementById("itemList").innerHTML = `<div style="color:#ff716d; text-align:center; padding:20px;">Failed to load data from Database</div>`;
     }
 }
 
@@ -268,6 +281,8 @@ function selectItem(item, element) {
     if (targetDrawer) {
         targetDrawer.classList.add('highlighted');
         document.getElementById('statusText').innerHTML = `Highlighting: <b>${escapeHtml(item.id)}</b> at drawer <span style="color:#38bdf8">${escapeHtml(item.drawer)}</span>`;
+    } else {
+        document.getElementById('statusText').innerHTML = `Selected item drawer: <b>${escapeHtml(item.drawer)}</b> (Cabinet match not found)`;
     }
 }
 
