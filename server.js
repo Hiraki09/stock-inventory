@@ -7,9 +7,6 @@ const { Pool } = require('pg');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// session ที่ไม่มี heartbeat เกินเวลานี้ ถือว่าหมดอายุ (ปิดแท็บโดยไม่ logout)
-const SESSION_TIMEOUT_MS = 10 * 60 * 1000;
-
 // ==========================================
 // DATABASE (PostgreSQL / Supabase)
 // ==========================================
@@ -70,10 +67,10 @@ async function initDatabase() {
 
     await pool.query(`
         CREATE TABLE IF NOT EXISTS deleted_items (
-            id               SERIAL PRIMARY KEY,
-            timestamp        TEXT,
-            "user"           TEXT,
-            deleted_line     TEXT
+            id                 SERIAL PRIMARY KEY,
+            timestamp          TEXT,
+            "user"             TEXT,
+            deleted_line       TEXT
         );
     `);
 
@@ -90,74 +87,6 @@ app.use(cors());
 app.use(express.json());
 
 // ==========================================
-// SESSION GUARD: แทรกสคริปต์เช็ก session ลงทุกหน้า HTML อัตโนมัติ
-// (ทำหน้าที่เป็น heartbeat ด้วย: ทุก 5 วินาทีจะต่ออายุ session)
-// ==========================================
-const GUARD_JS = [
-    "(function () {",
-    "  var email = '';",
-    "  try { var u = JSON.parse(localStorage.getItem('loggedInUser') || 'null'); email = ((u && u.email) || '').trim(); } catch (e) {}",
-    "  if (!email) return;",
-    "  var timer = null, handled = false;",
-    "  function check() {",
-    "    if (handled) return;",
-    "    fetch('/api/session-check?email=' + encodeURIComponent(email) + '&v=' + Date.now(), { cache: 'no-store' })",
-    "      .then(function (r) { return r.ok ? r.json() : null; })",
-    "      .then(function (d) {",
-    "        if (d && d.active === false) {",
-    "          handled = true; clearInterval(timer);",
-    "          localStorage.removeItem('loggedInUser');",
-    "          alert('You have been signed out by an administrator.');",
-    "          window.location.href = 'Login.HTML';",
-    "        }",
-    "      }).catch(function () {});",
-    "  }",
-    "  check(); timer = setInterval(check, 5000);",
-    "  document.addEventListener('visibilitychange', function () { if (!document.hidden) check(); });",
-    "})();"
-].join('\n');
-
-app.get('/session-guard.js', (req, res) => {
-    res.type('application/javascript').send(GUARD_JS);
-});
-
-function injectGuard(html, filePath) {
-    const name = path.basename(filePath).toLowerCase();
-    if (name === 'login.html') return html;
-    if (html.includes('session-guard.js')) return html;
-    const tag = '<script src="/session-guard.js"></script>\n';
-    return /<\/body>/i.test(html) ? html.replace(/<\/body>/i, tag + '</body>') : html + tag;
-}
-
-// (1) ไฟล์ .html ที่ถูกเรียกตรงๆ เช่น /main.HTML
-app.use((req, res, next) => {
-    if (req.method !== 'GET' || !/\.html?$/i.test(req.path)) return next();
-    let rel;
-    try { rel = decodeURIComponent(req.path); } catch (e) { return next(); }
-    const filePath = path.join(__dirname, rel);
-    if (!filePath.startsWith(__dirname + path.sep)) return next();
-    fs.readFile(filePath, 'utf8', (err, html) => {
-        if (err) return next();
-        res.type('html').send(injectGuard(html, filePath));
-    });
-});
-
-// (2) route ที่ใช้ res.sendFile(...)
-app.use((req, res, next) => {
-    const originalSendFile = res.sendFile.bind(res);
-    res.sendFile = function (filePath, ...rest) {
-        if (/\.html?$/i.test(filePath)) {
-            return fs.readFile(filePath, 'utf8', (err, html) => {
-                if (err) return originalSendFile(filePath, ...rest);
-                res.type('html').send(injectGuard(html, filePath));
-            });
-        }
-        return originalSendFile(filePath, ...rest);
-    };
-    next();
-});
-
-// ==========================================
 // FUNCTION: วันที่และเวลา
 // ==========================================
 function getCurrentDateTime() {
@@ -169,14 +98,6 @@ function getCurrentDateTime() {
     const minutes = String(now.getMinutes()).padStart(2, '0');
     const seconds = String(now.getSeconds()).padStart(2, '0');
     return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-}
-
-// เช็กว่า login_time (รูปแบบ "YYYY-MM-DD HH:MM:SS") ยังไม่หมดอายุ
-function isSessionFresh(loginTime) {
-    if (!loginTime) return false;
-    const t = new Date(String(loginTime).replace(' ', 'T')).getTime();
-    if (isNaN(t)) return false;
-    return Date.now() - t < SESSION_TIMEOUT_MS;
 }
 
 // ==========================================
@@ -261,7 +182,7 @@ async function migrateLegacyFilesIfNeeded() {
 }
 
 // ==========================================
-// VIRTUAL TEXT ROUTES
+// VIRTUAL TEXT & JSON ROUTES (สำหรับดึงข้อมูลสินค้า)
 // ==========================================
 app.get('/inventory.txt', async (req, res) => {
     try {
@@ -271,6 +192,17 @@ app.get('/inventory.txt', async (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(500).send('');
+    }
+});
+
+// เพิ่ม API JSON สำหรับหน้า Location Finder หรือหน้าอื่นๆ ที่ต้องการเรียกใช้ข้อมูลสินค้า
+app.get('/api/inventory', async (req, res) => {
+    try {
+        const result = await pool.query('SELECT * FROM inventory ORDER BY product_id ASC');
+        res.json({ success: true, data: result.rows });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false, message: 'Failed to load data from database' });
     }
 });
 
@@ -286,7 +218,7 @@ app.get('/history.txt', async (req, res) => {
 });
 
 // ==========================================
-// ROUTE: หน้าแรกและรองรับตัวพิมพ์เล็ก/ใหญ่
+// ROUTE: หน้า HTML ต่างๆ
 // ==========================================
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'Login.HTML'));
@@ -308,7 +240,6 @@ app.get(['/add.html', '/Add.html'], (req, res) => {
     res.sendFile(path.join(__dirname, 'ADD.HTML'));
 });
 
-// เพิ่มเส้นทางเรียกใช้งานหน้า Location Finder
 app.get(['/location.html', '/Location.html'], (req, res) => {
     res.sendFile(path.join(__dirname, 'location.html'));
 });
@@ -327,7 +258,7 @@ app.get(['/setting.html', '/Setting.html'], (req, res) => {
 app.use(express.static(__dirname));
 
 // ============================================================
-// API LOGIN (ตรวจสอบผู้ใช้และป้องกันการล็อกอินซ้ำ พร้อม timeout)
+// API LOGIN (ตรวจสอบผู้ใช้แบบปกติ ไม่มีตัวจับเวลาเตะออก)
 // ============================================================
 app.post('/api/login', async (req, res) => {
     const { email, password } = req.body;
@@ -349,22 +280,6 @@ app.post('/api/login', async (req, res) => {
         if (user.password !== password) {
             return res.json({ success: false, message: 'Invalid E-mail or Password' });
         }
-
-        // ตรวจว่าบัญชีนี้ออนไลน์อยู่จริงหรือไม่ (session ที่หมดอายุถือว่าตายแล้ว)
-        const activeCheck = await pool.query(
-            'SELECT login_time FROM active_sessions WHERE LOWER(email) = LOWER($1)',
-            [cleanEmail]
-        );
-        if (activeCheck.rows.length > 0 && isSessionFresh(activeCheck.rows[0].login_time)) {
-            return res.json({ success: false, message: 'This account is already being used from another device!' });
-        }
-
-        // ลบ session เก่า (ถ้ามี) แล้วบันทึกใหม่
-        await pool.query('DELETE FROM active_sessions WHERE LOWER(email) = LOWER($1)', [cleanEmail]);
-        await pool.query(
-            'INSERT INTO active_sessions (email, login_time) VALUES ($1, $2)',
-            [cleanEmail, getCurrentDateTime()]
-        );
 
         res.json({
             success: true,
@@ -539,7 +454,6 @@ app.get('/api/history', async (req, res) => {
     }
 });
 
-// 4.1 CLEAR HISTORY (route เดิม)
 app.post('/api/clear-history', async (req, res) => {
     try {
         await pool.query('DELETE FROM history');
@@ -550,7 +464,6 @@ app.post('/api/clear-history', async (req, res) => {
     }
 });
 
-// 4.2 RESET HISTORY (setting.html เรียกใช้)
 app.post('/api/history/reset', async (req, res) => {
     try {
         await pool.query('DELETE FROM history');
@@ -561,7 +474,6 @@ app.post('/api/history/reset', async (req, res) => {
     }
 });
 
-// 4.3 RESET INVENTORY
 app.post('/api/inventory/reset', async (req, res) => {
     try {
         await pool.query('DELETE FROM inventory');
@@ -574,110 +486,19 @@ app.post('/api/inventory/reset', async (req, res) => {
 });
 
 // ============================================================
-// 5. บันทึกประวัติ LOGIN / LOGOUT และเคลียร์สถานะออนไลน์
+// 5. บันทึกประวัติ LOGIN / LOGOUT
 // ============================================================
 app.post('/api/history/add', async (req, res) => {
-    const { user, email, action } = req.body;
+    const { user, action } = req.body;
     const username = user || 'Unknown';
     const actionType = action || 'LOGIN';
-    const targetEmail = email || '';
 
     try {
         await addHistory(actionType, '-', username);
-
-        if (actionType === 'LOGOUT' && targetEmail) {
-            await pool.query('DELETE FROM active_sessions WHERE LOWER(email) = LOWER($1)', [targetEmail.trim()]);
-        }
-
         res.json({ success: true, message: 'บันทึกประวัติเซสชันสำเร็จ' });
     } catch (err) {
         console.error(err);
         res.status(500).json({ success: false, message: 'บันทึกประวัติไม่สำเร็จ' });
-    }
-});
-
-// ============================================================
-// 6. ACTIVE USERS / KICK / SESSION CHECK
-// ============================================================
-async function isActiveAdmin(adminEmail) {
-    if (!adminEmail) return false;
-    const r = await pool.query(
-        'SELECT 1 FROM active_sessions WHERE LOWER(email) = LOWER($1)',
-        [adminEmail.trim()]
-    );
-    return r.rows.length > 0;
-}
-
-// รายชื่อผู้ใช้ที่ออนไลน์อยู่ (ตัดคนที่ session หมดอายุออก)
-app.get('/api/active-users', async (req, res) => {
-    try {
-        const result = await pool.query('SELECT email, login_time FROM active_sessions ORDER BY login_time ASC');
-        const users = result.rows.filter(r => isSessionFresh(r.login_time));
-        res.json({ success: true, users });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ success: false, message: 'Could not read the active users list' });
-    }
-});
-
-// เช็ก session + ต่ออายุ (heartbeat)
-app.get('/api/session-check', async (req, res) => {
-    const email = (req.query.email || '').trim();
-    if (!email) return res.json({ active: false });
-    try {
-        const result = await pool.query(
-            'UPDATE active_sessions SET login_time = $2 WHERE LOWER(email) = LOWER($1) RETURNING 1',
-            [email, getCurrentDateTime()]
-        );
-        res.json({ active: result.rows.length > 0 });
-    } catch (err) {
-        console.error(err);
-        res.json({ active: true }); // DB มีปัญหาชั่วคราว อย่าเตะคนออกมั่วๆ
-    }
-});
-
-// เตะผู้ใช้ 1 คน
-app.post('/api/kick-user', async (req, res) => {
-    const email = (req.body.email || '').trim().toLowerCase();
-    const by = req.body.by || 'Unknown';
-    const adminEmail = (req.body.adminEmail || '').trim().toLowerCase();
-
-    if (!email) return res.status(400).json({ success: false, message: 'No e-mail to kick' });
-    if (email === adminEmail) return res.status(400).json({ success: false, message: 'You cannot kick yourself' });
-
-    try {
-        if (!(await isActiveAdmin(adminEmail))) {
-            return res.status(403).json({ success: false, message: 'Not authorized' });
-        }
-        const result = await pool.query('DELETE FROM active_sessions WHERE LOWER(email) = LOWER($1)', [email]);
-        await addHistory('KICK', email, by);
-        res.json({ success: true, count: result.rowCount, message: `Kicked ${email}` });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ success: false, message: 'Kick failed' });
-    }
-});
-
-// เตะทุกคนยกเว้นตัวเอง
-app.post('/api/kick-all', async (req, res) => {
-    const by = req.body.by || 'Unknown';
-    const adminEmail = (req.body.adminEmail || '').trim().toLowerCase();
-
-    try {
-        if (!(await isActiveAdmin(adminEmail))) {
-            return res.status(403).json({ success: false, message: 'Not authorized' });
-        }
-        const result = await pool.query(
-            'DELETE FROM active_sessions WHERE LOWER(email) <> LOWER($1) RETURNING email',
-            [adminEmail]
-        );
-        for (const row of result.rows) {
-            await addHistory('KICK', row.email, by);
-        }
-        res.json({ success: true, count: result.rowCount, message: 'Kicked all other users' });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ success: false, message: 'Kick failed' });
     }
 });
 
