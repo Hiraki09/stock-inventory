@@ -45,7 +45,6 @@ async function initDatabase() {
         );
     `);
 
-    // ตรวจสอบและเพิ่มคอลัมน์ location ในกรณีที่ตารางเดิมมีอยู่แล้วแต่อาจยังไม่มีคอลัมน์นี้
     await pool.query(`
         DO $$ 
         BEGIN 
@@ -74,9 +73,7 @@ async function initDatabase() {
         );
     `);
 
-    // เคลียร์สถานะค้างทั้งหมดตอนเริ่มระบบใหม่
     await pool.query('DELETE FROM active_sessions');
-
     console.log('[DB] ตาราง users, active_sessions, inventory, history, deleted_items พร้อมใช้งาน');
 }
 
@@ -125,7 +122,7 @@ function formatHistoryLine(row) {
 }
 
 // ==========================================
-// MIGRATE: นำเข้าข้อมูลจากไฟล์ .txt เดิม (ทำครั้งเดียวตอนฐานข้อมูลว่าง)
+// MIGRATE: นำเข้าข้อมูลจากไฟล์ .txt เดิม
 // ==========================================
 async function migrateLegacyFilesIfNeeded() {
     const invCountResult = await pool.query('SELECT COUNT(*) AS c FROM inventory');
@@ -182,7 +179,7 @@ async function migrateLegacyFilesIfNeeded() {
 }
 
 // ==========================================
-// VIRTUAL TEXT & JSON ROUTES (สำหรับดึงข้อมูลสินค้า)
+// VIRTUAL TEXT & JSON ROUTES
 // ==========================================
 app.get('/inventory.txt', async (req, res) => {
     try {
@@ -195,7 +192,7 @@ app.get('/inventory.txt', async (req, res) => {
     }
 });
 
-// เพิ่ม API JSON สำหรับหน้า Location Finder หรือหน้าอื่นๆ ที่ต้องการเรียกใช้ข้อมูลสินค้า
+// API สำหรับให้หน้า Location Finder ดึงข้อมูล
 app.get('/api/inventory', async (req, res) => {
     try {
         const result = await pool.query('SELECT * FROM inventory ORDER BY product_id ASC');
@@ -258,7 +255,7 @@ app.get(['/setting.html', '/Setting.html'], (req, res) => {
 app.use(express.static(__dirname));
 
 // ============================================================
-// API LOGIN (ตรวจสอบผู้ใช้แบบปกติ ไม่มีตัวจับเวลาเตะออก)
+// API LOGIN
 // ============================================================
 app.post('/api/login', async (req, res) => {
     const { email, password } = req.body;
