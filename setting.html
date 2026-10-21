@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,7 +14,6 @@
 <link rel="apple-touch-icon" href="logo.png">
 
 <style>
-
 * {
     margin: 0;
     padding: 0;
@@ -26,7 +26,6 @@ body {
     background: #080f1b;
     color: #e5e7eb;
     min-height: 100vh;
-    overflow: hidden;
     display: flex;
 }
 
@@ -36,7 +35,6 @@ body.light-mode {
 }
 
 /* ================= SIDEBAR ================= */
-
 .sidebar {
     position: fixed;
     top: 0;
@@ -90,8 +88,7 @@ body.light-mode .logo p {
     color: #64748b;
 }
 
-/* MENU */
-
+/* ================= MENU ================= */
 .menu a {
     display: flex;
     align-items: center;
@@ -137,8 +134,7 @@ body.light-mode .menu a.active {
     font-size: 19px;
 }
 
-/* USER PROFILE BOX */
-
+/* ================= USER ================= */
 .user {
     position: absolute;
     bottom: 20px;
@@ -157,18 +153,12 @@ body.light-mode .user {
 
 .user-name {
     font-weight: bold;
-    display: flex;
-    align-items: center;
-    gap: 8px;
 }
 
 .user-email {
     color: #8995a7;
     font-size: 12px;
     margin-top: 4px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
 }
 
 body.light-mode .user-email {
@@ -176,7 +166,6 @@ body.light-mode .user-email {
 }
 
 /* ================= MAIN ================= */
-
 .main {
     margin-left: 265px;
     width: calc(100% - 265px);
@@ -193,7 +182,6 @@ body.sidebar-hidden .main {
 }
 
 /* ================= HEADER ================= */
-
 .header {
     display: flex;
     justify-content: space-between;
@@ -208,13 +196,13 @@ body.sidebar-hidden .main {
 }
 
 .menu-button {
-    width: 54px;
-    height: 54px;
+    width: 44px;
+    height: 44px;
     border-radius: 9px;
     border: 1px solid #273548;
     background: #111b29;
     color: white;
-    font-size: 28px;
+    font-size: 22px;
     cursor: pointer;
 }
 
@@ -243,24 +231,18 @@ body.light-mode .title p {
 }
 
 /* ================= SETTINGS CONTENT ================= */
-
 .settings-container {
+    max-width: 800px;
     display: flex;
     flex-direction: column;
     gap: 20px;
-    max-width: 800px;
-    padding-bottom: 30px;
 }
 
 .setting-card {
     background: #0d1622;
     border: 1px solid #263548;
-    padding: 25px;
     border-radius: 9px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 20px;
+    padding: 24px;
 }
 
 body.light-mode .setting-card {
@@ -268,14 +250,10 @@ body.light-mode .setting-card {
     border: 1px solid #cbd5e1;
 }
 
-.setting-info {
-    max-width: 500px;
-}
-
 .setting-card h3 {
     font-size: 18px;
     color: #f1f5f9;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
 }
 
 body.light-mode .setting-card h3 {
@@ -285,6 +263,7 @@ body.light-mode .setting-card h3 {
 .setting-card p {
     color: #8995a7;
     font-size: 14px;
+    margin-bottom: 16px;
 }
 
 body.light-mode .setting-card p {
@@ -297,34 +276,34 @@ body.light-mode .setting-card p {
 }
 
 .theme-btn {
-    padding: 12px 20px;
+    flex: 1;
+    padding: 12px;
     border-radius: 6px;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
     border: 1px solid #273548;
     background: #111b29;
     color: #e5e7eb;
-    transition: 0.2s;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
 }
 
 body.light-mode .theme-btn {
     background: #f1f5f9;
     border: 1px solid #cbd5e1;
-    color: #475569;
+    color: #1e293b;
 }
 
 .theme-btn.active {
     background: #2563eb;
+    border-color: #2563eb;
     color: white;
-    border-color: #3b82f6;
 }
 
-.logout-btn {
+.btn-logout {
     background: #dc2626;
     color: white;
     border: none;
-    padding: 12px 20px;
+    padding: 12px 24px;
     border-radius: 6px;
     font-size: 14px;
     font-weight: 600;
@@ -332,267 +311,14 @@ body.light-mode .theme-btn {
     transition: 0.2s;
 }
 
-.logout-btn:hover {
+.btn-logout:hover {
     background: #b91c1c;
 }
 
-.reset-history-btn {
-    background: #d97706;
-    color: white;
-    border: none;
-    padding: 12px 20px;
-    border-radius: 6px;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: 0.2s;
+@media (max-width: 700px) {
+    .sidebar { width: 210px; }
+    .main { margin-left: 210px; width: calc(100% - 210px); padding: 20px; }
 }
-
-.reset-history-btn:hover {
-    background: #b45309;
-}
-
-.reset-inventory-btn {
-    background: #b91c1c;
-    color: white;
-    border: none;
-    padding: 12px 20px;
-    border-radius: 6px;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: 0.2s;
-}
-
-.reset-inventory-btn:hover {
-    background: #991b1b;
-}
-
-/* ================= ACTIVE USERS / KICK ================= */
-
-.setting-card.column {
-    flex-direction: column;
-    align-items: stretch;
-}
-
-.active-users-list {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin-top: 5px;
-}
-
-.active-user-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 12px;
-    padding: 12px 15px;
-    background: #101a28;
-    border: 1px solid #263448;
-    border-radius: 7px;
-}
-
-body.light-mode .active-user-row {
-    background: #f8fafc;
-    border: 1px solid #cbd5e1;
-}
-
-.active-user-email {
-    font-size: 14px;
-    color: #e5e7eb;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-body.light-mode .active-user-email {
-    color: #1e293b;
-}
-
-.you-tag {
-    margin-left: 8px;
-    font-size: 11px;
-    font-weight: 700;
-    color: #70a0ff;
-}
-
-.kick-btn {
-    background: #7c3aed;
-    color: white;
-    border: none;
-    padding: 9px 16px;
-    border-radius: 6px;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    flex-shrink: 0;
-}
-
-.kick-btn:hover {
-    background: #6d28d9;
-}
-
-.kick-btn:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-}
-
-.kick-all-btn {
-    background: #7c3aed;
-    color: white;
-    border: none;
-    padding: 12px 20px;
-    border-radius: 6px;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    flex-shrink: 0;
-}
-
-.kick-all-btn:hover {
-    background: #6d28d9;
-}
-
-.empty-users {
-    color: #8995a7;
-    font-size: 14px;
-    padding: 6px 2px;
-}
-
-.card-head {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 20px;
-}
-
-/* ================= MODAL ================= */
-.modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(3px);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-    opacity: 0;
-    visibility: hidden;
-    transition: all 0.3s ease;
-}
-
-.modal-overlay.show {
-    opacity: 1;
-    visibility: visible;
-}
-
-.modal-box {
-    background: #0d1622;
-    border: 1px solid #263548;
-    padding: 30px;
-    border-radius: 12px;
-    width: 100%;
-    max-width: 400px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-    transform: translateY(-20px);
-    transition: transform 0.3s ease;
-}
-
-body.light-mode .modal-box {
-    background: #ffffff;
-    border: 1px solid #cbd5e1;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-}
-
-.modal-overlay.show .modal-box {
-    transform: translateY(0);
-}
-
-.modal-box h3 {
-    font-size: 20px;
-    color: #f1f5f9;
-    margin-bottom: 10px;
-}
-
-body.light-mode .modal-box h3 {
-    color: #0f172a;
-}
-
-.modal-box p {
-    color: #8995a7;
-    font-size: 14px;
-    margin-bottom: 20px;
-}
-
-body.light-mode .modal-box p {
-    color: #64748b;
-}
-
-.modal-input {
-    width: 100%;
-    padding: 12px 15px;
-    background: #111b29;
-    border: 1px solid #273548;
-    border-radius: 6px;
-    color: white;
-    font-size: 15px;
-    margin-bottom: 20px;
-    outline: none;
-}
-
-body.light-mode .modal-input {
-    background: #f1f5f9;
-    border: 1px solid #cbd5e1;
-    color: #0f172a;
-}
-
-.modal-input:focus {
-    border-color: #d97706;
-}
-
-.modal-actions {
-    display: flex;
-    gap: 10px;
-}
-
-.modal-btn {
-    flex: 1;
-    padding: 12px;
-    border-radius: 6px;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    border: none;
-    transition: 0.2s;
-}
-
-.modal-btn.cancel {
-    background: #273548;
-    color: #e5e7eb;
-}
-
-body.light-mode .modal-btn.cancel {
-    background: #e2e8f0;
-    color: #475569;
-}
-
-.modal-btn.cancel:hover {
-    background: #33445c;
-}
-
-.modal-btn.confirm {
-    background: #d97706;
-    color: white;
-}
-
-.modal-btn.confirm:hover {
-    background: #b45309;
-}
-
 </style>
 </head>
 
@@ -605,466 +331,123 @@ body.light-mode .modal-btn.cancel {
 </script>
 
 <!-- ================= SIDEBAR ================= -->
-
 <div class="sidebar">
-
     <div class="logo">
         <h1>COMPONENT</h1>
         <p>INVENTORY TRACKER</p>
     </div>
 
     <div class="menu">
-
-        <a href="main.HTML">
-            <span class="icon">▦</span>
-            Dashboard
-        </a>
-
-        <a href="Inventory.html">
-            <span class="icon">◇</span>
-            Inventory
-        </a>
-
-        <a href="ADD.html">
-            <span class="icon">▥</span>
-            Add Product
-        </a>
-
-        <a href="history.html">
-            <span class="icon">▤</span>
-            History
-        </a>
-
-        <a href="setting.html" class="active">
-            <span class="icon">⚙</span>
-            Settings
-        </a>
-
+        <a href="main.HTML"><span class="icon">▦</span> Dashboard</a>
+        <a href="Inventory.html"><span class="icon">◇</span> Inventory</a>
+        <a href="ADD.html"><span class="icon">▥</span> Add Product</a>
+        <a href="history.html"><span class="icon">▤</span> History</a>
+        <a href="setting.html" class="active"><span class="icon">⚙</span> Settings</a>
     </div>
 
     <div class="user">
-        <div class="user-name" id="currentUserName"><span>●</span> Loading...</div>
+        <div class="user-name" id="currentUserName">● &nbsp; Loading...</div>
         <div class="user-email" id="currentUserEmail">Loading...</div>
     </div>
-
 </div>
 
 <!-- ================= MAIN ================= -->
-
-<div class="main">
-
+<main class="main">
     <div class="header">
         <div class="title-area">
-            <button class="menu-button" onclick="toggleSidebar()" title="Show/Hide Menu">
-                ☰
-            </button>
+            <button class="menu-button" onclick="toggleSidebar()" title="Show/Hide Menu">☰</button>
             <div class="title">
                 <h2>Settings</h2>
-                <p>Manage your account settings and session</p>
+                <p>Manage application preferences</p>
             </div>
         </div>
     </div>
 
     <div class="settings-container">
-
-        <!-- Theme -->
+        <!-- Appearance Settings -->
         <div class="setting-card">
-            <div class="setting-info">
-                <h3>Appearance Theme</h3>
-                <p>Choose between dark and light mode for the user interface.</p>
-            </div>
+            <h3>Appearance Theme</h3>
+            <p>Choose between dark and light appearance modes for the interface.</p>
             <div class="theme-options">
-                <button class="theme-btn" id="darkThemeBtn" onclick="setTheme('dark')">🌙 Dark Mode</button>
-                <button class="theme-btn" id="lightThemeBtn" onclick="setTheme('light')">☀️ Light Mode</button>
+                <button class="theme-btn" id="darkThemeBtn" onclick="setTheme('dark')">Dark Mode</button>
+                <button class="theme-btn" id="lightThemeBtn" onclick="setTheme('light')">Light Mode</button>
             </div>
         </div>
 
-        <!-- Kick logged-in users -->
-        <div class="setting-card column">
-            <div class="card-head">
-                <div class="setting-info">
-                    <h3>Active Users</h3>
-                    <p>Force other logged-in users to sign out. They will be returned to the login page.</p>
-                </div>
-                <button class="kick-all-btn" id="kickAllBtn">Kick All Others</button>
-            </div>
-            <div class="active-users-list" id="activeUsersList"></div>
-        </div>
-
-        <!-- Reset History -->
+        <!-- Account / Session Actions -->
         <div class="setting-card">
-            <div class="setting-info">
-                <h3>Clear History Logs</h3>
-                <p>Permanently delete all action history records from the system. This action cannot be undone.</p>
-            </div>
-            <button class="reset-history-btn" id="resetHistoryBtn">Reset History</button>
-        </div>
-
-        <!-- Clear Inventory -->
-        <div class="setting-card">
-            <div class="setting-info">
-                <h3>Clear All Inventory</h3>
-                <p>Permanently delete all component items from the inventory database. This action cannot be undone.</p>
-            </div>
-            <button class="reset-inventory-btn" id="resetInventoryBtn">Clear Inventory</button>
-        </div>
-
-        <!-- Session -->
-        <div class="setting-card">
-            <div class="setting-info">
-                <h3>Account Session</h3>
-                <p>Signing out will clear your current session and require you to log in again with your credentials.</p>
-            </div>
-            <button class="logout-btn" id="logoutBtn">Log Out</button>
-        </div>
-
-    </div>
-
-</div>
-
-<!-- ================= PASSWORD MODAL ================= -->
-<div class="modal-overlay" id="passwordModal">
-    <div class="modal-box">
-        <h3>Security Verification</h3>
-        <p>Please enter your account password to confirm action.</p>
-        <input type="password" class="modal-input" id="confirmPasswordInput" placeholder="Enter your password">
-        <div class="modal-actions">
-            <button class="modal-btn cancel" id="cancelModalBtn">Cancel</button>
-            <button class="modal-btn confirm" id="submitPasswordBtn">Confirm Delete</button>
+            <h3>Account Session</h3>
+            <p>Sign out from your current session on this device.</p>
+            <button class="btn-logout" onclick="logout()">Log Out</button>
         </div>
     </div>
-</div>
+</main>
 
 <script>
-    const systemUsers = [
-        { id: "Admin FIRST", email: "admin@CBV.com", password: "admin3120654" }
-    ];
+const loggedInUser = localStorage.getItem("loggedInUser");
+if (!loggedInUser) window.location.href = "Login.HTML";
 
-    const savedTheme = localStorage.getItem('appTheme') || 'dark';
-    if (savedTheme === 'light') {
+let currentUserObj = null;
+try {
+    currentUserObj = JSON.parse(loggedInUser);
+    document.getElementById("currentUserName").innerHTML = "● &nbsp;" + escapeHtml(currentUserObj.id || currentUserObj.email);
+    document.getElementById("currentUserEmail").textContent = currentUserObj.email || "";
+} catch (error) {
+    localStorage.removeItem("loggedInUser");
+    window.location.href = "Login.HTML";
+}
+
+// Theme Handling
+const savedTheme = localStorage.getItem('appTheme') || 'dark';
+updateThemeUI(savedTheme);
+
+function setTheme(theme) {
+    localStorage.setItem('appTheme', theme);
+    if (theme === 'light') {
         document.body.classList.add('light-mode');
+    } else {
+        document.body.classList.remove('light-mode');
     }
+    updateThemeUI(theme);
+}
 
-    /* ---------- Active session helpers (data lives on the server) ---------- */
-    async function fetchActiveUsers() {
-        try {
-            const r = await fetch('/api/active-users?v=' + Date.now(), { cache: 'no-store' });
-            const d = await r.json();
-            return d.success ? d.users : [];
-        } catch (e) {
-            console.error('Active users error:', e);
-            return [];
-        }
+function updateThemeUI(theme) {
+    if (theme === 'light') {
+        document.getElementById('lightThemeBtn').classList.add('active');
+        document.getElementById('darkThemeBtn').classList.remove('active');
+    } else {
+        document.getElementById('darkThemeBtn').classList.add('active');
+        document.getElementById('lightThemeBtn').classList.remove('active');
     }
+}
 
-    document.addEventListener("DOMContentLoaded", () => {
-        updateThemeButtons(savedTheme);
-
-        const loggedInUser = localStorage.getItem('loggedInUser');
-
-        if (!loggedInUser) {
-            window.location.href = 'Login.HTML';
-            return;
-        }
-
-        let currentUserObj = null;
-        try {
-            currentUserObj = JSON.parse(loggedInUser);
-
-            const nameElement = document.getElementById('currentUserName');
-            const emailElement = document.getElementById('currentUserEmail');
-
-            if (nameElement) {
-                const displayName = currentUserObj.id || currentUserObj.email || "Unknown";
-                nameElement.innerHTML = `<span>●</span> ${escapeHtml(displayName)}`;
-            }
-            if (emailElement) {
-                emailElement.textContent = currentUserObj.email || "";
-            }
-        } catch (error) {
-            console.error("Invalid login data:", error);
-            localStorage.removeItem('loggedInUser');
-            window.location.href = 'Login.HTML';
-            return;
-        }
-
-        const myEmail = (currentUserObj.email || "").toLowerCase().trim();
-
-        const resetHistoryBtn = document.getElementById('resetHistoryBtn');
-        const resetInventoryBtn = document.getElementById('resetInventoryBtn');
-        const kickAllBtn = document.getElementById('kickAllBtn');
-        const activeUsersList = document.getElementById('activeUsersList');
-        const passwordModal = document.getElementById('passwordModal');
-        const cancelModalBtn = document.getElementById('cancelModalBtn');
-        const submitPasswordBtn = document.getElementById('submitPasswordBtn');
-        const confirmPasswordInput = document.getElementById('confirmPasswordInput');
-        const modalTitle = passwordModal.querySelector('h3');
-        const modalDesc = passwordModal.querySelector('p');
-
-        let currentActionType = '';
-        let kickTargetEmail = null; // null + 'kickAll' => everyone except me
-
-        function openModal(type, title, desc, btnText) {
-            currentActionType = type;
-            modalTitle.textContent = title;
-            modalDesc.textContent = desc;
-            submitPasswordBtn.textContent = btnText;
-            confirmPasswordInput.value = '';
-            passwordModal.classList.add('show');
-            confirmPasswordInput.focus();
-        }
-
-        /* ---------- Render active users ---------- */
-        async function renderActiveUsers() {
-            const users = await fetchActiveUsers();
-            const emails = users.map(u => (u.email || '').toLowerCase().trim());
-
-            activeUsersList.innerHTML = "";
-
-            if (emails.length === 0) {
-                activeUsersList.innerHTML = '<div class="empty-users">No active users.</div>';
-                kickAllBtn.disabled = true;
-                kickAllBtn.style.opacity = "0.4";
-                return;
-            }
-
-            const others = emails.filter(e => e !== myEmail);
-            kickAllBtn.disabled = others.length === 0;
-            kickAllBtn.style.opacity = others.length === 0 ? "0.4" : "1";
-
-            users.forEach(u => {
-                const email = (u.email || '').toLowerCase().trim();
-                const isMe = email === myEmail;
-                const row = document.createElement('div');
-                row.className = 'active-user-row';
-                row.innerHTML = `
-                    <div class="active-user-email">
-                        ● ${escapeHtml(email)}
-                        ${isMe ? '<span class="you-tag">(YOU)</span>' : ''}
-                        <span style="color:#8995a7;font-size:12px;margin-left:8px;">${escapeHtml(u.login_time || '')}</span>
-                    </div>
-                    <button class="kick-btn" ${isMe ? 'disabled title="You cannot kick yourself"' : ''}>Kick</button>
-                `;
-                if (!isMe) {
-                    row.querySelector('.kick-btn').addEventListener('click', () => {
-                        kickTargetEmail = email;
-                        openModal(
-                            'kick',
-                            'Kick User',
-                            `Enter your password to force ${email} to log out.`,
-                            'Confirm Kick'
-                        );
-                    });
-                }
-                activeUsersList.appendChild(row);
-            });
-        }
-
-        renderActiveUsers();
-        setInterval(renderActiveUsers, 5000);
-
-        if (kickAllBtn) {
-            kickAllBtn.addEventListener('click', () => {
-                kickTargetEmail = null;
-                openModal(
-                    'kickAll',
-                    'Kick All Other Users',
-                    'Enter your password to force every other logged-in user to log out.',
-                    'Confirm Kick'
-                );
-            });
-        }
-
-        /* ---------- Kick logic (server side) ---------- */
-        async function kickRequest(url, body) {
-            try {
-                const r = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(Object.assign({ by: currentUserObj.id, adminEmail: currentUserObj.email }, body))
-                });
-                return await r.json();
-            } catch (err) {
-                console.error('Kick error:', err);
-                return { success: false, message: 'Could not connect to the server' };
-            }
-        }
-
-        if (resetHistoryBtn) {
-            resetHistoryBtn.addEventListener('click', () => {
-                openModal(
-                    'history',
-                    'Security Verification',
-                    'Please enter your account password to confirm history deletion.',
-                    'Confirm Delete'
-                );
-            });
-        }
-
-        if (resetInventoryBtn) {
-            resetInventoryBtn.addEventListener('click', () => {
-                openModal(
-                    'inventory',
-                    'Inventory Deletion Warning',
-                    'Please enter your account password to delete ALL inventory items.',
-                    'Confirm Delete'
-                );
-            });
-        }
-
-        if (cancelModalBtn) {
-            cancelModalBtn.addEventListener('click', () => {
-                passwordModal.classList.remove('show');
-            });
-        }
-
-        if (submitPasswordBtn) {
-            submitPasswordBtn.addEventListener('click', async () => {
-                const enteredPassword = confirmPasswordInput.value;
-
-                if (!enteredPassword) {
-                    alert('กรุณากรอกรหัสผ่านเพื่อยืนยัน');
-                    return;
-                }
-
-                const userEmail = currentUserObj && currentUserObj.email ? currentUserObj.email.toLowerCase().trim() : "";
-                const matchedUser = systemUsers.find(u => u.email.toLowerCase().trim() === userEmail);
-                const correctPassword = matchedUser ? matchedUser.password : "admin3120654";
-
-                if (enteredPassword !== correctPassword) {
-                    alert('รหัสผ่านไม่ถูกต้อง!');
-                    return;
-                }
-
-                passwordModal.classList.remove('show');
-
-                if (currentActionType === 'kick') {
-                    const result = await kickRequest('/api/kick-user', { email: kickTargetEmail });
-                    alert(result.success
-                        ? 'User ' + kickTargetEmail + ' has been kicked out.'
-                        : 'Error: ' + (result.message || 'Kick failed'));
-                    renderActiveUsers();
-
-                } else if (currentActionType === 'kickAll') {
-                    const result = await kickRequest('/api/kick-all', {});
-                    alert(result.success
-                        ? 'All other users have been kicked out (' + result.count + ').'
-                        : 'Error: ' + (result.message || 'Kick failed'));
-                    renderActiveUsers();
-
-                } else if (currentActionType === 'history') {
-                    try {
-                        const response = await fetch('/api/history/reset', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' }
-                        });
-                        const result = await response.json();
-
-                        if (result.success) {
-                            alert('ล้างประวัติ (History) ทั้งหมดสำเร็จแล้ว');
-                        } else {
-                            alert('เกิดข้อผิดพลาด: ' + (result.message || 'ไม่สามารถรีเซ็ตได้'));
-                        }
-                    } catch (err) {
-                        console.error(err);
-                        alert('ไม่สามารถเชื่อมต่อกับ Server ได้');
-                    }
-                } else if (currentActionType === 'inventory') {
-                    try {
-                        const response = await fetch('/api/inventory/reset', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' }
-                        });
-                        const result = await response.json();
-
-                        if (result.success) {
-                            alert('ลบข้อมูลสินค้าใน Inventory ทั้งหมดสำเร็จแล้ว');
-                        } else {
-                            alert('เกิดข้อผิดพลาด: ' + (result.message || 'ไม่สามารถลบข้อมูลได้'));
-                        }
-                    } catch (err) {
-                        console.error(err);
-                        alert('ไม่สามารถเชื่อมต่อกับ Server ได้');
-                    }
-                }
-            });
-        }
-
-        const logoutBtn = document.getElementById('logoutBtn');
-        if (logoutBtn) {
-            logoutBtn.addEventListener('click', async () => {
-                try {
-                    await fetch('/api/history/add', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            action: 'LOGOUT',
-                            email: currentUserObj.email,
-                            user: currentUserObj.id
-                        })
-                    });
-                } catch (err) {
-                    console.error('Logout history error:', err);
-                }
-
-                try {
-                    let activeLogins = JSON.parse(localStorage.getItem("activeLogins") || "{}");
-                    delete activeLogins[currentUserObj.email.toLowerCase()];
-                    localStorage.setItem("activeLogins", JSON.stringify(activeLogins));
-                } catch (e) {
-                    console.error('Clear active login error:', e);
-                }
-
-                localStorage.removeItem('loggedInUser');
-                window.location.href = 'Login.HTML';
-            });
-        }
-    });
-
-    function setTheme(mode) {
-        if (mode === 'light') {
-            document.body.classList.add('light-mode');
-            localStorage.setItem('appTheme', 'light');
-        } else {
-            document.body.classList.remove('light-mode');
-            localStorage.setItem('appTheme', 'dark');
-        }
-        updateThemeButtons(mode);
+async function logout() {
+    try {
+        await fetch('/api/history/add', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                action: 'LOGOUT',
+                email: currentUserObj.email,
+                user: currentUserObj.id
+            })
+        });
+    } catch (e) {
+        console.error(e);
     }
+    localStorage.removeItem("loggedInUser");
+    window.location.href = "Login.HTML";
+}
 
-    function updateThemeButtons(mode) {
-        const darkBtn = document.getElementById('darkThemeBtn');
-        const lightBtn = document.getElementById('lightThemeBtn');
+function escapeHtml(text) {
+    if (!text) return "";
+    return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+}
 
-        if (darkBtn && lightBtn) {
-            if (mode === 'light') {
-                lightBtn.classList.add('active');
-                darkBtn.classList.remove('active');
-            } else {
-                darkBtn.classList.add('active');
-                lightBtn.classList.remove('active');
-            }
-        }
-    }
-
-    function escapeHtml(text) {
-        if (!text) return "";
-        return text
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#039;");
-    }
-
-    function toggleSidebar() {
-        document.body.classList.toggle('sidebar-hidden');
-        localStorage.setItem(
-            'sidebarHidden',
-            document.body.classList.contains('sidebar-hidden') ? '1' : '0'
-        );
-    }
+function toggleSidebar() {
+    document.body.classList.toggle('sidebar-hidden');
+    localStorage.setItem('sidebarHidden', document.body.classList.contains('sidebar-hidden') ? '1' : '0');
+}
 </script>
-
 </body>
 </html>
