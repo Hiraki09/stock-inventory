@@ -869,7 +869,7 @@ body.light-mode .delete-modal-content p {
                 type="text"
                 id="search"
                 class="search"
-                placeholder="⌕  Search by SKU, Type, or Value..."
+                placeholder="⌕ Search by Product ID, Equipment Cost, Type..."
                 onkeyup="searchInventory()"
             >
         </div>
@@ -1248,12 +1248,8 @@ function parseInventoryData(textData) {
 
         let cols = line.split("|").map(c => c.trim());
 
-        // Standard format from server.js formatInventoryLine:
-        // product_id | type | footprint | device_type | cost | durability | quantity | updated_at | location
-        // Ensure we have at least 9 elements (index 0 to 8)
         while (cols.length < 9) {
             if (cols.length === 7) {
-                // If location was missing in legacy txt, push updated_at and location
                 let dt = cols[6];
                 cols[6] = dt; 
                 cols.push('R11');
@@ -1465,7 +1461,7 @@ function editItem(button) {
     let currentType = row.cells[1].innerText.trim();
     let currentFootprint = row.cells[2].innerText.trim();
     let currentDeviceType = row.cells[3].innerText.trim();
-    let currentLocation = row.cells[7].innerText.trim(); // คอลัมน์ที่ 7 คือ Location
+    let currentLocation = row.cells[7].innerText.trim();
 
     setDropdownCustomValue("editType", currentType);
     updateTypeDropdowns(currentDeviceType, currentFootprint);
@@ -1476,7 +1472,6 @@ function editItem(button) {
     let qtyText = row.cells[6].innerText.replace(/,/g, '').replace('(LOW)', '').trim();
     document.getElementById("editQuantity").value = qtyText;
 
-    // เซ็ตค่า location ลงใน select dropdown
     setDropdownCustomValue("editLocation", currentLocation || "R11");
 
     document.getElementById("editModal").style.display = "flex";
@@ -1503,7 +1498,6 @@ async function saveEditedItem() {
         return;
     }
 
-    // รูปแบบการต่อข้อความส่งไปที่เซิร์ฟเวอร์ ให้ตรงกับ formatInventoryLine (product_id | type | footprint | device_type | cost | durability | quantity | updated_at | location)
     let newLine = `${newId} | ${type} | ${footprint || '-'} | ${deviceType || '-'} | ${costSpec || '-'} | ${durability || '-'} | ${quantity} | ${getCurrentDateTimeString()} | ${location}`;
 
     try {
@@ -1683,7 +1677,7 @@ function renderPagination(totalPages) {
 
 /* ================= SEARCH + TYPE FILTER ================= */
 function searchInventory() {
-    let query = document.getElementById("search").value.toLowerCase();
+    let query = document.getElementById("search").value.toLowerCase().trim();
     let typeValue = document.getElementById("typeFilter").value.toLowerCase();
 
     filteredData = allRowsData.filter(cols => {
@@ -1691,8 +1685,23 @@ function searchInventory() {
             return false;
         }
 
-        let lineText = cols.join(" ").toLowerCase();
-        return lineText.includes(query);
+        if (!query) return true;
+
+        let productId = (cols[0] || "").toLowerCase();   // Product ID
+        let type = (cols[1] || "").toLowerCase();          // Type
+        let footprint = (cols[2] || "").toLowerCase();     // Footprint
+        let deviceType = (cols[3] || "").toLowerCase();    // Device Type
+        let equipmentCost = (cols[4] || "").toLowerCase(); // Equipment Cost
+        let durability = (cols[5] || "").toLowerCase();    // Durability
+        let location = (cols[8] || "").toLowerCase();      // Location
+
+        return productId.includes(query) || 
+               equipmentCost.includes(query) || 
+               type.includes(query) || 
+               footprint.includes(query) || 
+               deviceType.includes(query) || 
+               durability.includes(query) ||
+               location.includes(query);
     });
 
     currentPage = 1;
