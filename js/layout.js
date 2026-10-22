@@ -25,6 +25,18 @@ var MENU_ITEMS = [
 
 /* ---------- ฟังก์ชันกลาง ---------- */
 
+function isMobileScreen() {
+    return window.matchMedia('(max-width: 768px)').matches;
+}
+
+function openSidebar() {
+    document.body.classList.add('sidebar-open');
+}
+
+function closeSidebar() {
+    document.body.classList.remove('sidebar-open');
+}
+
 /* ข้อมูลผู้ใช้ที่ Login อยู่ เช่น { id: "admin", email: "admin@cbv.com" } หรือ null */
 function getCurrentUser() {
     try {
@@ -45,8 +57,12 @@ function escapeHtml(value) {
         .replace(/'/g, '&#039;');
 }
 
-/* ปุ่ม ☰ ซ่อน/แสดงเมนู (จำค่าไว้ข้ามหน้า) */
+/* ปุ่ม ☰ ซ่อน/แสดงเมนู (จำค่าไว้ข้ามหน้าบน Desktop, เปิด/ปิด Drawer บน Mobile) */
 function toggleSidebar() {
+    if (isMobileScreen()) {
+        document.body.classList.toggle('sidebar-open');
+        return;
+    }
     document.body.classList.toggle('sidebar-hidden');
     localStorage.setItem('sidebarHidden', document.body.classList.contains('sidebar-hidden') ? '1' : '0');
 }
@@ -57,12 +73,10 @@ function toggleSidebar() {
     var activePage = script ? script.getAttribute('data-page') : '';
 
     /* 1) ธีม / โหมดมือถือ / ซ่อนเมนู */
-    if (localStorage.getItem('sidebarHidden') === '1') {
+    if (localStorage.getItem('sidebarHidden') === '1' && !isMobileScreen()) {
         document.body.classList.add('sidebar-hidden');
     }
-    if (localStorage.getItem('mobileMode') === 'enabled') {
-        document.body.classList.add('mobile-view-mode');
-    }
+    localStorage.removeItem('mobileMode');
     if ((localStorage.getItem('appTheme') || 'dark') === 'light') {
         document.body.classList.add('light-mode');
     }
@@ -100,5 +114,34 @@ function toggleSidebar() {
             '</div>' +
         '</div>';
 
+    html += '<div class="sidebar-backdrop" onclick="closeSidebar()"></div>';
+
     if (script) script.insertAdjacentHTML('afterend', html);
+
+    /* Gesture และ Event Listener สำหรับ Touch/Resize */
+    var EDGE = 30, DISTANCE = 60;
+    var startX = null, startY = 0;
+
+    document.addEventListener('touchstart', function (e) {
+        if (!isMobileScreen() || e.touches.length !== 1) return;
+        var x = e.touches[0].clientX;
+        var isOpen = document.body.classList.contains('sidebar-open');
+        startX = (isOpen || x <= EDGE) ? x : null;
+        startY = e.touches[0].clientY;
+    }, { passive: true });
+
+    document.addEventListener('touchend', function (e) {
+        if (startX === null) return;
+        var dx = e.changedTouches[0].clientX - startX;
+        var dy = e.changedTouches[0].clientY - startY;
+        startX = null;
+        if (Math.abs(dx) < DISTANCE || Math.abs(dx) < Math.abs(dy)) return;
+        if (dx > 0) openSidebar(); else closeSidebar();
+    }, { passive: true });
+
+    window.matchMedia('(max-width: 768px)').addEventListener('change', function (e) {
+        closeSidebar();
+        var hidden = localStorage.getItem('sidebarHidden') === '1' && !e.matches;
+        document.body.classList.toggle('sidebar-hidden', hidden);
+    });
 })();

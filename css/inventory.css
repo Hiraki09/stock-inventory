@@ -36,12 +36,6 @@ body.sidebar-hidden .sidebar {
     pointer-events: none;
 }
 
-/* ================= LOGO ================= */
-
-/* ================= MENU ================= */
-
-/* ================= USER ================= */
-
 /* ================= MAIN ================= */
 
 .main {
@@ -254,7 +248,7 @@ body.light-mode th {
     color: #475569;
 }
 
-/* ================= TYPE FILTER (header dropdown) ================= */
+/* ================= TYPE FILTER ================= */
 
 .type-filter {
     background: #0c1420;
@@ -611,8 +605,6 @@ body.light-mode .delete-modal-content p {
     background: #b91c1c;
 }
 
-/* ================= MOBILE VIEW SIMULATOR MODE ================= */
-
 /* ================= RESPONSIVE ================= */
 
 @media (max-width: 900px) {
@@ -633,5 +625,29 @@ body.light-mode .delete-modal-content p {
     }
     .form-group.full-width {
         grid-column: span 1;
+    }
+}
+
+@media (max-width: 768px) {
+    .header { 
+        flex-wrap: wrap; 
+        gap: 12px; 
+    }
+    .header-actions { 
+        width: 100%; 
+    }
+    .header-actions button { 
+        flex: 1; 
+    }
+    .table-container { 
+        overflow-x: auto; 
+        -webkit-overflow-scrolling: touch; 
+    }
+    table { 
+        min-width: 900px; 
+    }
+    .bottom { 
+        flex-wrap: wrap; 
+        gap: 12px; 
     }
 }
