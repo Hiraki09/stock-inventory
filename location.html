@@ -89,16 +89,23 @@ body.light-mode .title h2 { color: #0f172a; }
 
 .content-layout { display: grid; grid-template-columns: 1fr 1.2fr; gap: 25px; }
 
-.panel { background: #0d1622; border: 1px solid #263548; border-radius: 9px; padding: 20px; }
+.panel { background: #0d1622; border: 1px solid #263548; border-radius: 9px; padding: 20px; display: flex; flex-direction: column; }
 body.light-mode .panel { background: #ffffff; border: 1px solid #cbd5e1; }
 
+.search-bar-wrapper { display: flex; gap: 10px; margin-bottom: 15px; }
 .search-input {
-    width: 100%; height: 45px; background: #080d14; border: 1px solid #273548;
-    border-radius: 6px; padding: 0 15px; color: white; font-size: 14px; outline: none; margin-bottom: 15px;
+    flex: 1; height: 45px; background: #080d14; border: 1px solid #273548;
+    border-radius: 6px; padding: 0 15px; color: white; font-size: 14px; outline: none;
 }
 body.light-mode .search-input { background: #f8fafc; border: 1px solid #cbd5e1; color: #1e293b; }
 
-.item-list { max-height: 480px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+.reset-filter-btn {
+    height: 45px; padding: 0 12px; background: #1e293b; border: 1px solid #334155;
+    color: #38bdf8; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold;
+}
+.reset-filter-btn:hover { background: #334155; }
+
+.item-list { max-height: 440px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
 .list-item { background: #111b29; border: 1px solid #1f2d40; padding: 12px 15px; border-radius: 7px; cursor: pointer; transition: 0.2s; }
 body.light-mode .list-item { background: #f8fafc; border: 1px solid #e2e8f0; }
 .list-item:hover, .list-item.active { border-color: #3b82f6; background: #162235; }
@@ -112,8 +119,9 @@ body.light-mode .cabinet-container { background: #ffffff; border: 1px solid #cbd
 .drawer {
     background: #475569; border: 2px solid #64748b; border-radius: 6px; height: 42px;
     flex: 1; display: flex; align-items: flex-start; justify-content: center; padding-top: 5px;
-    font-size: 11px; font-weight: 600; color: #e2e8f0; position: relative; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 11px; font-weight: 600; color: #e2e8f0; position: relative; cursor: pointer; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
+.drawer:hover { background: #64748b; border-color: #94a3b8; }
 .drawer::after { content: ''; position: absolute; bottom: 5px; width: 18px; height: 3px; background: #94a3b8; border-radius: 2px; }
 .drawer.large { height: 58px; font-size: 11px; padding-top: 7px; }
 .drawer.large::after { bottom: 7px; width: 22px; height: 4px; }
@@ -166,7 +174,10 @@ body.light-mode .cabinet-container { background: #ffffff; border: 1px solid #cbd
 
     <div class="content-layout">
         <div class="panel">
-            <input type="text" id="searchInput" class="search-input" placeholder="🔍 Search Product ID, Type..." onkeyup="filterItems()">
+            <div class="search-bar-wrapper">
+                <input type="text" id="searchInput" class="search-input" placeholder="🔍 Search Product ID, Type..." onkeyup="filterItems()">
+                <button class="reset-filter-btn" onclick="resetDrawerFilter()" title="Show All">RESET</button>
+            </div>
             <div class="item-list" id="itemList">
                 <div style="color: #64748b; text-align: center; padding: 20px;">Loading from Database...</div>
             </div>
@@ -174,25 +185,25 @@ body.light-mode .cabinet-container { background: #ffffff; border: 1px solid #cbd
 
         <div class="cabinet-container">
             <div class="cabinet-frame">
-                <div class="drawer-row"><div class="drawer" data-drawer="R11">R11</div><div class="drawer" data-drawer="R12">R12</div><div class="drawer" data-drawer="R13">R13</div></div>
-                <div class="drawer-row"><div class="drawer" data-drawer="R21">R21</div><div class="drawer" data-drawer="R22">R22</div><div class="drawer" data-drawer="R23">R23</div></div>
-                <div class="drawer-row"><div class="drawer" data-drawer="R31">R31</div><div class="drawer" data-drawer="R32">R32</div><div class="drawer" data-drawer="R33">R33</div></div>
-                <div class="drawer-row"><div class="drawer" data-drawer="R41">R41</div><div class="drawer" data-drawer="R42">R42</div><div class="drawer" data-drawer="R43">R43</div></div>
-                <div class="drawer-row"><div class="drawer" data-drawer="R51">R51</div><div class="drawer" data-drawer="R52">R52</div><div class="drawer" data-drawer="R53">R53</div></div>
-                <div class="drawer-row"><div class="drawer" data-drawer="R61">R61</div><div class="drawer" data-drawer="R62">R62</div><div class="drawer" data-drawer="R63">R63</div></div>
-                <div class="drawer-row"><div class="drawer" data-drawer="R71">R71</div><div class="drawer" data-drawer="R72">R72</div><div class="drawer" data-drawer="R73">R73</div></div>
+                <div class="drawer-row"><div class="drawer" data-drawer="R11" onclick="filterByDrawer('R11')">R11</div><div class="drawer" data-drawer="R12" onclick="filterByDrawer('R12')">R12</div><div class="drawer" data-drawer="R13" onclick="filterByDrawer('R13')">R13</div></div>
+                <div class="drawer-row"><div class="drawer" data-drawer="R21" onclick="filterByDrawer('R21')">R21</div><div class="drawer" data-drawer="R22" onclick="filterByDrawer('R22')">R22</div><div class="drawer" data-drawer="R23" onclick="filterByDrawer('R23')">R23</div></div>
+                <div class="drawer-row"><div class="drawer" data-drawer="R31" onclick="filterByDrawer('R31')">R31</div><div class="drawer" data-drawer="R32" onclick="filterByDrawer('R32')">R32</div><div class="drawer" data-drawer="R33" onclick="filterByDrawer('R33')">R33</div></div>
+                <div class="drawer-row"><div class="drawer" data-drawer="R41" onclick="filterByDrawer('R41')">R41</div><div class="drawer" data-drawer="R42" onclick="filterByDrawer('R42')">R42</div><div class="drawer" data-drawer="R43" onclick="filterByDrawer('R43')">R43</div></div>
+                <div class="drawer-row"><div class="drawer" data-drawer="R51" onclick="filterByDrawer('R51')">R51</div><div class="drawer" data-drawer="R52" onclick="filterByDrawer('R52')">R52</div><div class="drawer" data-drawer="R53" onclick="filterByDrawer('R53')">R53</div></div>
+                <div class="drawer-row"><div class="drawer" data-drawer="R61" onclick="filterByDrawer('R61')">R61</div><div class="drawer" data-drawer="R62" onclick="filterByDrawer('R62')">R62</div><div class="drawer" data-drawer="R63" onclick="filterByDrawer('R63')">R63</div></div>
+                <div class="drawer-row"><div class="drawer" data-drawer="R71" onclick="filterByDrawer('R71')">R71</div><div class="drawer" data-drawer="R72" onclick="filterByDrawer('R72')">R72</div><div class="drawer" data-drawer="R73" onclick="filterByDrawer('R73')">R73</div></div>
                 <div class="drawer-row">
-                    <div class="drawer large" data-drawer="R8L1">R8L1</div>
-                    <div class="drawer large" data-drawer="R8L2">R8L2</div>
-                    <div class="drawer large" data-drawer="R8L3">R8L3</div>
+                    <div class="drawer large" data-drawer="R8L1" onclick="filterByDrawer('R8L1')">R8L1</div>
+                    <div class="drawer large" data-drawer="R8L2" onclick="filterByDrawer('R8L2')">R8L2</div>
+                    <div class="drawer large" data-drawer="R8L3" onclick="filterByDrawer('R8L3')">R8L3</div>
                 </div>
                 <div class="drawer-row">
-                    <div class="drawer large" data-drawer="R9L1">R9L1</div>
-                    <div class="drawer large" data-drawer="R9L2">R9L2</div>
-                    <div class="drawer large" data-drawer="R9L3">R9L3</div>
+                    <div class="drawer large" data-drawer="R9L1" onclick="filterByDrawer('R9L1')">R9L1</div>
+                    <div class="drawer large" data-drawer="R9L2" onclick="filterByDrawer('R9L2')">R9L2</div>
+                    <div class="drawer large" data-drawer="R9L3" onclick="filterByDrawer('R9L3')">R9L3</div>
                 </div>
             </div>
-            <div class="cabinet-status-text" id="statusText">Click an item on the left to highlight its drawer location</div>
+            <div class="cabinet-status-text" id="statusText">Click a drawer to filter items or click an item to highlight</div>
         </div>
     </div>
 </div>
@@ -214,10 +225,10 @@ try {
 }
 
 let inventoryItems = [];
+let selectedDrawerFilter = ""; // ตัวแปรเก็บค่าช่องตู้ที่กำลังถูกกรอง
 
 async function loadInventoryData() {
     try {
-        // เปลี่ยนมาดึงข้อมูลผ่าน virtual route /inventory.txt ที่ดึงตรงจาก PostgreSQL/Supabase เสมอ
         const response = await fetch('/inventory.txt?v=' + Date.now());
         if (!response.ok) throw new Error("Failed to load inventory data");
         const textData = await response.text();
@@ -229,7 +240,6 @@ async function loadInventoryData() {
             if (!line.trim()) return;
             let cols = line.split("|").map(c => c.trim());
             
-            // ป้องกันข้อมูลไม่ครบถ้วน (Format: product_id | type | footprint | device_type | cost | durability | quantity | updated_at | location)
             while (cols.length < 9) {
                 cols.push('-');
             }
@@ -239,11 +249,11 @@ async function loadInventoryData() {
                 type: cols[1],
                 detail: cols[3] !== '-' ? cols[3] : cols[2],
                 qty: cols[6],
-                drawer: cols[8] || 'R11' // ช่องที่ 9 คือ Location / Drawer
+                drawer: cols[8] || 'R11'
             });
         });
 
-        renderList(inventoryItems);
+        filterItems();
     } catch (err) {
         console.error("Error loading inventory:", err);
         document.getElementById("itemList").innerHTML = `<div style="color:#ff716d; text-align:center; padding:20px;">Failed to load data from Database</div>`;
@@ -255,7 +265,7 @@ function renderList(items) {
     listContainer.innerHTML = '';
     
     if (items.length === 0) {
-        listContainer.innerHTML = '<div style="color:#64748b; text-align:center; padding:20px;">No items found</div>';
+        listContainer.innerHTML = '<div style="color:#64748b; text-align:center; padding:20px;">No items found in this drawer</div>';
         return;
     }
 
@@ -281,19 +291,50 @@ function selectItem(item, element) {
     if (targetDrawer) {
         targetDrawer.classList.add('highlighted');
         document.getElementById('statusText').innerHTML = `Highlighting: <b>${escapeHtml(item.id)}</b> at drawer <span style="color:#38bdf8">${escapeHtml(item.drawer)}</span>`;
-    } else {
-        document.getElementById('statusText').innerHTML = `Selected item drawer: <b>${escapeHtml(item.drawer)}</b> (Cabinet match not found)`;
     }
+}
+
+// ฟังก์ชันเมื่อคลิกที่ช่องตู้ทางขวา เพื่อกรองแสดงเฉพาะสินค้าในช่องนั้นๆ
+function filterByDrawer(drawerName) {
+    selectedDrawerFilter = drawerName;
+    
+    // ไฮไลต์ช่องตู้ที่เลือก
+    document.querySelectorAll('.drawer').forEach(el => el.classList.remove('highlighted'));
+    const targetDrawer = document.querySelector(`.drawer[data-drawer="${drawerName}"]`);
+    if (targetDrawer) {
+        targetDrawer.classList.add('highlighted');
+    }
+
+    document.getElementById('statusText').innerHTML = `Showing items in drawer: <span style="color:#38bdf8">${drawerName}</span>`;
+    filterItems();
+}
+
+// ปุ่มล้างตัวกรองช่องตู้ เพื่อให้แสดงสินค้าทั้งหมดกลับมา
+function resetDrawerFilter() {
+    selectedDrawerFilter = "";
+    document.querySelectorAll('.drawer').forEach(el => el.classList.remove('highlighted'));
+    document.getElementById('statusText').innerHTML = `Click a drawer to filter items or click an item to highlight`;
+    filterItems();
 }
 
 function filterItems() {
     const kw = document.getElementById('searchInput').value.toLowerCase();
-    const filtered = inventoryItems.filter(i => 
-        i.id.toLowerCase().includes(kw) || 
-        i.type.toLowerCase().includes(kw) || 
-        i.detail.toLowerCase().includes(kw) ||
-        i.drawer.toLowerCase().includes(kw)
-    );
+    
+    const filtered = inventoryItems.filter(i => {
+        // เงื่อนไขที่ 1: กรองด้วยช่องตู้ (ถ้ามีการคลิกเลือกช่องตู้ไว้)
+        if (selectedDrawerFilter && i.drawer.toLowerCase() !== selectedDrawerFilter.toLowerCase()) {
+            return false;
+        }
+        // เงื่อนไขที่ 2: กรองด้วยคำค้นหาในช่อง Search
+        const matchKeyword = !kw || 
+            i.id.toLowerCase().includes(kw) || 
+            i.type.toLowerCase().includes(kw) || 
+            i.detail.toLowerCase().includes(kw) ||
+            i.drawer.toLowerCase().includes(kw);
+
+        return matchKeyword;
+    });
+
     renderList(filtered);
 }
 
