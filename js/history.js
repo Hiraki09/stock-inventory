@@ -1,8 +1,13 @@
 /* ผู้ใช้ที่ Login อยู่ (มาจาก js/layout.js) */
 const currentUserObj = getCurrentUser();
 
-const ADMIN_EMAIL = ["admin@cbv.com", "faa@cbv.com"];
-const ADMIN_PASSWORD = "admin3120654";
+// กำหนดรายชื่อบัญชีแอดมินและรหัสผ่านของแต่ละคน (สามารถเพิ่มรายชื่อและเปลี่ยนรหัสผ่านได้ที่นี่)
+const ADMIN_ACCOUNTS = [
+    { email: "admin@cbv.com", password: "admin3120654" },
+    { email: "faa@cbv.com", password: "admin3120654" },
+    // ตัวอย่างการเพิ่มแอดมินคนอื่นๆ เพิ่มเติม:
+    // { email: "manager@cbv.com", password: "managerpass123" }
+];
 
 let historyData = [];
 let currentPage = 1;
@@ -12,7 +17,10 @@ let filteredData = [];
 document.addEventListener("DOMContentLoaded", () => {
     const userEmailLower = currentUserObj && currentUserObj.email ? currentUserObj.email.toLowerCase() : "";
 
-    if (!currentUserObj || !ADMIN_EMAIL.includes(userEmailLower)) {
+    // ตรวจสอบว่าอีเมลของผู้ใช้ตรงกับรายชื่อแอดมินที่ตั้งไว้หรือไม่
+    const currentAdmin = ADMIN_ACCOUNTS.find(a => a.email.toLowerCase() === userEmailLower);
+
+    if (!currentUserObj || !currentAdmin) {
         alert("หน้านี้สำหรับผู้ดูแลระบบ (Admin) เท่านั้น!");
         window.location.href = "main.HTML";
         return;
@@ -29,7 +37,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
 function verifyAdminPassword() {
     const enteredPassword = document.getElementById('historyPasswordInput').value;
-    if (enteredPassword === ADMIN_PASSWORD) {
+    const userEmailLower = currentUserObj && currentUserObj.email ? currentUserObj.email.toLowerCase() : "";
+    
+    // ค้นหารหัสผ่านที่ตรงกับอีเมลของแอดมินที่กำลัง Login อยู่
+    const currentAdmin = ADMIN_ACCOUNTS.find(a => a.email.toLowerCase() === userEmailLower);
+
+    if (currentAdmin && currentAdmin.password === enteredPassword) {
         sessionStorage.setItem('historyUnlocked', 'true');
         document.getElementById('historyAuthModal').classList.remove('show');
         initAdminPage();
@@ -201,3 +214,7 @@ document.getElementById("searchInput").addEventListener("input", function() {
     displayHistory();
 });
 
+function escapeHtml(text) {
+    if (!text) return "";
+    return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+}
