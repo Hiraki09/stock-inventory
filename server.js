@@ -66,10 +66,10 @@ async function initDatabase() {
 
     await pool.query(`
         CREATE TABLE IF NOT EXISTS deleted_items (
-            id                 SERIAL PRIMARY KEY,
-            timestamp          TEXT,
-            "user"             TEXT,
-            deleted_line       TEXT
+            id                   SERIAL PRIMARY KEY,
+            timestamp            TEXT,
+            "user"               TEXT,
+            deleted_line         TEXT
         );
     `);
 
@@ -382,7 +382,7 @@ app.post('/api/delete-item', async (req, res) => {
 });
 
 // ============================================================
-// 3. EDIT PRODUCT
+// 3. EDIT PRODUCT (แก้ไขให้รับและอัปเดตค่า Location อย่างถูกต้อง)
 // ============================================================
 app.post('/api/edit-item', async (req, res) => {
     const oldId = req.body.oldId;
@@ -395,6 +395,11 @@ app.post('/api/edit-item', async (req, res) => {
 
     const newParts = newLine.split('|').map(c => c.trim());
     const newId = newParts[0];
+    const type = newParts[1] || '-';
+    const footprint = newParts[2] || '-';
+    const deviceType = newParts[3] || '-';
+    const cost = newParts[4] || '-';
+    const durability = newParts[5] || '-';
     const editingQuantity = parseInt(newParts[6]) || 0;
     const location = newParts[8] || 'R11';
     const currentDateTime = getCurrentDateTime();
@@ -417,16 +422,17 @@ app.post('/api/edit-item', async (req, res) => {
         if (conflictResult.rows.length > 0) {
             const conflictRow = conflictResult.rows[0];
             const totalQty = (conflictRow.quantity || 0) + editingQuantity;
+            
             await pool.query(
-                'UPDATE inventory SET quantity = $1, location = $2, updated_at = $3 WHERE product_id = $4',
-                [totalQty, location, currentDateTime, newId]
+                'UPDATE inventory SET type = $1, footprint = $2, device_type = $3, cost = $4, durability = $5, quantity = $6, location = $7, updated_at = $8 WHERE product_id = $9',
+                [type, footprint, deviceType, cost, durability, totalQty, location, currentDateTime, newId]
             );
         } else {
             await pool.query(`
                 INSERT INTO inventory
                 (product_id, type, footprint, device_type, cost, durability, quantity, location, updated_at)
                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-            `, [newId, newParts[1] || '-', newParts[2] || '-', newParts[3] || '-', newParts[4] || '-', newParts[5] || '-', editingQuantity, location, currentDateTime]);
+            `, [newId, type, footprint, deviceType, cost, durability, editingQuantity, location, currentDateTime]);
         }
 
         await addHistory('EDIT', newId, username);
