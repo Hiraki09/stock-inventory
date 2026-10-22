@@ -299,6 +299,55 @@ body.light-mode .theme-btn {
     color: white;
 }
 
+/* Toggle Switch Style */
+.setting-item-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 26px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #273548;
+    transition: .3s;
+    border-radius: 26px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .3s;
+    border-radius: 50%;
+}
+
+input:checked + .slider {
+    background-color: #2563eb;
+}
+
+input:checked + .slider:before {
+    transform: translateX(24px);
+}
+
 .btn-logout {
     background: #dc2626;
     color: white;
@@ -315,6 +364,35 @@ body.light-mode .theme-btn {
     background: #b91c1c;
 }
 
+/* ================= MOBILE VIEW SIMULATOR MODE ================= */
+body.mobile-view-mode {
+    background: #040810 !important;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    overflow: hidden;
+}
+
+body.mobile-view-mode .main,
+body.mobile-view-mode .sidebar {
+    width: 414px !important;
+    height: 896px !important;
+    max-height: 95vh;
+    border: 8px solid #1e293b;
+    border-radius: 30px;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.8);
+    position: relative;
+    margin: auto;
+    overflow-y: auto;
+}
+
+body.mobile-view-mode .sidebar {
+    position: absolute !important;
+    z-index: 1000;
+    height: 100% !important;
+}
+
 @media (max-width: 700px) {
     .sidebar { width: 210px; }
     .main { margin-left: 210px; width: calc(100% - 210px); padding: 20px; }
@@ -327,6 +405,10 @@ body.light-mode .theme-btn {
 <script>
     if (localStorage.getItem('sidebarHidden') === '1') {
         document.body.classList.add('sidebar-hidden');
+    }
+    // โหลดโหมดมือถือตั้งแต่เริ่มเปิดหน้าเว็บ
+    if (localStorage.getItem('mobileMode') === 'enabled') {
+        document.body.classList.add('mobile-view-mode');
     }
 </script>
 
@@ -375,6 +457,20 @@ body.light-mode .theme-btn {
             </div>
         </div>
 
+        <!-- Mobile View Mode Settings -->
+        <div class="setting-card">
+            <div class="setting-item-row">
+                <div>
+                    <h3>Mobile View Mode</h3>
+                    <p style="margin-bottom: 0;">Simulate a mobile device screen layout for the interface.</p>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" id="mobileModeToggle" onchange="toggleMobileMode()">
+                    <span class="slider round"></span>
+                </label>
+            </div>
+        </div>
+
         <!-- Account / Session Actions -->
         <div class="setting-card">
             <h3>Account Session</h3>
@@ -419,6 +515,22 @@ function updateThemeUI(theme) {
     } else {
         document.getElementById('darkThemeBtn').classList.add('active');
         document.getElementById('lightThemeBtn').classList.remove('active');
+    }
+}
+
+// Mobile Mode Handling
+const mobileModeCheckbox = document.getElementById('mobileModeToggle');
+if (localStorage.getItem('mobileMode') === 'enabled') {
+    mobileModeCheckbox.checked = true;
+}
+
+function toggleMobileMode() {
+    if (mobileModeCheckbox.checked) {
+        document.body.classList.add('mobile-view-mode');
+        localStorage.setItem('mobileMode', 'enabled');
+    } else {
+        document.body.classList.remove('mobile-view-mode');
+        localStorage.setItem('mobileMode', 'disabled');
     }
 }
 
