@@ -73,7 +73,9 @@ async function initDatabase() {
         );
     `);
 
-    await pool.query('DELETE FROM active_sessions');
+    // ปิดการลบ active_sessions อัตโนมัติ เพื่อไม่ให้สถานะหลุดเวลาเซิร์ฟเวอร์รีสตาร์ท
+    // await pool.query('DELETE FROM active_sessions');
+    
     console.log('[DB] ตาราง users, active_sessions, inventory, history, deleted_items พร้อมใช้งาน');
 }
 
