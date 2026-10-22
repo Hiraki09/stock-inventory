@@ -361,6 +361,8 @@
             'body.light-mode #i18n-switcher button{color:#64748b}' +
             'body.light-mode #i18n-switcher button:hover{color:#0f172a}' +
             'body.light-mode #i18n-switcher button.active{background:#16a34a;color:#fff}' +
+            '#i18n-switcher.in-sidebar{position:absolute;left:14px;right:14px;bottom:100px;box-shadow:none}' +
+            '#i18n-switcher.in-sidebar button{flex:1;padding:9px 0}' +
             '@media print{#i18n-switcher{display:none}}';
         var style = document.createElement('style');
         style.textContent = css;
@@ -381,7 +383,13 @@
             b.addEventListener('click', function () { setLang(pair[0]); });
             box.appendChild(b);
         });
-        document.body.appendChild(box);
+        var userBox = document.querySelector('.sidebar .user');
+        if (userBox) {
+            box.classList.add('in-sidebar');
+            userBox.parentNode.insertBefore(box, userBox);
+        } else {
+            document.body.appendChild(box);
+        }
     }
 
     function updateSwitcher() {
