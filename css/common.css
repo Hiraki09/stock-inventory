@@ -1,0 +1,174 @@
+/* =====================================================================
+   css/common.css — สไตล์ที่ทุกหน้าใช้ร่วมกัน
+   (เมนูด้านข้าง, โหมดสว่าง, โหมดมือถือ)
+
+   ★ แก้หน้าตาเมนูที่นี่ที่เดียว ทุกหน้าเปลี่ยนตาม
+   ★ ตำแหน่ง/ขนาดของเมนูและเนื้อหา (.sidebar, .main) อยู่ในไฟล์ CSS ของแต่ละหน้า
+     เพราะแต่ละหน้าจัดเลย์เอาต์ต่างกัน
+   ===================================================================== */
+
+body.light-mode {
+    background: #f1f5f9;
+    color: #1e293b;
+}
+
+body.light-mode .sidebar {
+    background: #ffffff;
+    border-right: 1px solid #cbd5e1;
+}
+
+.logo {
+    padding: 0 15px 28px;
+    border-bottom: 1px solid #202d3d;
+    margin-bottom: 25px;
+}
+
+body.light-mode .logo {
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.logo h1 {
+    font-size: 27px;
+    color: #f8fafc;
+    letter-spacing: -1px;
+}
+
+body.light-mode .logo h1 {
+    color: #0f172a;
+}
+
+.logo p {
+    color: #aab4c3;
+    font-size: 17px;
+    letter-spacing: 1px;
+}
+
+body.light-mode .logo p {
+    color: #64748b;
+}
+
+.menu a {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px 18px;
+    margin-bottom: 7px;
+    border-radius: 9px;
+    color: #aeb9c9;
+    text-decoration: none;
+    font-size: 16px;
+    transition: 0.2s;
+}
+
+body.light-mode .menu a {
+    color: #475569;
+}
+
+.menu a:hover {
+    background: #141e2c;
+    color: white;
+}
+
+body.light-mode .menu a:hover {
+    background: #f1f5f9;
+    color: #0f172a;
+}
+
+.menu a.active {
+    background: #162235;
+    color: #70a0ff;
+    border: 1px solid #263752;
+}
+
+body.light-mode .menu a.active {
+    background: #eff6ff;
+    color: #2563eb;
+    border: 1px solid #bfdbfe;
+}
+
+.icon {
+    width: 23px;
+    text-align: center;
+    font-size: 19px;
+}
+
+.user {
+    position: absolute;
+    bottom: 20px;
+    left: 14px;
+    width: 237px;
+    padding: 15px;
+    background: #101a28;
+    border: 1px solid #263448;
+    border-radius: 9px;
+}
+
+body.light-mode .user {
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+}
+
+.user-name {
+    font-weight: bold;
+}
+
+.user-email {
+    color: #8995a7;
+    font-size: 12px;
+    margin-top: 4px;
+}
+
+body.light-mode .user-email {
+    color: #64748b;
+}
+
+body.light-mode .title h2 {
+    color: #0f172a;
+}
+
+@media (min-width: 768px) {
+    body.mobile-view-mode {
+            background: #040810 !important;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+    body.mobile-view-mode .main,
+        body.mobile-view-mode .sidebar {
+            width: 414px !important;
+            height: 896px !important;
+            max-height: 95vh;
+            border: 8px solid #1e293b;
+            border-radius: 30px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.8);
+            position: relative;
+            margin: auto;
+            overflow-y: auto;
+        }
+    body.mobile-view-mode .sidebar {
+            position: absolute !important;
+            z-index: 1000;
+            height: 100% !important;
+        }
+}
+
+@media (max-width: 767px) {
+    body.mobile-view-mode {
+            display: block !important;
+            height: auto !important;
+            overflow: auto !important;
+        }
+    body.mobile-view-mode .main,
+        body.mobile-view-mode .sidebar {
+            width: 100% !important;
+            height: auto !important;
+            min-height: 100vh !important;
+            border: none !important;
+            border-radius: 0 !important;
+            box-shadow: none !important;
+            position: relative !important;
+            margin: 0 !important;
+        }
+}
