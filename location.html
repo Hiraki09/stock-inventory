@@ -194,14 +194,14 @@ body.light-mode .cabinet-container { background: #ffffff; border: 1px solid #cbd
                 <div class="drawer-row"><div class="drawer" data-drawer="R71" onclick="filterByDrawer('R71')">R71</div><div class="drawer" data-drawer="R72" onclick="filterByDrawer('R72')">R72</div><div class="drawer" data-drawer="R73" onclick="filterByDrawer('R73')">R73</div></div>
                 <div class="drawer-row"><div class="drawer" data-drawer="R81" onclick="filterByDrawer('R81')">R81</div><div class="drawer" data-drawer="R82" onclick="filterByDrawer('R82')">R82</div><div class="drawer" data-drawer="R83" onclick="filterByDrawer('R83')">R83</div></div>
                 <div class="drawer-row">
-                    <div class="drawer large" data-drawer="R8L1" onclick="filterByDrawer('R8L1')">R8L1</div>
-                    <div class="drawer large" data-drawer="R8L2" onclick="filterByDrawer('R8L2')">R8L2</div>
-                    <div class="drawer large" data-drawer="R8L3" onclick="filterByDrawer('R8L3')">R8L3</div>
-                </div>
-                <div class="drawer-row">
                     <div class="drawer large" data-drawer="R9L1" onclick="filterByDrawer('R9L1')">R9L1</div>
                     <div class="drawer large" data-drawer="R9L2" onclick="filterByDrawer('R9L2')">R9L2</div>
                     <div class="drawer large" data-drawer="R9L3" onclick="filterByDrawer('R9L3')">R9L3</div>
+                </div>
+                <div class="drawer-row">
+                    <div class="drawer large" data-drawer="R10L1" onclick="filterByDrawer('R10L1')">R10L1</div>
+                    <div class="drawer large" data-drawer="R10L2" onclick="filterByDrawer('R10L2')">R10L2</div>
+                    <div class="drawer large" data-drawer="R10L3" onclick="filterByDrawer('R10L3')">R10L3</div>
                 </div>
             </div>
             <div class="cabinet-status-text" id="statusText">Click a drawer to filter items or click an item to highlight</div>
@@ -226,7 +226,7 @@ try {
 }
 
 let inventoryItems = [];
-let selectedDrawerFilter = ""; // ตัวแปรเก็บค่าช่องตู้ที่กำลังถูกกรอง
+let selectedDrawerFilter = "";
 
 async function loadInventoryData() {
     try {
@@ -295,11 +295,9 @@ function selectItem(item, element) {
     }
 }
 
-// ฟังก์ชันเมื่อคลิกที่ช่องตู้ทางขวา เพื่อกรองแสดงเฉพาะสินค้าในช่องนั้นๆ
 function filterByDrawer(drawerName) {
     selectedDrawerFilter = drawerName;
     
-    // ไฮไลต์ช่องตู้ที่เลือก
     document.querySelectorAll('.drawer').forEach(el => el.classList.remove('highlighted'));
     const targetDrawer = document.querySelector(`.drawer[data-drawer="${drawerName}"]`);
     if (targetDrawer) {
@@ -310,7 +308,6 @@ function filterByDrawer(drawerName) {
     filterItems();
 }
 
-// ปุ่มล้างตัวกรองช่องตู้ เพื่อให้แสดงสินค้าทั้งหมดกลับมา
 function resetDrawerFilter() {
     selectedDrawerFilter = "";
     document.querySelectorAll('.drawer').forEach(el => el.classList.remove('highlighted'));
@@ -322,11 +319,9 @@ function filterItems() {
     const kw = document.getElementById('searchInput').value.toLowerCase();
     
     const filtered = inventoryItems.filter(i => {
-        // เงื่อนไขที่ 1: กรองด้วยช่องตู้ (ถ้ามีการคลิกเลือกช่องตู้ไว้)
         if (selectedDrawerFilter && i.drawer.toLowerCase() !== selectedDrawerFilter.toLowerCase()) {
             return false;
         }
-        // เงื่อนไขที่ 2: กรองด้วยคำค้นหาในช่อง Search
         const matchKeyword = !kw || 
             i.id.toLowerCase().includes(kw) || 
             i.type.toLowerCase().includes(kw) || 
