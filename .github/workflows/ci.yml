@@ -15,7 +15,14 @@ jobs:
           node-version: 22
       - name: Check JavaScript syntax
         run: |
+          failed=0
           for f in server.js js/*.js; do
-            node --check "$f"
-            echo "ok $f"
+            [ -f "$f" ] || continue
+            if node --check "$f"; then
+              echo "✅ $f"
+            else
+              echo "::error file=$f::Syntax error in $f"
+              failed=1
+            fi
           done
+          exit $failed
