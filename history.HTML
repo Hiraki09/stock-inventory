@@ -488,7 +488,7 @@ body.light-mode .page-btn { background: #ffffff; border: 1px solid #cbd5e1; colo
 }
 .modal-overlay.show { opacity: 1; visibility: visible; }
 .modal-box {
-    background: #0d1622; border: 1px solid #263548; padding: 30px; border-radius: 12px; width: 100%; max-width: 400px;
+    background: #0d1622; border: 1px solid #263448; padding: 30px; border-radius: 12px; width: 100%; max-width: 400px;
 }
 body.light-mode .modal-box { background: #ffffff; border: 1px solid #cbd5e1; }
 .modal-box h3 { font-size: 20px; color: #f1f5f9; margin-bottom: 10px; }
@@ -707,7 +707,6 @@ let filteredData = [];
 document.addEventListener("DOMContentLoaded", () => {
     const userEmailLower = currentUserObj && currentUserObj.email ? currentUserObj.email.toLowerCase() : "";
 
-    // ป้องกันไม่ให้ไอดีอื่นที่ไม่ใช่ Admin เข้าหน้านี้
     if (!currentUserObj || !ADMIN_EMAIL.includes(userEmailLower)) {
         alert("หน้านี้สำหรับผู้ดูแลระบบ (Admin) เท่านั้น!");
         window.location.href = "main.HTML";
@@ -747,7 +746,7 @@ async function loadActiveUsers() {
         const res = await fetch('/api/active-users');
         const data = await res.json();
         const container = document.getElementById('activeUsersContainer');
-        if (!data.success || data.users.length === 0) {
+        if (!data.success || !data.users || data.users.length === 0) {
             container.innerHTML = '<div style="color: #64748b; font-size: 13px; text-align: center; padding: 10px;">No active users found.</div>';
             return;
         }
