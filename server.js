@@ -192,7 +192,6 @@ app.get('/inventory.txt', async (req, res) => {
     }
 });
 
-// API สำหรับให้หน้า Location Finder ดึงข้อมูล
 app.get('/api/inventory', async (req, res) => {
     try {
         const result = await pool.query('SELECT * FROM inventory ORDER BY product_id ASC');
@@ -255,7 +254,7 @@ app.get(['/setting.html', '/Setting.html'], (req, res) => {
 app.use(express.static(__dirname));
 
 // ============================================================
-// API LOGIN
+// API LOGIN (เพิ่มการบันทึก active_sessions และประวัติ LOGIN)
 // ============================================================
 app.post('/api/login', async (req, res) => {
     const { email, password } = req.body;
@@ -278,6 +277,17 @@ app.post('/api/login', async (req, res) => {
             return res.json({ success: false, message: 'Invalid E-mail or Password' });
         }
 
+        // บันทึกเซสชันลงตาราง active_sessions
+        const loginTime = getCurrentDateTime();
+        await pool.query(`
+            INSERT INTO active_sessions (email, login_time)
+            VALUES ($1, $2)
+            ON CONFLICT (email) DO UPDATE SET login_time = $2
+        `, [user.email, loginTime]);
+
+        // บันทึกประวัติลง history
+        await addHistory('LOGIN', '-', user.id);
+
         res.json({
             success: true,
             user: {
@@ -288,6 +298,50 @@ app.post('/api/login', async (req, res) => {
     } catch (err) {
         console.error('Login error:', err);
         res.status(500).json({ success: false, message: 'Login failed. Please try again.' });
+    }
+});
+
+// ============================================================
+// API ACTIVE USERS & KICK (เพิ่มใหม่เพื่อให้หน้า History ควบคุมได้)
+// ============================================================
+app.get('/api/active-users', async (req, res) => {
+    try {
+        const result = await pool.query('SELECT email, login_time FROM active_sessions ORDER BY login_time DESC');
+        res.json({ success: true, users: result.rows });
+    } catch (err) {
+        console.error('Error fetching active users:', err);
+        res.status(500).json({ success: false, message: 'Failed to fetch active users' });
+    }
+});
+
+app.post('/api/kick-user', async (req, res) => {
+    const { email, adminEmail, by } = req.body;
+    if (!email) {
+        return res.status(400).json({ success: false, message: 'ไม่พบอีเมลผู้ใช้' });
+    }
+    try {
+        await pool.query('DELETE FROM active_sessions WHERE LOWER(email) = LOWER($1)', [email]);
+        await addHistory('KICK', '-', by || adminEmail || 'Admin');
+        res.json({ success: true, message: `เตะผู้ใช้ ${email} สำเร็จ` });
+    } catch (err) {
+        console.error('Error kicking user:', err);
+        res.status(500).json({ success: false, message: 'ไม่สามารถเตะผู้ใช้ได้' });
+    }
+});
+
+app.post('/api/kick-all', async (req, res) => {
+    const { adminEmail, by } = req.body;
+    try {
+        if (adminEmail) {
+            await pool.query('DELETE FROM active_sessions WHERE LOWER(email) != LOWER($1)', [adminEmail]);
+        } else {
+            await pool.query('DELETE FROM active_sessions');
+        }
+        await addHistory('KICK_ALL', '-', by || adminEmail || 'Admin');
+        res.json({ success: true, message: 'เตะผู้ใช้อื่นทั้งหมดสำเร็จ' });
+    } catch (err) {
+        console.error('Error kicking all users:', err);
+        res.status(500).json({ success: false, message: 'ไม่สามารถเตะผู้ใช้ทั้งหมดได้' });
     }
 });
 
@@ -382,7 +436,7 @@ app.post('/api/delete-item', async (req, res) => {
 });
 
 // ============================================================
-// 3. EDIT PRODUCT (แก้ไขให้รับและอัปเดตค่า Location อย่างถูกต้อง)
+// 3. EDIT PRODUCT
 // ============================================================
 app.post('/api/edit-item', async (req, res) => {
     const oldId = req.body.oldId;
@@ -489,15 +543,20 @@ app.post('/api/inventory/reset', async (req, res) => {
 });
 
 // ============================================================
-// 5. บันทึกประวัติ LOGIN / LOGOUT
+// 5. บันทึกประวัติ LOGIN / LOGOUT (จัดการลบออกจาก active_sessions เมื่อ LOGOUT)
 // ============================================================
 app.post('/api/history/add', async (req, res) => {
-    const { user, action } = req.body;
+    const { user, email, action } = req.body;
     const username = user || 'Unknown';
     const actionType = action || 'LOGIN';
 
     try {
         await addHistory(actionType, '-', username);
+
+        if (actionType === 'LOGOUT' && email) {
+            await pool.query('DELETE FROM active_sessions WHERE LOWER(email) = LOWER($1)', [email]);
+        }
+
         res.json({ success: true, message: 'บันทึกประวัติเซสชันสำเร็จ' });
     } catch (err) {
         console.error(err);
