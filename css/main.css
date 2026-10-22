@@ -15,8 +15,6 @@ body {
     display: flex;
 }
 
-/* ธีมสว่าง (Light Mode) */
-
 /* ================= SIDEBAR ================= */
 
 .sidebar {
@@ -36,10 +34,6 @@ body {
 body.sidebar-hidden .sidebar {
     transform: translateX(-100%);
 }
-
-/* MENU */
-
-/* USER */
 
 /* ================= MAIN ================= */
 
@@ -271,7 +265,7 @@ body.light-mode .bar-label {
     color: #64748b;
 }
 
-/* DONUT CHART (วงกลมเปอร์เซ็นต์เต็ม 100%) */
+/* DONUT CHART */
 .donut-wrapper {
     flex: 0.9;
     display: flex;
@@ -522,8 +516,6 @@ body.light-mode .qty-text.low {
     color: white;
 }
 
-/* ================= MOBILE VIEW SIMULATOR MODE ================= */
-
 /* ================= RESPONSIVE ================= */
 
 @media (max-width: 1100px) {
@@ -536,15 +528,7 @@ body.light-mode .qty-text.low {
     }
 }
 
-@media (max-width: 700px) {
-    .sidebar {
-        width: 210px;
-    }
-
-    .main {
-        padding: 20px;
-    }
-
+@media (max-width: 768px) {
     .header {
         flex-direction: column;
         align-items: flex-start;
@@ -553,5 +537,28 @@ body.light-mode .qty-text.low {
 
     .cards {
         grid-template-columns: 1fr;
+    }
+
+    .chart-container { 
+        flex-direction: column; 
+        align-items: stretch; 
+    }
+
+    .bar-chart-wrapper, 
+    .donut-wrapper { 
+        flex: none; 
+        width: 100%; 
+    }
+
+    .donut-wrapper, 
+    body.light-mode .donut-wrapper { 
+        border-left: none; 
+        padding-left: 0; 
+    }
+
+    table { 
+        display: block; 
+        overflow-x: auto; 
+        white-space: nowrap; 
     }
 }

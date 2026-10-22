@@ -32,10 +32,6 @@ body.sidebar-hidden .sidebar {
     transform: translateX(-100%);
 }
 
-/* ================= MENU ================= */
-
-/* ================= USER ================= */
-
 /* ================= MAIN ================= */
 .main {
     margin-left: 265px;
@@ -370,10 +366,19 @@ body.light-mode .modal-input { background: #f1f5f9; border: 1px solid #cbd5e1; c
 .modal-btn.cancel { background: #273548; color: #e5e7eb; }
 .modal-btn.confirm { background: #2563eb; color: white; }
 
-/* ================= MOBILE VIEW SIMULATOR MODE ================= */
+/* ================= RESPONSIVE ================= */
 
 @media (max-width: 900px) {
     .admin-section { grid-template-columns: 1fr; }
-    .sidebar { width: 210px; }
-    .main { margin-left: 210px; width: calc(100% - 210px); padding: 20px; }
+}
+
+@media (max-width: 768px) {
+    .header { 
+        flex-wrap: wrap; 
+        gap: 12px; 
+    }
+    .controls, 
+    .search { 
+        width: 100%; 
+    }
 }
