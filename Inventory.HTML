@@ -749,32 +749,51 @@ body.light-mode .delete-modal-content p {
 }
 
 /* ================= MOBILE VIEW SIMULATOR MODE ================= */
-body.mobile-view-mode {
-    background: #040810 !important;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    overflow: hidden;
+@media (min-width: 768px) {
+    body.mobile-view-mode {
+        background: #040810 !important;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        overflow: hidden;
+    }
+    body.mobile-view-mode .main,
+    body.mobile-view-mode .sidebar {
+        width: 414px !important;
+        height: 896px !important;
+        max-height: 95vh;
+        border: 8px solid #1e293b;
+        border-radius: 30px;
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.8);
+        position: relative;
+        margin: auto;
+        overflow-y: auto;
+    }
+    body.mobile-view-mode .sidebar {
+        position: absolute !important;
+        z-index: 1000;
+        height: 100% !important;
+    }
 }
 
-body.mobile-view-mode .main,
-body.mobile-view-mode .sidebar {
-    width: 414px !important;
-    height: 896px !important;
-    max-height: 95vh;
-    border: 8px solid #1e293b;
-    border-radius: 30px;
-    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.8);
-    position: relative;
-    margin: auto;
-    overflow-y: auto;
-}
-
-body.mobile-view-mode .sidebar {
-    position: absolute !important;
-    z-index: 1000;
-    height: 100% !important;
+@media (max-width: 767px) {
+    body.mobile-view-mode {
+        display: block !important;
+        height: auto !important;
+        overflow: auto !important;
+    }
+    body.mobile-view-mode .main,
+    body.mobile-view-mode .sidebar {
+        width: 100% !important;
+        height: auto !important;
+        min-height: 100vh !important;
+        border: none !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        position: relative !important;
+        margin: 0 !important;
+    }
 }
 
 /* ================= RESPONSIVE ================= */
@@ -808,7 +827,6 @@ body.mobile-view-mode .sidebar {
     if (localStorage.getItem('sidebarHidden') === '1') {
         document.body.classList.add('sidebar-hidden');
     }
-    // โหลดโหมดมือถือตั้งแต่เริ่มเปิดหน้าเว็บ
     if (localStorage.getItem('mobileMode') === 'enabled') {
         document.body.classList.add('mobile-view-mode');
     }
