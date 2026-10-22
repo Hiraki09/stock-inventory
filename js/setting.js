@@ -25,22 +25,6 @@ function updateThemeUI(theme) {
     }
 }
 
-// Mobile Mode Handling
-const mobileModeCheckbox = document.getElementById('mobileModeToggle');
-if (localStorage.getItem('mobileMode') === 'enabled') {
-    mobileModeCheckbox.checked = true;
-}
-
-function toggleMobileMode() {
-    if (mobileModeCheckbox.checked) {
-        document.body.classList.add('mobile-view-mode');
-        localStorage.setItem('mobileMode', 'enabled');
-    } else {
-        document.body.classList.remove('mobile-view-mode');
-        localStorage.setItem('mobileMode', 'disabled');
-    }
-}
-
 async function logout() {
     try {
         await fetch('/api/history/add', {

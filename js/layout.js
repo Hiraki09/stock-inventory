@@ -76,9 +76,7 @@ function toggleSidebar() {
     if (localStorage.getItem('sidebarHidden') === '1' && !isMobileScreen()) {
         document.body.classList.add('sidebar-hidden');
     }
-    if (localStorage.getItem('mobileMode') === 'enabled') {
-        document.body.classList.add('mobile-view-mode');
-    }
+    localStorage.removeItem('mobileMode');
     if ((localStorage.getItem('appTheme') || 'dark') === 'light') {
         document.body.classList.add('light-mode');
     }
