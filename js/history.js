@@ -4,7 +4,7 @@ const currentUserObj = getCurrentUser();
 // กำหนดรายชื่อบัญชีแอดมินและรหัสผ่านของแต่ละคน (สามารถเพิ่มรายชื่อและเปลี่ยนรหัสผ่านได้ที่นี่)
 const ADMIN_ACCOUNTS = [
     { email: "admin@cbv.com", password: "admin3120654" },
-    { email: "faa@cbv.com", password: "admin3120654" },
+    { email: "faa@cbv.com", password: "thepthut" },
     // ตัวอย่างการเพิ่มแอดมินคนอื่นๆ เพิ่มเติม:
     // { email: "manager@cbv.com", password: "managerpass123" }
 ];
