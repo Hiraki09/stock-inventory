@@ -1,0 +1,239 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+
+body {
+    background: #080f1b;
+    color: #e5e7eb;
+    min-height: 100vh;
+    display: flex;
+}
+
+/* ================= SIDEBAR ================= */
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 265px;
+    height: 100vh;
+    overflow: hidden;
+    background: #09111d;
+    border-right: 1px solid #243244;
+    padding: 28px 14px;
+    transition: transform 0.25s ease;
+    z-index: 500;
+}
+
+body.sidebar-hidden .sidebar {
+    transform: translateX(-100%);
+}
+
+/* ================= MENU ================= */
+
+/* ================= USER ================= */
+
+/* ================= MAIN ================= */
+.main {
+    margin-left: 265px;
+    width: calc(100% - 265px);
+    height: 100vh;
+    padding: 30px 35px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    transition: margin-left 0.25s ease, width 0.25s ease;
+}
+
+body.sidebar-hidden .main {
+    margin-left: 0;
+    width: 100%;
+}
+
+/* ================= HEADER ================= */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.title-area {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.menu-button {
+    width: 44px;
+    height: 44px;
+    border-radius: 9px;
+    border: 1px solid #273548;
+    background: #111b29;
+    color: white;
+    font-size: 22px;
+    cursor: pointer;
+}
+
+body.light-mode .menu-button {
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    color: #0f172a;
+}
+
+.title h2 {
+    font-size: 30px;
+    color: #f8fafc;
+}
+
+.title p {
+    color: #8995a7;
+    margin-top: 4px;
+}
+
+body.light-mode .title p {
+    color: #64748b;
+}
+
+/* ================= SETTINGS CONTENT ================= */
+.settings-container {
+    max-width: 800px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.setting-card {
+    background: #0d1622;
+    border: 1px solid #263548;
+    border-radius: 9px;
+    padding: 24px;
+}
+
+body.light-mode .setting-card {
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+}
+
+.setting-card h3 {
+    font-size: 18px;
+    color: #f1f5f9;
+    margin-bottom: 8px;
+}
+
+body.light-mode .setting-card h3 {
+    color: #0f172a;
+}
+
+.setting-card p {
+    color: #8995a7;
+    font-size: 14px;
+    margin-bottom: 16px;
+}
+
+body.light-mode .setting-card p {
+    color: #64748b;
+}
+
+.theme-options {
+    display: flex;
+    gap: 12px;
+}
+
+.theme-btn {
+    flex: 1;
+    padding: 12px;
+    border-radius: 6px;
+    border: 1px solid #273548;
+    background: #111b29;
+    color: #e5e7eb;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+body.light-mode .theme-btn {
+    background: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    color: #1e293b;
+}
+
+.theme-btn.active {
+    background: #2563eb;
+    border-color: #2563eb;
+    color: white;
+}
+
+/* Toggle Switch Style */
+.setting-item-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 26px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #273548;
+    transition: .3s;
+    border-radius: 26px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .3s;
+    border-radius: 50%;
+}
+
+input:checked + .slider {
+    background-color: #2563eb;
+}
+
+input:checked + .slider:before {
+    transform: translateX(24px);
+}
+
+.btn-logout {
+    background: #dc2626;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.btn-logout:hover {
+    background: #b91c1c;
+}
+
+/* ================= MOBILE VIEW SIMULATOR MODE ================= */
+
+@media (max-width: 700px) {
+    .sidebar { width: 210px; }
+    .main { margin-left: 210px; width: calc(100% - 210px); padding: 20px; }
+}
