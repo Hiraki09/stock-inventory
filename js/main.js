@@ -39,7 +39,6 @@ async function loadInventory() {
         let totalItems = 0;
         let lowStockItems = 0;
         let totalQuantitySum = 0;
-        let displayedCount = 0;
 
         let historyLogs = [];
 
@@ -63,6 +62,9 @@ async function loadInventory() {
             console.warn("Cannot load history.txt:", historyError);
         }
 
+        // รวบรวมรายการที่เป็น Low Stock ทั้งหมดก่อน
+        let lowStockRowsData = [];
+
         for (let i = 0; i < lines.length; i++) {
             const line = lines[i];
 
@@ -82,11 +84,10 @@ async function loadInventory() {
             totalItems++;
             totalQuantitySum += quantity;
 
-            // รวมจำนวนชิ้นตาม Type (ถ้าตรงกับกลุ่มที่กำหนด หรือจะเพิ่มเข้าไปอัตโนมัติก็ได้)
+            // รวมจำนวนชิ้นตาม Type
             if (typeCounts[deviceType] !== undefined) {
                 typeCounts[deviceType] += quantity;
             } else {
-                // หากมี Type นอกเหนือจากที่กำหนด ให้จัดเข้ากลุ่มอื่นหรือเก็บเพิ่ม
                 typeCounts[deviceType] = (typeCounts[deviceType] || 0) + quantity;
             }
 
@@ -94,81 +95,87 @@ async function loadInventory() {
 
             if (isLow) {
                 lowStockItems++;
-            }
 
-            // แสดงเฉพาะรายการที่ Low Stock เท่านั้นในตาราง
-            if (!isLow) {
-                continue;
-            }
+                let movementAction = "ADD";
+                let movementTime = addedDate;
 
-            let movementAction = "ADD";
-            let movementTime = addedDate;
+                for (let h = historyLogs.length - 1; h >= 0; h--) {
+                    const historyData = historyLogs[h]
+                        .split("|")
+                        .map(value => value.trim());
 
-            for (let h = historyLogs.length - 1; h >= 0; h--) {
-                const historyData = historyLogs[h]
-                    .split("|")
-                    .map(value => value.trim());
+                    const historyAction = historyData[0];
+                    const historyId = historyData[1];
+                    const historyTime = historyData[2];
 
-                const historyAction = historyData[0];
-                const historyId = historyData[1];
-                const historyTime = historyData[2];
-
-                if (historyId === productId) {
-                    movementAction = historyAction;
-                    movementTime = historyTime || addedDate;
-                    break;
+                    if (historyId === productId) {
+                        movementAction = historyAction;
+                        movementTime = historyTime || addedDate;
+                        break;
+                    }
                 }
-            }
 
+                lowStockRowsData.push({
+                    productId,
+                    itemType: data[1],
+                    quantity,
+                    movementAction,
+                    movementTime
+                });
+            }
+        }
+
+        // จำกัดให้แสดงผล Low Stock Items แค่ 15 รายการล่าสุด
+        const limitedLowStock = lowStockRowsData.slice(-15).reverse();
+
+        limitedLowStock.forEach(item => {
             let actionClass = "action-default";
 
-            if (movementAction === "ADD") {
+            if (item.movementAction === "ADD") {
                 actionClass = "action-add";
-            } else if (movementAction === "EDIT") {
+            } else if (item.movementAction === "EDIT") {
                 actionClass = "action-edit";
-            } else if (movementAction === "DELETE") {
+            } else if (item.movementAction === "DELETE") {
                 actionClass = "action-delete";
             }
 
-            const formattedQty = quantity.toLocaleString("en-US");
+            const formattedQty = item.quantity.toLocaleString("en-US");
 
             const row = document.createElement("tr");
 
             row.innerHTML = `
                 <td style="color:#6e9dff; font-weight:600;">
-                    ${escapeHtml(productId)}
+                    ${escapeHtml(item.productId)}
                 </td>
 
                 <td>
-                    ${escapeHtml(data[1])}
+                    ${escapeHtml(item.itemType)}
                 </td>
 
                 <td>
                     <span class="action-badge ${actionClass}">
-                        ${escapeHtml(movementAction)}
+                        ${escapeHtml(item.movementAction)}
                     </span>
                 </td>
 
-                <td class="qty-text ${isLow ? "low" : ""}">
+                <td class="qty-text low">
                     ${formattedQty}
-                    ${isLow ? '<span class="low-tag">(LOW)</span>' : ""}
+                    <span class="low-tag">(LOW)</span>
                 </td>
 
                 <td>
-                    <span class="status ${isLow ? "delayed" : "completed"}">
-                        ${isLow ? "Low Stock" : "Completed"}
+                    <span class="status delayed">
+                        Low Stock
                     </span>
                 </td>
 
                 <td style="color:#7e8999;">
-                    ${escapeHtml(movementTime)}
+                    ${escapeHtml(item.movementTime)}
                 </td>
             `;
 
             table.appendChild(row);
-
-            displayedCount++;
-        }
+        });
 
         document.getElementById("totalItemsCount").innerText =
             totalItems.toLocaleString();
@@ -221,7 +228,6 @@ function renderCharts(typeCounts, totalSum) {
     const keys = Object.keys(typeCounts);
     const maxVal = Math.max(...Object.values(typeCounts), 1);
 
-    // สีสำหรับแต่ละ Type
     const colors = [
         "#3b82f6", "#10b981", "#f59e0b", "#ef4444", 
         "#8b5cf6", "#ec4899", "#06b6d4", "#84cc16", "#64748b"
@@ -234,8 +240,7 @@ function renderCharts(typeCounts, totalSum) {
         const count = typeCounts[key];
         const color = colors[index % colors.length];
 
-        // 1. สร้างกราฟแท่ง (Bar Chart)
-        const heightPercent = Math.max((count / maxVal) * 100, 4); // อย่างน้อย 4% ให้เห็นแท่ง
+        const heightPercent = Math.max((count / maxVal) * 100, 4);
 
         const group = document.createElement("div");
         group.className = "bar-group";
@@ -246,7 +251,6 @@ function renderCharts(typeCounts, totalSum) {
         `;
         barChartContainer.appendChild(group);
 
-        // 2. คำนวณเปอร์เซ็นต์สำหรับกราฟวงกลม (Donut Chart เต็ม 100%)
         const percentage = totalSum > 0 ? (count / totalSum) * 100 : 0;
         const angleSpan = totalSum > 0 ? (count / totalSum) * 360 : 0;
 
@@ -255,7 +259,6 @@ function renderCharts(typeCounts, totalSum) {
         conicGradientStops.push(`${color} ${startAngle}deg ${endAngle}deg`);
         accumulatedAngle = endAngle;
 
-        // เพิ่ม Legend ของวงกลม
         if (count > 0) {
             const legendItem = document.createElement("div");
             legendItem.className = "legend-item";
@@ -267,7 +270,6 @@ function renderCharts(typeCounts, totalSum) {
         }
     });
 
-    // อัปเดตสีกราฟวงกลมแบบ conic-gradient ครบ 100%
     if (totalSum > 0 && conicGradientStops.length > 0) {
         donutChartElement.style.background = `conic-gradient(${conicGradientStops.join(", ")})`;
     } else {
@@ -298,7 +300,7 @@ function updateDateTime() {
 updateDateTime();
 setInterval(updateDateTime, 1000);
 
-/* ================= LOAD LIVE LOGS ================= */
+/* ================= LOAD LIVE LOGS (SHOW USER & STATUS) ================= */
 
 async function loadLiveLogs() {
     const logsContainer = document.getElementById("liveLogs");
@@ -345,6 +347,8 @@ async function loadLiveLogs() {
             const action = data[0] || "-";
             const productId = data[1] || "-";
             const time = data[2] || "-";
+            // ดึงชื่อ User จากฟิลด์ที่ 4 (index 3) ตามรูปแบบ history line ที่บันทึกไว้
+            const user = data[3] ? data[3].replace(/^\||\|$/g, '') : "Unknown";
 
             const log = document.createElement("div");
             log.className = "log";
@@ -357,19 +361,30 @@ async function loadLiveLogs() {
                 actionClass = "action-edit";
             } else if (action === "DELETE") {
                 actionClass = "action-delete";
+            } else if (action === "LOGIN") {
+                actionClass = "action-login";
+            } else if (action === "LOGOUT") {
+                actionClass = "action-logout";
             }
 
             log.innerHTML = `
-                <div>
-                    <strong>ID: ${escapeHtml(productId)}</strong>
-
-                    <span class="action-badge ${actionClass}">
-                        ${escapeHtml(action)}
-                    </span>
-
-                    <div class="log-time">
-                        ${escapeHtml(time)}
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">
+                    <div>
+                        <div style="font-size: 12px; color: #94a3b8; margin-bottom: 2px;">
+                            User: <strong style="color: #f8fafc;">${escapeHtml(user)}</strong>
+                        </div>
+                        <div style="font-size: 13px; color: #cbd5e1;">
+                            ID: <strong>${escapeHtml(productId)}</strong>
+                        </div>
                     </div>
+                    <div>
+                        <span class="action-badge ${actionClass}">
+                            ${escapeHtml(action)}
+                        </span>
+                    </div>
+                </div>
+                <div class="log-time" style="margin-top: 4px;">
+                    ${escapeHtml(time)}
                 </div>
             `;
 
