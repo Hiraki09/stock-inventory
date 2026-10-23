@@ -1,20 +1,42 @@
 /* =====================================================================
    css/common.css — สไตล์ที่ทุกหน้าใช้ร่วมกัน
-   (เมนูด้านข้าง, โหมดสว่าง, โหมดมือถือ)
-
-   ★ แก้หน้าตาเมนูที่นี่ที่เดียว ทุกหน้าเปลี่ยนตาม
-   ★ ตำแหน่ง/ขนาดของเมนูและเนื้อหา (.sidebar, .main) อยู่ในไฟล์ CSS ของแต่ละหน้า
-     เพราะแต่ละหน้าจัดเลย์เอาต์ต่างกัน
+   (เมนูด้านข้าง, โหมดสว่าง, โหมดมือถือ, การกำหนดชุดสีหลัก)
    ===================================================================== */
 
+/* กำหนดตัวแปรสีพื้นฐาน (Dark Mode - โทน Green Tech / ดำเขียวอมน้ำเงิน) */
+:root {
+    --bg-main: #080f1b;
+    --bg-sidebar: #09111d;
+    --bg-card: #0d1622;
+    --border-color: #263548;
+    --text-main: #e5e7eb;
+    --text-muted: #8995a7;
+    --accent-color: #00E5AB;
+    --accent-blue: #3b82f6;
+}
+
+/* โหมดสว่าง (Light Mode - โทนสะอาด สบายตา) */
 body.light-mode {
-    background: #f1f5f9;
-    color: #1e293b;
+    --bg-main: #f1f5f9;
+    --bg-sidebar: #ffffff;
+    --bg-card: #ffffff;
+    --border-color: #cbd5e1;
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+    --accent-color: #00E5AB;
+    --accent-blue: #2563eb;
+    background: var(--bg-main);
+    color: var(--text-main);
+}
+
+body {
+    background: var(--bg-main);
+    color: var(--text-main);
 }
 
 body.light-mode .sidebar {
-    background: #ffffff;
-    border-right: 1px solid #cbd5e1;
+    background: var(--bg-sidebar);
+    border-right: 1px solid var(--border-color);
 }
 
 .logo {
@@ -125,7 +147,6 @@ body.light-mode .user-email {
 body.light-mode .title h2 {
     color: #0f172a;
 }
-
 
 .sidebar-backdrop { 
     display: none; 
