@@ -64,6 +64,7 @@ async function loadActiveUsers() {
         const res = await fetch('/api/active-users');
         const data = await res.json();
         const container = document.getElementById('activeUsersContainer');
+        if (!container) return;
         if (!data.success || !data.users || data.users.length === 0) {
             container.innerHTML = '<div style="color: #64748b; font-size: 13px; text-align: center; padding: 10px;">No active users found.</div>';
             return;
@@ -168,6 +169,7 @@ async function loadHistory() {
 
         historyData.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
         filteredData = [...historyData];
+        currentPage = 1;
         displayHistory();
     } catch (error) {
         console.error(error);
@@ -177,12 +179,15 @@ async function loadHistory() {
 function displayHistory() {
     const body = document.getElementById("historyBody");
     const empty = document.getElementById("emptyMessage");
+    if (!body) return;
+
     body.innerHTML = "";
     if (filteredData.length === 0) {
-        empty.style.display = "block";
+        if (empty) empty.style.display = "block";
+        updatePagination(0);
         return;
     }
-    empty.style.display = "none";
+    if (empty) empty.style.display = "none";
     
     const start = (currentPage - 1) * rowsPerPage;
     const paginated = filteredData.slice(start, start + rowsPerPage);
@@ -205,14 +210,96 @@ function displayHistory() {
         `;
         body.appendChild(row);
     });
+
+    updatePagination(filteredData.length);
 }
 
-document.getElementById("searchInput").addEventListener("input", function() {
-    const kw = this.value.toLowerCase();
-    filteredData = historyData.filter(i => i.action.toLowerCase().includes(kw) || i.productID.toLowerCase().includes(kw) || i.date.toLowerCase().includes(kw) || i.user.toLowerCase().includes(kw));
-    currentPage = 1;
-    displayHistory();
-});
+function updatePagination(totalItems) {
+    const pageInfo = document.getElementById("pageInfo");
+    const paginationContainer = document.getElementById("paginationContainer");
+
+    const startItem = totalItems === 0 ? 0 : (currentPage - 1) * rowsPerPage + 1;
+    const endItem = Math.min(currentPage * rowsPerPage, totalItems);
+
+    if (pageInfo) {
+        pageInfo.textContent = `Showing ${startItem} to ${endItem} of ${totalItems} entries`;
+    }
+
+    if (!paginationContainer) return;
+    paginationContainer.innerHTML = "";
+
+    const totalPages = Math.ceil(totalItems / rowsPerPage) || 1;
+
+    // ปุ่มย้อนกลับ (Previous)
+    const prevBtn = document.createElement("button");
+    prevBtn.className = "page-btn";
+    prevBtn.textContent = "‹";
+    prevBtn.disabled = currentPage === 1;
+    prevBtn.onclick = () => {
+        if (currentPage > 1) {
+            currentPage--;
+            displayHistory();
+        }
+    };
+    paginationContainer.appendChild(prevBtn);
+
+    // สร้างหมายเลขหน้า
+    for (let i = 1; i <= totalPages; i++) {
+        if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+            const btn = document.createElement("button");
+            btn.className = `page-btn ${i === currentPage ? "active" : ""}`;
+            btn.textContent = i;
+            btn.onclick = () => {
+                currentPage = i;
+                displayHistory();
+            };
+            paginationContainer.appendChild(btn);
+        } else if (i === currentPage - 2 || i === currentPage + 2) {
+            const span = document.createElement("span");
+            span.textContent = "...";
+            span.style.padding = "0 5px";
+            span.style.color = "#8995a7";
+            paginationContainer.appendChild(span);
+        }
+    }
+
+    // ปุ่มถัดไป (Next)
+    const nextBtn = document.createElement("button");
+    nextBtn.className = "page-btn";
+    nextBtn.textContent = "›";
+    nextBtn.disabled = currentPage === totalPages || totalPages === 0;
+    nextBtn.onclick = () => {
+        if (currentPage < totalPages) {
+            currentPage++;
+            displayHistory();
+        }
+    };
+    paginationContainer.appendChild(nextBtn);
+}
+
+function changeRowsPerPage() {
+    const select = document.getElementById("rowsSelect");
+    if (select) {
+        rowsPerPage = parseInt(select.value) || 10;
+        currentPage = 1;
+        displayHistory();
+    }
+}
+
+const searchInputEl = document.getElementById("searchInput");
+if (searchInputEl) {
+    searchInputEl.addEventListener("input", function() {
+        const kw = this.value.toLowerCase();
+        filteredData = historyData.filter(i => 
+            i.action.toLowerCase().includes(kw) || 
+            i.productID.toLowerCase().includes(kw) || 
+            i.date.toLowerCase().includes(kw) || 
+            i.user.toLowerCase().includes(kw)
+        );
+        currentPage = 1;
+        displayHistory();
+    });
+}
 
 function escapeHtml(text) {
     if (!text) return "";
