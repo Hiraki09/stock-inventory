@@ -6,10 +6,21 @@
     transition: background 0.2s, color 0.2s, border-color 0.2s;
 }
 
-/* ธีมมืด (Dark Mode - ค่าเริ่มต้น) */
+/* ธีมมืด (Dark Mode - โทน Green Tech / ดำเขียวอมน้ำเงินพรีเมียม) */
+:root {
+    --bg-main: #060b14;
+    --bg-sidebar: #060b14;
+    --bg-card: #0b1322;
+    --border-color: #1e293b;
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    --accent-color: #00E5AB;
+    --accent-blue: #3b82f6;
+}
+
 body {
-    background: #080f1b;
-    color: #e5e7eb;
+    background: var(--bg-main);
+    color: var(--text-main);
     min-height: 100vh;
     overflow: hidden;
     display: flex;
@@ -24,8 +35,8 @@ body {
     width: 265px;
     height: 100vh;
     overflow: hidden;
-    background: #09111d;
-    border-right: 1px solid #243244;
+    background: var(--bg-sidebar);
+    border-right: 1px solid var(--border-color);
     padding: 28px 14px;
     transition: transform 0.25s ease;
     z-index: 500;
@@ -71,8 +82,8 @@ body.sidebar-hidden .main {
     width: 50px;
     height: 50px;
     border-radius: 9px;
-    border: 1px solid #273548;
-    background: #111b29;
+    border: 1px solid var(--border-color);
+    background: #0b1322;
     color: white;
     font-size: 25px;
     cursor: pointer;
@@ -86,11 +97,11 @@ body.light-mode .menu-button {
 
 .title h2 {
     font-size: 30px;
-    color: #f8fafc;
+    color: var(--text-main);
 }
 
 .title p {
-    color: #8995a7;
+    color: var(--text-muted);
     margin-top: 4px;
 }
 
@@ -103,11 +114,11 @@ body.light-mode .title p {
 .search {
     width: 250px;
     height: 42px;
-    background: #080d14;
-    border: 1px solid #273548;
+    background: #060b14;
+    border: 1px solid var(--border-color);
     border-radius: 6px;
     padding: 0 15px;
-    color: #566276;
+    color: var(--text-muted);
     outline: none;
     display: flex;
     align-items: center;
@@ -122,7 +133,7 @@ body.light-mode .search {
 }
 
 .search:hover {
-    border-color: #557bdc;
+    border-color: var(--accent-color);
 }
 
 /* ================= CARDS ================= */
@@ -134,11 +145,21 @@ body.light-mode .search {
 }
 
 .card {
-    background: #0d1622;
-    border: 1px solid #263548;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
     padding: 22px;
-    border-radius: 9px;
-    min-height: 120px;
+    border-radius: 16px;
+    min-height: 125px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+    transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.card:hover {
+    border-color: rgba(0, 229, 171, 0.3);
+    transform: translateY(-2px);
 }
 
 body.light-mode .card {
@@ -146,10 +167,28 @@ body.light-mode .card {
     border: 1px solid #cbd5e1;
 }
 
+/* กล่องไอคอนโค้งมนด้านในการ์ด */
+.card-icon-box {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    margin-bottom: 8px;
+}
+
+.card:nth-child(1) .card-icon-box { background: rgba(59, 130, 246, 0.15); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.3); }
+.card:nth-child(2) .card-icon-box { background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); }
+.card:nth-child(3) .card-icon-box { background: rgba(0, 229, 171, 0.15); color: #00E5AB; border: 1px solid rgba(0, 229, 171, 0.3); }
+.card:nth-child(4) .card-icon-box { background: rgba(139, 92, 246, 0.15); color: #8b5cf6; border: 1px solid rgba(139, 92, 246, 0.3); }
+
 .card h3 {
-    font-size: 14px;
-    color: #9eabc0;
-    margin-bottom: 12px;
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+    font-weight: 500;
 }
 
 body.light-mode .card h3 {
@@ -157,8 +196,9 @@ body.light-mode .card h3 {
 }
 
 .card h1 {
-    font-size: 30px;
-    color: #f8fafc;
+    font-size: 26px;
+    color: var(--text-main);
+    font-weight: 700;
 }
 
 body.light-mode .card h1 {
@@ -175,10 +215,10 @@ body.light-mode .card h1 {
 }
 
 .box {
-    background: #0d1622;
-    border: 1px solid #263548;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
     padding: 20px;
-    border-radius: 9px;
+    border-radius: 16px;
 }
 
 body.light-mode .box {
@@ -187,7 +227,7 @@ body.light-mode .box {
 }
 
 .box h3 {
-    color: #f1f5f9;
+    color: var(--text-main);
 }
 
 body.light-mode .box h3 {
@@ -210,7 +250,7 @@ body.light-mode .box h3 {
     align-items: flex-end;
     gap: 8px;
     padding: 10px 5px 0 5px;
-    border-bottom: 1px solid #263548;
+    border-bottom: 1px solid var(--border-color);
 }
 
 body.light-mode .bar-chart-wrapper {
@@ -228,7 +268,7 @@ body.light-mode .bar-chart-wrapper {
 
 .bar-value {
     font-size: 10px;
-    color: #9eabc0;
+    color: var(--text-muted);
     margin-bottom: 4px;
 }
 
@@ -239,20 +279,20 @@ body.light-mode .bar-value {
 .bar {
     width: 100%;
     max-width: 28px;
-    background: #3b82f6;
+    background: var(--accent-color);
     border-radius: 3px 3px 0 0;
     min-height: 4px;
     transition: height 0.4s ease;
 }
 
 body.light-mode .bar {
-    background: #2563eb;
+    background: #059669;
 }
 
 .bar-label {
     margin-top: 8px;
     font-size: 10px;
-    color: #9eabc0;
+    color: var(--text-muted);
     text-align: center;
     writing-mode: horizontal-tb;
     overflow: hidden;
@@ -272,7 +312,7 @@ body.light-mode .bar-label {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    border-left: 1px solid #263548;
+    border-left: 1px solid var(--border-color);
     padding-left: 15px;
 }
 
@@ -297,7 +337,7 @@ body.light-mode .donut-wrapper {
 .donut-hole {
     width: 85px;
     height: 85px;
-    background: #0d1622;
+    background: var(--bg-card);
     border-radius: 50%;
     display: flex;
     flex-direction: column;
@@ -311,7 +351,7 @@ body.light-mode .donut-hole {
 
 .donut-hole span {
     font-size: 12px;
-    color: #9eabc0;
+    color: var(--text-muted);
 }
 
 body.light-mode .donut-hole span {
@@ -357,8 +397,8 @@ body.light-mode .legend-item {
 
 .log {
     padding: 14px 0;
-    border-bottom: 1px solid #263548;
-    color: #9eabc0;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-muted);
     font-size: 14px;
 }
 
@@ -372,7 +412,7 @@ body.light-mode .log {
 }
 
 .log-time {
-    color: #66758a;
+    color: #64748b;
     font-size: 12px;
     margin-top: 4px;
 }
@@ -388,11 +428,11 @@ body.light-mode .log-time {
     font-size: 20px;
     font-weight: 600;
     letter-spacing: 1px;
-    color: #8fb4ff;
+    color: var(--accent-color);
 }
 
 body.light-mode .realtime-clock {
-    color: #2563eb;
+    color: #059669;
 }
 
 /* ================= ACTION BADGE ================= */
@@ -408,17 +448,17 @@ body.light-mode .realtime-clock {
 }
 
 .action-add {
-    background: #16a34a;
+    background: #10b981;
     color: white;
 }
 
 .action-edit {
-    background: #2563eb;
+    background: #3b82f6;
     color: white;
 }
 
 .action-delete {
-    background: #dc2626;
+    background: #ef4444;
     color: white;
 }
 
@@ -438,7 +478,7 @@ table {
 th {
     padding: 14px 12px;
     text-align: left;
-    color: #9eabc0;
+    color: var(--text-muted);
     font-size: 12px;
     letter-spacing: 0.5px;
 }
@@ -450,8 +490,8 @@ body.light-mode th {
 
 td {
     padding: 16px 12px;
-    border-top: 1px solid #263548;
-    color: #e4e9f0;
+    border-top: 1px solid var(--border-color);
+    color: var(--text-main);
     font-size: 14px;
 }
 
@@ -461,7 +501,7 @@ body.light-mode td {
 }
 
 tr:hover {
-    background: #151f2d;
+    background: rgba(255, 255, 255, 0.03);
 }
 
 body.light-mode tr:hover {
@@ -471,7 +511,7 @@ body.light-mode tr:hover {
 /* ================= QUANTITY & LOW STOCK ================= */
 
 .qty-text {
-    color: #73a0ff;
+    color: #60a5fa;
     font-weight: 600;
 }
 
@@ -480,7 +520,7 @@ body.light-mode .qty-text {
 }
 
 .qty-text.low {
-    color: #ff716d;
+    color: #f87171;
 }
 
 body.light-mode .qty-text.low {
@@ -488,7 +528,7 @@ body.light-mode .qty-text.low {
 }
 
 .low-tag {
-    color: #ff625e;
+    color: #f87171;
     font-weight: bold;
     margin-left: 4px;
 }
@@ -502,17 +542,17 @@ body.light-mode .qty-text.low {
 }
 
 .completed {
-    background: #16a34a;
+    background: #10b981;
     color: white;
 }
 
 .processing {
-    background: #2563eb;
+    background: #3b82f6;
     color: white;
 }
 
 .delayed {
-    background: #dc2626;
+    background: #ef4444;
     color: white;
 }
 

@@ -1,58 +1,80 @@
 /* =====================================================================
-   css/common.css — สไตล์ที่ทุกหน้าใช้ร่วมกัน
-   (เมนูด้านข้าง, โหมดสว่าง, โหมดมือถือ, การกำหนดชุดสีหลัก)
+   css/common.css — สไตล์ที่ทุกหน้าใช้ร่วมกัน (Dark & Light Gradient Theme)
    ===================================================================== */
 
-/* กำหนดตัวแปรสีพื้นฐาน (Dark Mode - โทน Green Tech / ดำเขียวอมน้ำเงิน) */
+/* กำหนดตัวแปรสีพื้นฐาน (Dark Mode - โทน Green Tech / ดำเขียวอมน้ำเงินพรีเมียม) */
 :root {
-    --bg-main: #080f1b;
-    --bg-sidebar: #09111d;
-    --bg-card: #0d1622;
-    --border-color: #263548;
-    --text-main: #e5e7eb;
-    --text-muted: #8995a7;
+    --bg-main: #060b14;
+    --bg-sidebar: #060b14;
+    --bg-card: #0b1322;
+    --border-color: #1e293b;
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
     --accent-color: #00E5AB;
     --accent-blue: #3b82f6;
 }
 
-/* โหมดสว่าง (Light Mode - โทนสะอาด สบายตา) */
+/* โหมดสว่าง (Light Mode - โทนสว่างสะอาด พร้อมการไล่สีพื้นหลังแบบมีมิติ) */
 body.light-mode {
-    --bg-main: #f1f5f9;
+    --bg-main: #f4f7fc;
     --bg-sidebar: #ffffff;
     --bg-card: #ffffff;
-    --border-color: #cbd5e1;
+    --border-color: #e2e8f0;
     --text-main: #1e293b;
     --text-muted: #64748b;
-    --accent-color: #00E5AB;
+    --accent-color: #00b087;
     --accent-blue: #2563eb;
-    background: var(--bg-main);
+}
+
+/* พื้นหลังแบบไล่ระดับสี (Gradient Background) สำหรับโทนมืด */
+body {
+    background: linear-gradient(135deg, #030712 0%, #060b14 50%, #0b1322 100%);
+    background-attachment: fixed;
+    color: var(--text-main);
+    transition: background 0.2s ease, color 0.2s ease;
+    min-height: 100vh;
+    margin: 0;
+    display: flex;
+}
+
+/* พื้นหลังแบบไล่ระดับสีสำหรับโทนสว่าง */
+body.light-mode {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 60%, #e2e8f0 100%);
+    background-attachment: fixed;
     color: var(--text-main);
 }
 
-body {
-    background: var(--bg-main);
-    color: var(--text-main);
+.sidebar {
+    background: var(--bg-sidebar);
+    border-right: 1px solid var(--border-color);
+    padding: 28px 14px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 265px;
+    height: 100vh;
+    overflow-y: auto;
+    transition: transform 0.25s ease, background 0.2s, border-color 0.2s;
+    z-index: 500;
 }
 
 body.light-mode .sidebar {
     background: var(--bg-sidebar);
     border-right: 1px solid var(--border-color);
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.03);
 }
 
 .logo {
     padding: 0 15px 28px;
-    border-bottom: 1px solid #202d3d;
+    border-bottom: 1px solid var(--border-color);
     margin-bottom: 25px;
 }
 
-body.light-mode .logo {
-    border-bottom: 1px solid #e2e8f0;
-}
-
 .logo h1 {
-    font-size: 27px;
-    color: #f8fafc;
-    letter-spacing: -1px;
+    font-size: 24px;
+    color: var(--text-main);
+    letter-spacing: -0.5px;
+    font-weight: 700;
 }
 
 body.light-mode .logo h1 {
@@ -60,58 +82,58 @@ body.light-mode .logo h1 {
 }
 
 .logo p {
-    color: #aab4c3;
-    font-size: 17px;
+    color: var(--accent-color);
+    font-size: 14px;
     letter-spacing: 1px;
-}
-
-body.light-mode .logo p {
-    color: #64748b;
+    font-weight: 600;
 }
 
 .menu a {
     display: flex;
     align-items: center;
     gap: 15px;
-    padding: 15px 18px;
-    margin-bottom: 7px;
-    border-radius: 9px;
-    color: #aeb9c9;
+    padding: 14px 18px;
+    margin-bottom: 8px;
+    border-radius: 12px;
+    color: var(--text-muted);
     text-decoration: none;
-    font-size: 16px;
-    transition: 0.2s;
+    font-size: 15px;
+    font-weight: 500;
+    transition: 0.2s ease;
 }
 
 body.light-mode .menu a {
-    color: #475569;
+    color: #64748b;
 }
 
 .menu a:hover {
-    background: #141e2c;
-    color: white;
+    background: rgba(0, 229, 171, 0.08);
+    color: var(--accent-color);
 }
 
 body.light-mode .menu a:hover {
-    background: #f1f5f9;
-    color: #0f172a;
+    background: rgba(0, 176, 135, 0.08);
+    color: #00b087;
 }
 
 .menu a.active {
-    background: #162235;
-    color: #70a0ff;
-    border: 1px solid #263752;
+    background: linear-gradient(135deg, rgba(0, 229, 171, 0.15), rgba(0, 229, 171, 0.05));
+    color: var(--accent-color);
+    border: 1px solid rgba(0, 229, 171, 0.3);
+    box-shadow: 0 0 15px rgba(0, 229, 171, 0.1);
 }
 
 body.light-mode .menu a.active {
-    background: #eff6ff;
-    color: #2563eb;
-    border: 1px solid #bfdbfe;
+    background: linear-gradient(135deg, rgba(0, 176, 135, 0.12), rgba(0, 176, 135, 0.03));
+    color: #00b087;
+    border: 1px solid rgba(0, 176, 135, 0.25);
+    box-shadow: 0 4px 12px rgba(0, 176, 135, 0.08);
 }
 
 .icon {
-    width: 23px;
+    width: 24px;
     text-align: center;
-    font-size: 19px;
+    font-size: 18px;
 }
 
 .user {
@@ -120,22 +142,29 @@ body.light-mode .menu a.active {
     left: 14px;
     width: 237px;
     padding: 15px;
-    background: #101a28;
-    border: 1px solid #263448;
-    border-radius: 9px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    transition: background 0.2s, border-color 0.2s;
 }
 
 body.light-mode .user {
     background: #f8fafc;
-    border: 1px solid #cbd5e1;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
 }
 
 .user-name {
     font-weight: bold;
+    color: var(--text-main);
+}
+
+body.light-mode .user-name {
+    color: #1e293b;
 }
 
 .user-email {
-    color: #8995a7;
+    color: var(--text-muted);
     font-size: 12px;
     margin-top: 4px;
 }
