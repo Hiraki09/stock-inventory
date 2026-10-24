@@ -8,18 +8,28 @@
 
 /* ธีมมืด (Dark Mode - โทน Green Tech / ดำเขียวอมน้ำเงินพรีเมียม) */
 :root {
-    --bg-main: #060b14;
-    --bg-sidebar: #060b14;
-    --bg-card: #0b1322;
-    --border-color: #1e293b;
+    --bg-main: #0B1020;
+    --bg-sidebar: #0A1424;
+    --bg-card: #0F1B30;
+    --border-color: #1E293B;
     --text-main: #f8fafc;
     --text-muted: #94a3b8;
     --accent-color: #00E5AB;
+    --accent-green: #22C55E;
     --accent-blue: #3b82f6;
+    --accent-red: #F43F5E;
+    --accent-amber: #F59E0B;
+    --accent-purple: #8B5CF6;
+    --accent-indigo: #6366F1;
+    --bg-gradient:
+        radial-gradient(circle at 0% 100%, rgba(0, 229, 171, 0.10) 0%, transparent 40%),
+        radial-gradient(circle at 100% 0%, rgba(99, 102, 241, 0.12) 0%, transparent 45%),
+        linear-gradient(160deg, #0B1020 0%, #0A1628 55%, #070C18 100%);
 }
 
 body {
-    background: var(--bg-main);
+    background: var(--bg-gradient);
+    background-attachment: fixed;
     color: var(--text-main);
     min-height: 100vh;
     overflow: hidden;
@@ -35,7 +45,7 @@ body {
     width: 265px;
     height: 100vh;
     overflow: hidden;
-    background: var(--bg-sidebar);
+    background: linear-gradient(180deg, #0A1424 0%, #08101E 70%, #06261F 100%);
     border-right: 1px solid var(--border-color);
     padding: 28px 14px;
     transition: transform 0.25s ease;
@@ -82,11 +92,12 @@ body.sidebar-hidden .main {
     width: 50px;
     height: 50px;
     border-radius: 9px;
-    border: 1px solid var(--border-color);
-    background: #0b1322;
-    color: white;
+    border: 1px solid rgba(0, 229, 171, 0.35);
+    background: rgba(15, 27, 48, 0.9);
+    color: #00E5AB;
     font-size: 25px;
     cursor: pointer;
+    box-shadow: 0 0 12px rgba(0, 229, 171, 0.12);
 }
 
 body.light-mode .menu-button {
@@ -114,10 +125,10 @@ body.light-mode .title p {
 .search {
     width: 250px;
     height: 42px;
-    background: #060b14;
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
-    padding: 0 15px;
+    background: rgba(10, 20, 36, 0.8);
+    border: 1px solid rgba(0, 229, 171, 0.45);
+    border-radius: 999px;
+    padding: 0 18px;
     color: var(--text-muted);
     outline: none;
     display: flex;
@@ -145,20 +156,27 @@ body.light-mode .search {
 }
 
 .card {
-    background: var(--bg-card);
-    border: 1px solid var(--border-color);
+    --card-color: 59, 130, 246;
+    background: linear-gradient(135deg, rgba(var(--card-color), 0.22) 0%, rgba(var(--card-color), 0.05) 100%), var(--bg-card);
+    border: 1px solid rgba(var(--card-color), 0.55);
     padding: 22px;
     border-radius: 16px;
     min-height: 125px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
-    transition: transform 0.2s ease, border-color 0.2s ease;
+    box-shadow: 0 0 18px rgba(var(--card-color), 0.18), 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
+.card:nth-child(1) { --card-color: 59, 130, 246; }   /* ฟ้า  */
+.card:nth-child(2) { --card-color: 244, 63, 94; }    /* แดงโรส */
+.card:nth-child(3) { --card-color: 34, 197, 94; }    /* เขียว */
+.card:nth-child(4) { --card-color: 99, 102, 241; }   /* อินดิโก้ */
+
 .card:hover {
-    border-color: rgba(0, 229, 171, 0.3);
+    border-color: rgba(var(--card-color), 0.9);
+    box-shadow: 0 0 26px rgba(var(--card-color), 0.32), 0 10px 25px -5px rgba(0, 0, 0, 0.3);
     transform: translateY(-2px);
 }
 
@@ -179,10 +197,53 @@ body.light-mode .card {
     margin-bottom: 8px;
 }
 
-.card:nth-child(1) .card-icon-box { background: rgba(59, 130, 246, 0.15); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.3); }
-.card:nth-child(2) .card-icon-box { background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); }
-.card:nth-child(3) .card-icon-box { background: rgba(0, 229, 171, 0.15); color: #00E5AB; border: 1px solid rgba(0, 229, 171, 0.3); }
-.card:nth-child(4) .card-icon-box { background: rgba(139, 92, 246, 0.15); color: #8b5cf6; border: 1px solid rgba(139, 92, 246, 0.3); }
+.card .card-icon-box {
+    background: rgba(var(--card-color), 0.28);
+    color: rgb(var(--card-color));
+    border: 1px solid rgba(var(--card-color), 0.45);
+}
+
+/* การ์ด 3 ใบแรก: ไอคอนอยู่ซ้าย ชื่อกับตัวเลขอยู่ขวา (เหมือนในรูปตัวอย่าง) */
+.card:nth-child(-n+3) {
+    display: grid;
+    grid-template-columns: 64px 1fr;
+    grid-template-rows: auto auto;
+    column-gap: 18px;
+    row-gap: 2px;
+    align-content: center;
+    align-items: center;
+    min-height: 140px;
+    padding: 22px 24px;
+}
+
+.card:nth-child(-n+3) .card-icon-box {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+    width: 64px;
+    height: 64px;
+    border-radius: 16px;
+    font-size: 28px;
+    margin-bottom: 0;
+    background: linear-gradient(135deg, rgba(var(--card-color), 0.45), rgba(var(--card-color), 0.18));
+    box-shadow: 0 0 14px rgba(var(--card-color), 0.35);
+}
+
+.card:nth-child(-n+3) h3 {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: end;
+    margin-bottom: 0;
+    font-size: 15px;
+    color: #e2e8f0;
+}
+
+.card:nth-child(-n+3) h1 {
+    grid-column: 2;
+    grid-row: 2;
+    align-self: start;
+    font-size: 34px;
+    line-height: 1.1;
+}
 
 .card h3 {
     font-size: 13px;
@@ -215,10 +276,11 @@ body.light-mode .card h1 {
 }
 
 .box {
-    background: var(--bg-card);
-    border: 1px solid var(--border-color);
+    background: linear-gradient(160deg, rgba(0, 229, 171, 0.05) 0%, rgba(15, 27, 48, 0.9) 45%), var(--bg-card);
+    border: 1px solid rgba(0, 229, 171, 0.22);
     padding: 20px;
     border-radius: 16px;
+    box-shadow: 0 0 16px rgba(0, 229, 171, 0.06);
 }
 
 body.light-mode .box {
@@ -447,18 +509,20 @@ body.light-mode .realtime-clock {
     margin-left: 8px;
 }
 
-.action-add {
-    background: #10b981;
+.action-add,
+.action-login {
+    background: rgba(34, 197, 94, 0.9);
     color: white;
 }
 
-.action-edit {
+.action-edit,
+.action-logout {
     background: #3b82f6;
     color: white;
 }
 
 .action-delete {
-    background: #ef4444;
+    background: #F43F5E;
     color: white;
 }
 
@@ -542,7 +606,7 @@ body.light-mode .qty-text.low {
 }
 
 .completed {
-    background: #10b981;
+    background: #22C55E;
     color: white;
 }
 
@@ -552,8 +616,88 @@ body.light-mode .qty-text.low {
 }
 
 .delayed {
-    background: #ef4444;
+    background: #F43F5E;
     color: white;
+}
+
+/* =====================================================================
+   LIGHT MODE — โทนขาว มิ้นต์ ฟ้า อ่อน (ตรงตามรูปตัวอย่าง)
+   ===================================================================== */
+
+body.light-mode .card:nth-child(1) { --card-color: 16, 185, 129; }   /* มิ้นต์  */
+body.light-mode .card:nth-child(2) { --card-color: 244, 63, 94; }    /* ชมพูแดง */
+body.light-mode .card:nth-child(3) { --card-color: 59, 130, 246; }   /* ฟ้า */
+body.light-mode .card:nth-child(4) { --card-color: 139, 92, 246; }   /* ม่วง */
+
+body.light-mode .card {
+    background: linear-gradient(135deg, rgba(var(--card-color), 0.14) 0%, rgba(var(--card-color), 0.04) 100%), #FFFFFF;
+    border: 1px solid rgba(var(--card-color), 0.30);
+    box-shadow: 0 6px 18px rgba(var(--card-color), 0.12);
+}
+
+body.light-mode .card:hover {
+    border-color: rgba(var(--card-color), 0.60);
+    box-shadow: 0 10px 24px rgba(var(--card-color), 0.20);
+}
+
+body.light-mode .card .card-icon-box {
+    background: linear-gradient(135deg, rgb(var(--card-color)), rgba(var(--card-color), 0.72));
+    color: #FFFFFF;
+    border: none;
+    box-shadow: 0 6px 14px rgba(var(--card-color), 0.35);
+}
+
+body.light-mode .card h3 {
+    color: #334155;
+}
+
+body.light-mode .card h1 {
+    color: #0F172A;
+}
+
+body.light-mode .realtime-clock {
+    color: #334155;
+}
+
+body.light-mode .box {
+    background: #FFFFFF;
+    border: 1px solid #D9E8E2;
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.05);
+}
+
+body.light-mode .menu-button {
+    background: #FFFFFF;
+    border: 1px solid #D9E8E2;
+    color: #0F172A;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+}
+
+body.light-mode .search {
+    background: #FFFFFF;
+    border: 1px solid #BFE6D8;
+    color: #94A3B8;
+}
+
+body.light-mode .search:hover {
+    border-color: #10B981;
+}
+
+body.light-mode .delayed {
+    background: #FEE2E2;
+    color: #E11D48;
+}
+
+body.light-mode .bar-chart-wrapper,
+body.light-mode .donut-wrapper {
+    border-color: #E2EFE9;
+}
+
+body.light-mode td {
+    border-top: 1px solid #EDF4F1;
+}
+
+body.light-mode .log {
+    border-bottom: 1px solid #E8F1ED;
 }
 
 /* ================= RESPONSIVE ================= */

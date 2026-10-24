@@ -228,9 +228,10 @@ function renderCharts(typeCounts, totalSum) {
     const keys = Object.keys(typeCounts);
     const maxVal = Math.max(...Object.values(typeCounts), 1);
 
+    // ลำดับตรงกับ LED, TRANSISTOR, RESISTOR, CAPACITOR, IC, INDUCTOR, DIODE, MODULE
     const colors = [
-        "#3b82f6", "#10b981", "#f59e0b", "#ef4444", 
-        "#8b5cf6", "#ec4899", "#06b6d4", "#84cc16", "#64748b"
+        "#3b82f6", "#22c55e", "#f59e0b", "#f43f5e",
+        "#8b5cf6", "#06b6d4", "#0ea5e9", "#84cc16", "#6366f1"
     ];
 
     let conicGradientStops = [];

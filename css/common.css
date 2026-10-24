@@ -1,34 +1,30 @@
 /* =====================================================================
-   css/common.css — สไตล์ที่ทุกหน้าใช้ร่วมกัน (Dark & Light Gradient Theme)
+   css/common.css — สไตล์โทนสี Dark Tech พรีเมียม (ตรงตามภาพตัวอย่าง)
    ===================================================================== */
 
-/* กำหนดตัวแปรสีพื้นฐาน (Dark Mode - โทน Green Tech / ดำเขียวอมน้ำเงินพรีเมียม) */
 :root {
-    --bg-main: #060b14;
-    --bg-sidebar: #060b14;
-    --bg-card: #0b1322;
-    --border-color: #1e293b;
+    --bg-main: #0B1020;
+    --bg-sidebar: #0A1424;
+    --bg-card: #0F1B30;
+    --border-color: #1E293B;
     --text-main: #f8fafc;
     --text-muted: #94a3b8;
     --accent-color: #00E5AB;
+    --accent-green: #22C55E;
     --accent-blue: #3b82f6;
+    --accent-red: #F43F5E;
+    --accent-amber: #F59E0B;
+    --accent-purple: #8B5CF6;
+    --accent-indigo: #6366F1;
+    --bg-gradient:
+        radial-gradient(circle at 0% 100%, rgba(0, 229, 171, 0.10) 0%, transparent 40%),
+        radial-gradient(circle at 100% 0%, rgba(99, 102, 241, 0.12) 0%, transparent 45%),
+        linear-gradient(160deg, #0B1020 0%, #0A1628 55%, #070C18 100%);
 }
 
-/* โหมดสว่าง (Light Mode - โทนสว่างสะอาด พร้อมการไล่สีพื้นหลังแบบมีมิติ) */
-body.light-mode {
-    --bg-main: #f4f7fc;
-    --bg-sidebar: #ffffff;
-    --bg-card: #ffffff;
-    --border-color: #e2e8f0;
-    --text-main: #1e293b;
-    --text-muted: #64748b;
-    --accent-color: #00b087;
-    --accent-blue: #2563eb;
-}
-
-/* พื้นหลังแบบไล่ระดับสี (Gradient Background) สำหรับโทนมืด */
+/* พื้นหลังไล่เฉดน้ำเงินกรมท่า มีแสงเขียวมิ้นต์และอินดิโก้เรือง ๆ ตามมุม */
 body {
-    background: linear-gradient(135deg, #030712 0%, #060b14 50%, #0b1322 100%);
+    background: var(--bg-gradient);
     background-attachment: fixed;
     color: var(--text-main);
     transition: background 0.2s ease, color 0.2s ease;
@@ -37,16 +33,10 @@ body {
     display: flex;
 }
 
-/* พื้นหลังแบบไล่ระดับสีสำหรับโทนสว่าง */
-body.light-mode {
-    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 60%, #e2e8f0 100%);
-    background-attachment: fixed;
-    color: var(--text-main);
-}
-
+/* แถบเมนูด้านซ้าย (Sidebar) */
 .sidebar {
-    background: var(--bg-sidebar);
-    border-right: 1px solid var(--border-color);
+    background: linear-gradient(180deg, #0A1424 0%, #08101E 70%, #06261F 100%);
+    border-right: 1px solid #1E293B;
     padding: 28px 14px;
     position: fixed;
     top: 0;
@@ -58,76 +48,52 @@ body.light-mode {
     z-index: 500;
 }
 
-body.light-mode .sidebar {
-    background: var(--bg-sidebar);
-    border-right: 1px solid var(--border-color);
-    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.03);
-}
-
 .logo {
-    padding: 0 15px 28px;
-    border-bottom: 1px solid var(--border-color);
-    margin-bottom: 25px;
+    padding: 0 15px 24px;
+    border-bottom: 1px solid #1e293b;
+    margin-bottom: 22px;
 }
 
 .logo h1 {
-    font-size: 24px;
-    color: var(--text-main);
+    font-size: 22px;
+    color: #ffffff;
     letter-spacing: -0.5px;
-    font-weight: 700;
-}
-
-body.light-mode .logo h1 {
-    color: #0f172a;
+    font-weight: 800;
 }
 
 .logo p {
-    color: var(--accent-color);
-    font-size: 14px;
-    letter-spacing: 1px;
-    font-weight: 600;
+    color: #00E5AB;
+    font-size: 13px;
+    letter-spacing: 1.2px;
+    font-weight: 700;
 }
 
+/* เมนูลิงก์ */
 .menu a {
     display: flex;
     align-items: center;
     gap: 15px;
-    padding: 14px 18px;
-    margin-bottom: 8px;
+    padding: 8px 12px;
+    margin-bottom: 6px;
     border-radius: 12px;
-    color: var(--text-muted);
+    color: #94a3b8;
     text-decoration: none;
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 500;
     transition: 0.2s ease;
 }
 
-body.light-mode .menu a {
-    color: #64748b;
-}
-
 .menu a:hover {
     background: rgba(0, 229, 171, 0.08);
-    color: var(--accent-color);
-}
-
-body.light-mode .menu a:hover {
-    background: rgba(0, 176, 135, 0.08);
-    color: #00b087;
+    color: #00E5AB;
 }
 
 .menu a.active {
-    background: linear-gradient(135deg, rgba(0, 229, 171, 0.15), rgba(0, 229, 171, 0.05));
-    color: var(--accent-color);
-    border: 1px solid rgba(0, 229, 171, 0.3);
-    box-shadow: 0 0 15px rgba(0, 229, 171, 0.1);
-}
-
-body.light-mode .menu a.active {
-    background: linear-gradient(135deg, rgba(0, 176, 135, 0.12), rgba(0, 176, 135, 0.03));
-    color: #00b087;
-    border: 1px solid rgba(0, 176, 135, 0.25);
-    box-shadow: 0 4px 12px rgba(0, 176, 135, 0.08);
+    background: linear-gradient(135deg, rgba(0, 229, 171, 0.28), rgba(34, 197, 94, 0.12));
+    color: #00E5AB;
+    font-weight: 700;
+    border: 1px solid rgba(0, 229, 171, 0.55);
+    box-shadow: 0 0 18px rgba(0, 229, 171, 0.22);
 }
 
 .icon {
@@ -136,45 +102,489 @@ body.light-mode .menu a.active {
     font-size: 18px;
 }
 
+/* ไอคอนเมนู: กล่องโค้งมนมีไอคอนเส้น เรืองแสงเมื่อเลือก */
+.menu a .icon {
+    width: 34px;
+    height: 34px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    background: rgba(148, 163, 184, 0.08);
+    color: #94a3b8;
+    transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.menu a .icon svg {
+    width: 20px;
+    height: 20px;
+}
+
+.menu a:hover .icon {
+    background: rgba(0, 229, 171, 0.14);
+    color: #00E5AB;
+}
+
+.menu a.active .icon {
+    background: linear-gradient(135deg, #00E5AB, #22C55E);
+    color: #04211B;
+    box-shadow: 0 0 12px rgba(0, 229, 171, 0.45);
+}
+
+body.light-mode .menu a .icon {
+    background: rgba(100, 116, 139, 0.08);
+    color: #64748B;
+}
+
+body.light-mode .menu a:hover .icon {
+    background: rgba(16, 185, 129, 0.14);
+    color: #059669;
+}
+
+body.light-mode .menu a.active .icon {
+    background: linear-gradient(135deg, #10B981, #059669);
+    color: #FFFFFF;
+    box-shadow: 0 4px 10px rgba(16, 185, 129, 0.35);
+}
+
+/* =====================================================================
+   LIGHT MODE — โทนขาว มิ้นต์ ฟ้า อ่อน สบายตา
+   ===================================================================== */
+
+body.light-mode {
+    --bg-main: #F4FBF8;
+    --bg-sidebar: #FFFFFF;
+    --bg-card: #FFFFFF;
+    --border-color: #D9E8E2;
+    --text-main: #0F172A;
+    --text-muted: #64748B;
+    --accent-color: #10B981;
+    --bg-gradient:
+        radial-gradient(circle at 0% 100%, rgba(16, 185, 129, 0.14) 0%, transparent 45%),
+        radial-gradient(circle at 100% 0%, rgba(99, 102, 241, 0.07) 0%, transparent 40%),
+        linear-gradient(160deg, #F8FDFB 0%, #F1F8F6 60%, #EBF5F2 100%);
+}
+
+body.light-mode .sidebar {
+    background: linear-gradient(180deg, #FFFFFF 0%, #F6FCF9 100%);
+    border-right: 1px solid #DDEBE5;
+    box-shadow: 4px 0 18px rgba(15, 23, 42, 0.03);
+}
+
+body.light-mode .logo {
+    border-bottom: 1px solid #E2EFE9;
+}
+
+body.light-mode .logo h1 {
+    color: #0F172A;
+}
+
+body.light-mode .logo p {
+    color: #10B981;
+}
+
+body.light-mode .menu a {
+    color: #334155;
+}
+
+body.light-mode .menu a:hover {
+    background: rgba(16, 185, 129, 0.10);
+    color: #059669;
+}
+
+body.light-mode .menu a.active {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.24), rgba(16, 185, 129, 0.12));
+    color: #047857;
+    border: 1px solid rgba(16, 185, 129, 0.35);
+    box-shadow: none;
+}
+
+body.light-mode .user {
+    background: #FFFFFF;
+    border: 1px solid #DDEBE5;
+    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.05);
+}
+
+body.light-mode .user-name {
+    color: #0F172A;
+}
+
+body.light-mode .user-email {
+    color: #64748B;
+}
+
+/* =====================================================================
+   THEME สำหรับหน้าอื่น ๆ (Add / History / Inventory / Location / Settings)
+   ใช้ "html body" นำหน้าเพื่อให้ชนะสีเดิมในไฟล์ของแต่ละหน้า
+   โดยไม่ขึ้นกับลำดับการโหลดไฟล์ CSS
+   ===================================================================== */
+
+html body {
+    background: var(--bg-gradient);
+    background-attachment: fixed;
+    color: var(--text-main);
+}
+
+html body .sidebar {
+    background: linear-gradient(180deg, #0A1424 0%, #08101E 70%, #06261F 100%);
+    border-right-color: #1E293B;
+}
+
+html body .main,
+html body.light-mode .main {
+    background: transparent;
+}
+
+html body .title h2 { color: var(--text-main); }
+html body .title p  { color: var(--text-muted); }
+
+/* ---------- ปุ่มเมนู ---------- */
+
+html body .menu-button {
+    background: rgba(15, 27, 48, 0.9);
+    border-color: rgba(0, 229, 171, 0.35);
+    color: #00E5AB;
+    box-shadow: 0 0 12px rgba(0, 229, 171, 0.12);
+}
+
+html body .menu-button:hover {
+    background: rgba(0, 229, 171, 0.12);
+    border-color: #00E5AB;
+    color: #00E5AB;
+}
+
+html body.light-mode .menu-button {
+    background: #FFFFFF;
+    border-color: #D9E8E2;
+    color: #0F172A;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+}
+
+html body.light-mode .menu-button:hover {
+    background: #ECFDF5;
+    border-color: #10B981;
+    color: #059669;
+}
+
+/* ---------- กล่อง / การ์ด / Modal ---------- */
+
+html body .form-box,
+html body .admin-box,
+html body .history-box,
+html body .inventory-box,
+html body .panel,
+html body .cabinet-container,
+html body .setting-card,
+html body .modal-box,
+html body .modal-content {
+    background: linear-gradient(160deg, rgba(0, 229, 171, 0.05) 0%, rgba(15, 27, 48, 0.92) 45%), #0F1B30;
+    border: 1px solid rgba(0, 229, 171, 0.22);
+    border-radius: 16px;
+    box-shadow: 0 0 16px rgba(0, 229, 171, 0.06);
+}
+
+html body.light-mode .form-box,
+html body.light-mode .admin-box,
+html body.light-mode .history-box,
+html body.light-mode .inventory-box,
+html body.light-mode .panel,
+html body.light-mode .cabinet-container,
+html body.light-mode .setting-card,
+html body.light-mode .modal-box,
+html body.light-mode .modal-content {
+    background: #FFFFFF;
+    border: 1px solid #D9E8E2;
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.05);
+}
+
+html body .form-box h3 { border-bottom-color: #1E293B; }
+
+html body .search-area {
+    background: rgba(0, 229, 171, 0.03);
+    border-bottom-color: #1E293B;
+}
+
+html body.light-mode .search-area {
+    background: #F6FCF9;
+    border-bottom-color: #E2EFE9;
+}
+
+html body .bottom { border-top-color: #1E293B; }
+
+/* ---------- ช่องกรอก ---------- */
+
+html body input.search,
+html body .search-input,
+html body .form-control,
+html body .rows-select,
+html body .modal-input,
+html body .type-filter {
+    background: rgba(10, 20, 36, 0.8);
+    border-color: rgba(0, 229, 171, 0.28);
+}
+
+html body.light-mode input.search,
+html body.light-mode .search-input,
+html body.light-mode .form-control,
+html body.light-mode .rows-select,
+html body.light-mode .modal-input,
+html body.light-mode .type-filter {
+    background: #FFFFFF;
+    border-color: #CFE5DC;
+}
+
+html body input.search:focus,
+html body .search-input:focus,
+html body .form-control:focus,
+html body .rows-select:focus,
+html body .modal-input:focus,
+html body .type-filter:focus {
+    border-color: #00E5AB;
+    box-shadow: 0 0 0 2px rgba(0, 229, 171, 0.18);
+}
+
+html body.light-mode input.search:focus,
+html body.light-mode .search-input:focus,
+html body.light-mode .form-control:focus,
+html body.light-mode .rows-select:focus,
+html body.light-mode .modal-input:focus,
+html body.light-mode .type-filter:focus {
+    border-color: #10B981;
+    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.18);
+}
+
+/* ---------- ปุ่มหลัก (เขียวมิ้นต์) ---------- */
+
+html body .btn-primary,
+html body .btn-save,
+html body .modal-btn.confirm,
+html body .page.active,
+html body .page-btn.active,
+html body .theme-btn.active {
+    background: linear-gradient(135deg, #00E5AB, #22C55E);
+    border-color: transparent;
+    color: #04211B;
+    font-weight: 700;
+}
+
+html body .btn-primary:hover,
+html body .btn-save:hover,
+html body .modal-btn.confirm:hover,
+html body .page.active:hover:not(:disabled) {
+    background: linear-gradient(135deg, #1FF0B9, #34D36B);
+    color: #04211B;
+    box-shadow: 0 0 14px rgba(0, 229, 171, 0.35);
+}
+
+html body.light-mode .btn-primary,
+html body.light-mode .btn-save,
+html body.light-mode .modal-btn.confirm,
+html body.light-mode .page.active,
+html body.light-mode .page-btn.active,
+html body.light-mode .theme-btn.active {
+    background: linear-gradient(135deg, #10B981, #059669);
+    border-color: transparent;
+    color: #FFFFFF;
+}
+
+html body.light-mode .btn-primary:hover,
+html body.light-mode .btn-save:hover,
+html body.light-mode .modal-btn.confirm:hover,
+html body.light-mode .page.active:hover:not(:disabled) {
+    background: linear-gradient(135deg, #059669, #047857);
+    color: #FFFFFF;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.30);
+}
+
+/* ปุ่ม Add Product (หน้า Inventory) */
+html body .add-btn {
+    background: transparent;
+    border-color: #00E5AB;
+    color: #00E5AB;
+}
+
+html body .add-btn:hover {
+    background: rgba(0, 229, 171, 0.12);
+}
+
+html body.light-mode .add-btn {
+    background: linear-gradient(135deg, #10B981, #059669);
+    border-color: transparent;
+    color: #FFFFFF;
+}
+
+html body.light-mode .add-btn:hover {
+    background: linear-gradient(135deg, #059669, #047857);
+}
+
+/* ---------- ตาราง ---------- */
+
+html body thead,
+html body.light-mode thead {
+    background: transparent;
+}
+
+html body th {
+    background: rgba(0, 229, 171, 0.07);
+    color: #94A3B8;
+}
+
+html body.light-mode th {
+    background: #F0F9F5;
+    color: #475569;
+}
+
+html body td { border-top-color: #1E293B; }
+html body.light-mode td { border-top-color: #EDF4F1; }
+
+html body tbody tr { background: transparent; }
+html body tbody tr:nth-child(even) { background: rgba(255, 255, 255, 0.02); }
+html body tbody tr:hover,
+html body tr:hover { background: rgba(0, 229, 171, 0.05); }
+
+html body.light-mode tbody tr { background: #FFFFFF; }
+html body.light-mode tbody tr:nth-child(even) { background: #F8FCFA; }
+html body.light-mode tbody tr:hover,
+html body.light-mode tr:hover { background: #F0F9F5; }
+
+/* ---------- ป้ายสถานะ (ให้เหมือน Dashboard) ---------- */
+
+html body .action-add,
+html body .action-login {
+    background: rgba(34, 197, 94, 0.9);
+    color: #FFFFFF;
+    border: none;
+}
+
+html body .action-edit,
+html body .action-logout {
+    background: #3B82F6;
+    color: #FFFFFF;
+    border: none;
+}
+
+html body .action-delete {
+    background: #F43F5E;
+    color: #FFFFFF;
+}
+
+/* ---------- หน้า Location ---------- */
+
+html body .list-item {
+    background: rgba(15, 27, 48, 0.8);
+    border-color: #1E293B;
+}
+
+html body .list-item:hover,
+html body .list-item.active {
+    border-color: #00E5AB;
+    background: rgba(0, 229, 171, 0.08);
+}
+
+html body.light-mode .list-item {
+    background: #F8FCFA;
+    border-color: #E2EFE9;
+}
+
+html body.light-mode .list-item:hover,
+html body.light-mode .list-item.active {
+    border-color: #10B981;
+    background: #ECFDF5;
+}
+
+html body .reset-filter-btn {
+    background: rgba(15, 27, 48, 0.8);
+    border-color: rgba(0, 229, 171, 0.35);
+    color: #00E5AB;
+}
+
+html body .reset-filter-btn:hover {
+    background: rgba(0, 229, 171, 0.12);
+}
+
+html body .drawer.highlighted {
+    background: #00E5AB !important;
+    border-color: #00B88A !important;
+    color: #04211B !important;
+    box-shadow: -8px 0 20px rgba(0, 229, 171, 0.55);
+}
+
+/* กล่องข้อมูลผู้ใช้ด้านล่างซ้าย */
 .user {
     position: absolute;
     bottom: 20px;
     left: 14px;
     width: 237px;
-    padding: 15px;
-    background: var(--bg-card);
-    border: 1px solid var(--border-color);
+    padding: 12px 14px;
+    display: grid;
+    grid-template-columns: 40px minmax(0, 1fr);
+    column-gap: 12px;
+    align-items: center;
+    background: rgba(15, 27, 48, 0.85);
+    border: 1px solid rgba(0, 229, 171, 0.25);
     border-radius: 12px;
-    transition: background 0.2s, border-color 0.2s;
 }
 
-body.light-mode .user {
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+/* รูปโปรไฟล์ + จุดเขียวสถานะออนไลน์ */
+.user-avatar {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+    position: relative;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.35), rgba(59, 130, 246, 0.15));
+    color: #60a5fa;
+}
+
+.user-avatar svg {
+    width: 24px;
+    height: 24px;
+}
+
+.status-dot {
+    position: absolute;
+    right: -1px;
+    bottom: -1px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #22C55E;
+    border: 2px solid #0F1B30;
+    box-shadow: 0 0 6px rgba(34, 197, 94, 0.6);
+}
+
+body.light-mode .user-avatar {
+    background: linear-gradient(135deg, #DBEAFE, #BFDBFE);
+    color: #3B82F6;
+}
+
+body.light-mode .status-dot {
+    border-color: #FFFFFF;
+}
+
+.user-name,
+.user-email {
+    grid-column: 2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .user-name {
     font-weight: bold;
-    color: var(--text-main);
-}
-
-body.light-mode .user-name {
-    color: #1e293b;
+    color: #f8fafc;
+    font-size: 14px;
 }
 
 .user-email {
-    color: var(--text-muted);
+    color: #94a3b8;
     font-size: 12px;
-    margin-top: 4px;
-}
-
-body.light-mode .user-email {
-    color: #64748b;
-}
-
-body.light-mode .title h2 {
-    color: #0f172a;
+    margin-top: 2px;
 }
 
 .sidebar-backdrop { 
